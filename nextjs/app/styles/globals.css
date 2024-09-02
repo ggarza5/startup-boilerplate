@@ -1,0 +1,22 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.sidebar {
+  width: 200px;
+  float: left;
+}
+
+.sidebar button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar button:hover {
+  background-color: #ddd;
+}
