@@ -91,6 +91,7 @@ export default async function SignIn({
               disableButton={searchParams.disable_button}
             />
           )}
+          asd
           {viewProp === 'update_password' && (
             <UpdatePassword redirectMethod={redirectMethod} />
           )}
