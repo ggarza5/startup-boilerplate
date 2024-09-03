@@ -1,5 +1,5 @@
-const Results = ({ sessionData }) => {
-  const calculateScore = (answers) => {
+const Results = ({ sessionData }: { sessionData: any }) => {
+  const calculateScore = (answers: any) => {
     // Implement scoring logic
     return 0; // Placeholder
   };
