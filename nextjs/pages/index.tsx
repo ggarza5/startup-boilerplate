@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import QuestionSection from '../components/QuestionSection';
 import Timer from '../components/Timer';
-import { generateQuestionSection } from '../../pages/api/ai'; // Adjust the import path to go up one level from the current directory
+import { generateQuestionSection } from './api/ai';
 
 interface Section {
   id: number;

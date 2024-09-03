@@ -1,13 +1,21 @@
 import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://your-supabase-url.supabase.co';
-const supabaseKey = 'your-supabase-key';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const openai = new OpenAI();
-
 export const generateQuestionSection = async (prompt: string) => {
+  console.log('Loaded environment variables:', {
+    SUPABASE_URL: supabaseUrl,
+    SUPABASE_KEY: supabaseKey,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    NEXT_PUBLIC_OPENAI_API_KEY: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  });
+    const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
   // Call OpenAI API
   const completion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
