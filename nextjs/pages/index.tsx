@@ -47,15 +47,16 @@ const IndexPage: React.FC = () => {
 
   return (
     <div>
-      <Sidebar sections={sections} onSelectSection={handleSelectSection} />
+      <Sidebar startSection={(section: string) => handleSelectSection(parseInt(section, 10))} />
       {currentSection && (
         <div>
-          <Timer start={startTimer} />
-          <QuestionSection questions={currentSection.questions} onSubmit={handleSubmitAnswers} />
+          <Timer />
+          <QuestionSection section={{ type: 'section', ...currentSection }} saveSession={handleSubmitAnswers} />
         </div>
       )}
     </div>
   );
+       
 };
 
 export default IndexPage;
