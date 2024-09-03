@@ -1,3 +1,5 @@
+"use client"; // Add this directive
+
 import React from 'react';
 import ResultsPage from '../components/ResultsPage';
 

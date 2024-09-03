@@ -1,8 +1,10 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import QuestionSection from '../components/QuestionSection';
 import Timer from '../components/Timer';
-import { generateQuestionSection } from './api/ai';
+import { generateQuestionSection } from '../../pages/api/ai';
 
 interface Section {
   id: number;
@@ -14,6 +16,7 @@ interface Question {
   text: string;
   options: string[];
 }
+
 
 const IndexPage: React.FC = () => {
   const [sections, setSections] = useState<Section[]>([]);
@@ -28,7 +31,7 @@ const IndexPage: React.FC = () => {
       // ... other sections
     ]);
   }, []);
-
+  
   const handleSelectSection = async (sectionId: number) => {
     const section = await generateQuestionSection("Math");
     if (section && typeof section === 'object' && 'questions' in section) {

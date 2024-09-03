@@ -89,7 +89,7 @@ export default function Pricing({ user }: Props) {
     if (error) {
       setPriceIdLoading(null);
       return router.push(
-        getErrorRedirect(currentPath, 'Error Occured', error.message)
+        getErrorRedirect(currentPath ?? '', 'Error Occurred', error.message ?? 'Unknown error' as string)
       );
     }
     const redirectUrl = data?.redirect_url;
@@ -97,7 +97,7 @@ export default function Pricing({ user }: Props) {
       setPriceIdLoading(null);
       return router.push(
         getErrorRedirect(
-          currentPath,
+          currentPath ?? '',
           'An unknown error occurred.',
           'Please try again later or contact a system administrator.'
         )
