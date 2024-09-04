@@ -1,13 +1,9 @@
 import React from 'react';
-
-interface Section {
-  id: number;
-  name: string;
-}
+import { Section } from '../types'; // Import the Section type
 
 interface SidebarProps {
   sections: Section[];
-  onSelectSection: (sectionId: number) => void;
+  onSelectSection: (sectionName: string) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ sections, onSelectSection }) => {
@@ -15,7 +11,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sections, onSelectSection }) => {
     <div className="sidebar">
       {sections.map((section) => (
         <div key={section.id}>
-          <button onClick={() => onSelectSection(section.id)}>
+          <button onClick={() => onSelectSection(section.name)}>
             {section.name}
           </button>
         </div>

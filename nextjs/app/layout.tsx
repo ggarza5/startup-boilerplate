@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
-import Footer from '@/components/ui/Footer';
-import Navbar from '@/components/ui/Navbar';
-import { Toaster } from '@/components/ui/Toasts/toaster';
+import Footer from './components/ui/Footer'; // Corrected import path
+import Navbar from './components/ui/Navbar'; // Corrected import path
+import { Toaster } from './components/ui/Toasts/toaster'; // Corrected import path
 import { PropsWithChildren, Suspense } from 'react';
-import { getURL } from '@/utils/helpers';
+import { getURL } from '../utils/helpers'; // Corrected import path
 import 'styles/main.css';
 import { PHProvider } from './providers';
 import dynamic from 'next/dynamic';

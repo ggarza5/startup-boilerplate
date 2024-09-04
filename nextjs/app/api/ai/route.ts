@@ -1,3 +1,4 @@
+import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 
@@ -6,16 +7,21 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-export const generateQuestionSection = async (prompt: string) => {
+export async function POST(request: NextRequest) {
+  const { prompt } = await request.json();
+  console.log('we called the right one')
+
   console.log('Loaded environment variables:', {
     SUPABASE_URL: supabaseUrl,
     SUPABASE_KEY: supabaseKey,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     NEXT_PUBLIC_OPENAI_API_KEY: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
   });
-    const openai = new OpenAI({
+
+  const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
   });
+
   // Call OpenAI API
   const completion = await openai.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
@@ -32,8 +38,8 @@ export const generateQuestionSection = async (prompt: string) => {
     ]);
 
   if (error) {
-    throw new Error('Error storing data in Supabase: ' + error.message);
+    return NextResponse.json({ error: 'Error storing data in Supabase: ' + error.message }, { status: 500 });
   }
 
-  return generatedText;
-};
+  return NextResponse.json({ answer: generatedText });
+}
