@@ -1,54 +1,44 @@
-"use client";
+import { About } from '@/components/landing/About';
+import { Cta } from '@/components/landing/Cta';
+import { FAQ } from '@/components/landing/FAQ';
+import { Features } from '@/components/landing/Features';
+import { Footer } from '@/components/landing/Footer';
+import { Hero } from '@/components/landing/Hero';
+import { HowItWorks } from '@/components/landing/HowItWorks';
+import { Navbar } from '@/components/landing/Navbar';
+import { Newsletter } from '@/components/landing/Newsletter';
+import { Pricing } from '@/components/landing/Pricing';
+import { ScrollToTop } from '@/components/landing/ScrollToTop';
+import { Services } from '@/components/landing/Services';
+import { Sponsors } from '@/components/landing/Sponsors';
+import { Team } from '@/components/landing/Team';
+import { Testimonials } from '@/components/landing/Testimonials';
+import { createClient } from '@/utils/supabase/server';
 
-import React, { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
-import QuestionSection from './components/QuestionSection';
-import Timer from './components/Timer';
-import { Section } from './types'; // Import the Section type
+export default async function LandingPage() {
+  const supabase = createClient();
 
-interface Question {
-  id: number;
-  text: string;
-  options: string[];
-}
-
-const IndexPage: React.FC = () => {
-  const [sections, setSections] = useState<Section[]>([]);
-  const [currentSection, setCurrentSection] = useState<Section | null>(null); // Update type to Section
-  const [startTimer, setStartTimer] = useState(false);
-
-  useEffect(() => {
-    // Fetch sections from API or database
-    setSections([
-      { id: 1, name: 'Math', type: 'subject', questions: [] },
-      { id: 2, name: 'Reading', type: 'subject', questions: [] },
-      // ... other sections
-    ]);
-  }, []);
-
-  const handleSelectSection = async (sectionName: string) => {
-    console.log("selected a section: ", sectionName);
-  };
-
-  const handleSubmitAnswers = (answers: Record<number, string>) => {
-    // Handle answer submission
-    setStartTimer(false);
-  };
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
 
   return (
-    <div>
-      <Sidebar sections={sections} onSelectSection={handleSelectSection} />
-      {currentSection && (
-        <div>
-          <Timer startTimer={startTimer} />
-          <QuestionSection 
-            questions={currentSection.questions}
-            onSubmit={handleSubmitAnswers}
-          />
-        </div>
-      )}
-    </div>
+    <>
+      <Navbar user={user} />
+      <Hero />
+      <Sponsors />
+      <About />
+      <HowItWorks />
+      <Features />
+      <Services />
+      <Cta />
+      <Testimonials />
+      <Team />
+      <Pricing user={user} />
+      <Newsletter />
+      <FAQ />
+      <Footer />
+      <ScrollToTop />
+    </>
   );
-};
-
-export default IndexPage;
+}

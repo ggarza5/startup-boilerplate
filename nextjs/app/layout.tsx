@@ -1,12 +1,11 @@
 import { Metadata } from 'next';
-import Footer from './components/ui/Footer'; // Corrected import path
-import Navbar from './components/ui/Navbar'; // Corrected import path
-import { Toaster } from './components/ui/Toasts/toaster'; // Corrected import path
-import { PropsWithChildren, Suspense } from 'react';
-import { getURL } from '../utils/helpers'; // Corrected import path
-import 'styles/main.css';
+import { PropsWithChildren } from 'react';
+import { getURL } from '@/utils/helpers';
+import '@/styles/main.css';
 import { PHProvider } from './providers';
+import { ThemeProvider } from '@/components/landing/theme-provider';
 import dynamic from 'next/dynamic';
+import { Toaster } from '@/components/ui/toaster';
 
 const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false
@@ -55,22 +54,20 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en">
-      <PHProvider>
-        <body className="bg-black loading">
-          <PostHogPageView />
-          <Navbar />
-          <main
-            id="skip"
-            className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
-          >
-            {children}
-          </main>
-          <Footer />
-          <Suspense>
+      <ThemeProvider>
+        <PHProvider>
+          <body>
+            <PostHogPageView />
+            <main
+              id="skip"
+              className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
+            >
+              {children}
+            </main>
             <Toaster />
-          </Suspense>
-        </body>
-      </PHProvider>
+          </body>
+        </PHProvider>
+      </ThemeProvider>
     </html>
   );
 }
