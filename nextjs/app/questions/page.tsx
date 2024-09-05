@@ -4,13 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import QuestionSection from '../components/QuestionSection';
 import Timer from '../components/Timer';
-import { Section } from '../types'; // Import the Section type
-
-interface Question {
-  id: number;
-  text: string;
-  options: string[];
-}
+import { Section, Question } from '../types'; // Import the Section type
 
 const IndexPage: React.FC = () => {
   const [sections, setSections] = useState<Section[]>([]);
@@ -26,25 +20,28 @@ const IndexPage: React.FC = () => {
     ]);
   }, []);
   
+  useEffect(() => {
+    console.log('currentSection', currentSection);
+  }, [currentSection]);
+
   const handleSelectSection = async (sectionName: string) => {
-    console.log('we are about to call')
+    console.log('we are about to call');
     try {
       const response = await fetch('/api/ai/generateQuestionSection', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sectionName }),
+        body: JSON.stringify({ sectionName: sectionName }), // Build the prompt
       });
-  
+
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
-  
       if (data && typeof data === 'object' && 'answer' in data) {
-        setCurrentSection({ questions: [{ id: 1, text: data.answer, options: [] }] }); // Modify this according to your question format
+        setCurrentSection({ questions: data.answer.questions });
         setStartTimer(true);
       } else {
         console.error('Invalid section data received');

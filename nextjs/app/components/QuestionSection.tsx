@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
-
-interface Question {
-  id: number;
-  text: string;
-  options: string[];
-}
+import { Question } from '../types';
 
 interface QuestionSectionProps {
   questions: Question[];
-  onSubmit: (answers: Record<number, string>) => void;
+  onSubmit: (answers: Record<string, string>) => void;
 }
 
 const QuestionSection: React.FC<QuestionSectionProps> = ({ questions, onSubmit }) => {
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>({});
 
-  const handleChange = (questionId: number, answer: string) => {
+  const handleChange = (questionId: string, answer: string) => {
     setAnswers({ ...answers, [questionId]: answer });
   };
 
@@ -24,14 +19,14 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ questions, onSubmit }
 
   return (
     <div>
-      {questions.map((question) => (
+      {questions && questions.length > 0 ? questions.map((question) => (
         <div key={question.id}>
-          <p>{question.text}</p>
-          {question.options.map((option) => (
-            <label key={option}>
+          <p>{question.question}</p>
+          {question.answer_choices.map((option) => (
+            <label key={`${question.id}-${option}`}>
               <input
                 type="radio"
-                name={question.id.toString()}
+                name={question.id}
                 value={option}
                 onChange={() => handleChange(question.id, option)}
               />
@@ -39,7 +34,7 @@ const QuestionSection: React.FC<QuestionSectionProps> = ({ questions, onSubmit }
             </label>
           ))}
         </div>
-      ))}
+      )) : <p>No questions available</p>}
       <button onClick={handleSubmit}>Submit</button>
     </div>
   );
