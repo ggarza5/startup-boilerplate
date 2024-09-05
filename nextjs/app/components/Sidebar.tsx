@@ -1,35 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import '@fortawesome/fontawesome-free/css/all.min.css'; // Import Font Awesome CSS
+import { Section } from '../types'; // Import the Section type
 
-const Sidebar = () => {
-	const [sections, setSections] = useState([]);
+interface SidebarProps {
+	sections: Section[];
+	onSelectSection: (sectionName: string) => Promise<void>;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ sections, onSelectSection }) => {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 
-	useEffect(() => {
-		const getSections = async () => {
-			try {
-				const response = await axios.get('/api/sections');
-				setSections(response.data);
-			} catch (error) {
-				console.error('Error fetching sections:', error);
-			}
-		};
-		getSections();
-	}, []);
-
 	return (
-		<div className={`fixed top-0 left-0 h-full bg-gray-800 text-white ${isCollapsed ? 'w-16' : 'w-64'} transition-width duration-300`}>
-			<div className="flex justify-between items-center p-4 border-b border-gray-700">
-				<button onClick={() => setIsCollapsed(!isCollapsed)} className="text-gray-400 hover:text-white">
+		<div className={`h-full bg-background text-white dark:bg-background ${isCollapsed ? 'w-16' : 'w-64'} transition-width duration-300 border-r border-gray-700 dark:border-gray-800`}>
+			<div className="flex justify-between items-center p-4 border-b border-gray-700 dark:border-gray-800">
+				<button onClick={() => setIsCollapsed(!isCollapsed)} className="text-gray-900 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300">
 					{isCollapsed ? '>' : '<'}
 				</button>
-				<button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-					New Section
+				<button className="bg-gray-900 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded dark:bg-blue-600 dark:hover:bg-blue-800">
+					<i className="fas fa-plus"></i> {/* Plus icon */}
 				</button>
 			</div>
 			<div className="p-4">
-				{sections.map((section: { id: string; name: string }) => (
-					<div key={section.id} className="mb-2 p-2 bg-gray-700 rounded">
+				{sections.map((section) => (
+					<div 
+						key={section.id} 
+						className="mb-2 p-2 cursor-pointer text-black hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800" 
+						onClick={() => onSelectSection(section.name)}
+					>
 						{section.name}
 					</div>
 				))}

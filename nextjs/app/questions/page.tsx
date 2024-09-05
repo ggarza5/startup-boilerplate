@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 import QuestionSection from '../components/QuestionSection';
 import Timer from '../components/Timer';
 import { Section, Question } from '../types'; // Import the Section type
+import { Navbar } from '@/components/landing/Navbar'; // Import Navbar
 
 const IndexPage: React.FC = () => {
   const [sections, setSections] = useState<Section[]>([]);
@@ -57,14 +58,19 @@ const IndexPage: React.FC = () => {
   };
 
   return (
-    <div>
-      <Sidebar sections={sections} onSelectSection={handleSelectSection} />
-      {currentSection && (
-        <div>
-          <Timer startTimer={startTimer} />
-          <QuestionSection questions={currentSection.questions} onSubmit={handleSubmitAnswers} />
+    <div className="flex flex-col h-screen">
+      <Navbar user={null} /> {/* Add Navbar */}
+      <div className="flex grow">
+        <Sidebar sections={sections} onSelectSection={handleSelectSection} />
+        <div className="flex grow flex-col ml-64"> {/* Add margin to avoid overlap */}
+          {currentSection && (
+            <div>
+              <Timer startTimer={startTimer} />
+              <QuestionSection questions={currentSection.questions} onSubmit={handleSubmitAnswers} />
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
