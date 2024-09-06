@@ -45,7 +45,7 @@ export const generateSection = async (sectionName: string, sectionType: string) 
     .insert([
       { name: sectionName, section_type: sectionType }  // Assuming sectionName is the type of the section
     ])
-    .select('id')
+    .select('*')
     .single();
 
   if (sectionError) {
@@ -76,5 +76,5 @@ export const generateSection = async (sectionName: string, sectionType: string) 
     }
   }
 
-  return { answer: generatedText, sectionId: sectionId };
+  return { answer: generatedText, sectionId: sectionId, name: sectionName, type: sectionType, created_at: sectionData.created_at };
 };

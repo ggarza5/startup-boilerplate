@@ -20,7 +20,7 @@ const Results: React.FC = () => {
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
       <Navbar user={null} /> {/* Add Navbar */}
       <div className="flex grow">
-        <Sidebar sections={[]} onSelectSection={async () => {}} /> {/* Add Sidebar */}
+        <Sidebar sections={[]} onSelectSection={async () => {}} onAddSection={async () => {}} isCreatingSection={false} setIsCreatingSection={() => {}} />
         <div className="flex grow flex-col p-4 overflow-hidden"> {/* Add margin to avoid overlap */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center">
             <Confetti
