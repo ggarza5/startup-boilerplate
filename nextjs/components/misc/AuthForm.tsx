@@ -135,9 +135,9 @@ export function AuthForm({ state }: { state: AuthState }) {
   // add toast if error
   useEffect(() => {
     type ToastVariant = 'destructive' | 'default' | undefined | null;
-    const title = searchParams.get('toast_title') || undefined;
-    const description = searchParams.get('toast_description') || undefined;
-    const variant = searchParams.get('toast_variant') as ToastVariant;
+    const title = searchParams?.get('toast_title') || undefined;
+    const description = searchParams?.get('toast_description') || undefined;
+    const variant = searchParams?.get('toast_variant') as ToastVariant;
     if (title || description) {
       setTimeout(
         () =>

@@ -22,6 +22,7 @@ export default async function LandingPage() {
     data: { user }
   } = await supabase.auth.getUser();
 
+
   return (
     <>
       <Navbar user={user} />

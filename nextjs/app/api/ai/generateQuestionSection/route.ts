@@ -3,8 +3,8 @@ import { generateSection } from '../../../services/generateSectionService';
 
 export async function POST(request: NextRequest) {
   try {
-    const { sectionName } = await request.json();
-    const result = await generateSection(sectionName);
+    const { sectionName, sectionType } = await request.json();
+    const result = await generateSection(sectionName, sectionType);
     return NextResponse.json(result);
   } catch (error) {
     if (error instanceof Error) {

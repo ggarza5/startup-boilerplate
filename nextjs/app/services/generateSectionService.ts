@@ -19,8 +19,9 @@ const SectionSchema = z.object({
   questions: z.array(QuestionSchema),
 });
 
-export const generateSection = async (sectionName: string) => {
-  const prompt = `Generate a ${sectionName} SAT question section with questions, answers, and explanations that address each choice. Return in json format. I need these fields: question, answer_choices, answer, explanation. Answer_choices should be an array of strings, others should be string`;
+export const generateSection = async (sectionName: string, sectionType: string) => {
+  console.log(`generating a ${sectionType} section`);
+  const prompt = `Generate a ${sectionType} SAT question section with questions, answers, and explanations that address each choice. Return in json format. I need these fields: question, answer_choices, answer, explanation. Answer_choices should be an array of strings, others should be string`;
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -42,7 +43,7 @@ export const generateSection = async (sectionName: string) => {
   const { data: sectionData, error: sectionError } = await supabase
     .from('sections')
     .insert([
-      { section_type: sectionName }  // Assuming sectionName is the type of the section
+      { name: sectionName, section_type: sectionType }  // Assuming sectionName is the type of the section
     ])
     .select('id')
     .single();

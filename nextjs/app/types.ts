@@ -10,8 +10,9 @@ export interface Question {
 }
 
 export interface Section {
-  id: number;
+  id: string;
   name: string;
   type: string;
   questions: Question[];
+  createdAt?: string;
 }

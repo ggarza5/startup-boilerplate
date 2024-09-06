@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  mode: 'jit',
   darkMode: ['class'],
   content: [
     './pages/**/*.{ts,tsx}',
@@ -50,7 +51,11 @@ module.exports = {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
-        }
+        },
+        'scrollbar-thumb-light': '#888',
+        'scrollbar-track-light': '#f1f1f1',
+        'scrollbar-thumb-dark': '#555',
+        'scrollbar-track-dark': '#333',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -73,5 +78,14 @@ module.exports = {
       }
     }
   },
-  plugins: [require('tailwindcss-animate')]
+  plugins: [
+    require('tailwind-scrollbar'),
+    require('tailwindcss-animate')
+  ],
+  variants: {
+    scrollbar: ['dark'],
+    extend: {
+      scrollbar: ['dark'],
+    }
+  }
 };

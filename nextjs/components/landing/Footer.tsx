@@ -14,7 +14,7 @@ export const Footer = () => {
             className="font-bold text-xl flex"
           >
             <LogoIcon />
-            ShadcnUI/React
+            {process.env.NEXT_PUBLIC_PROJECT_NAME}
           </a>
         </div>
 
