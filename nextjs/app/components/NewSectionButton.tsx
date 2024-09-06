@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface NewSectionButtonProps {
 	onAddSection: (type: string, sectionName: string) => void;
@@ -6,6 +6,7 @@ interface NewSectionButtonProps {
 
 const NewSectionButton: React.FC<NewSectionButtonProps> = ({ onAddSection }) => {
 	const [showMenu, setShowMenu] = useState(false);
+	const menuRef = useRef<HTMLDivElement>(null);
 
 	const handleAddSection = (type: string) => {
 		const date = new Date();
@@ -14,8 +15,21 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({ onAddSection }) => 
 		setShowMenu(false);
 	};
 
+	const handleClickOutside = (event: MouseEvent) => {
+		if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+			setShowMenu(false);
+		}
+	};
+
+	useEffect(() => {
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, []);
+
 	return (
-		<div className="relative">
+		<div className="relative" ref={menuRef}>
 			<button 
 				onClick={() => setShowMenu(!showMenu)} 
 				className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded dark:bg-blue-600 dark:hover:bg-blue-800"
