@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { fetchSectionByName } from '../../../services/sectionsService';
 import { NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextApiRequest, res: NextApiResponse) {
     console.log(req.url)
     //just get the last part of the URL (after last /)
     const sectionName = req.url!.split('/').pop();
