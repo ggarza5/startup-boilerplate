@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
-import { fetchQuestionsBySectionId } from '../../services/questionService';
+import { fetchQuestionsBySectionId } from '../../../services/questionService';
 
-export async function GET(req: Request) {
-    //get sectionId from searchParams
-
-    const url = new URL(req.url);
-    const sectionId = url.searchParams.get('id');
+export async function GET(req: Request, { params }: { params: { id: string } }) {
+    const sectionId = params.id;
     if (!sectionId) {
         return NextResponse.json({ error: 'Section ID is required' }, { status: 400 });
     }
+
+    console.log('we are in righ!!');
 
     try {
         // Fetch questions using the service
@@ -17,6 +16,7 @@ export async function GET(req: Request) {
         // Combine section and questions
         const responseData = {
             questions, // Include questions in the response
+            id: sectionId,
         };
 
         return NextResponse.json(responseData);

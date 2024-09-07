@@ -1,8 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import { fetchSections } from '../../services/sectionsService';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextApiRequest, res: NextApiResponse) {
+export async function GET(req: NextRequest, res: NextResponse) {
     try {
         const sections = await fetchSections();
         return NextResponse.json(sections);

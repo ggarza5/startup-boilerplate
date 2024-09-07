@@ -18,45 +18,44 @@ interface TestimonialProps {
 const testimonials: TestimonialProps[] = [
   {
     image: 'https://github.com/shadcn.png',
-    name: 'John Doe React',
-    userName: '@john_Doe',
-    comment: 'This landing page is awesome!'
+    name: 'Jane Doe',
+    userName: '@jane_doe',
+    comment: 'This SAT practice platform is amazing!'
   },
   {
     image: 'https://github.com/shadcn.png',
-    name: 'John Doe React',
-    userName: '@john_Doe1',
+    name: 'John Smith',
+    userName: '@john_smith',
     comment:
-      'Lorem ipsum dolor sit amet,empor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.'
-  },
-
-  {
-    image: 'https://github.com/shadcn.png',
-    name: 'John Doe React',
-    userName: '@john_Doe2',
-    comment:
-      'Lorem ipsum dolor sit amet,exercitation. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.'
+      'The detailed analytics helped me understand my strengths and weaknesses.'
   },
   {
     image: 'https://github.com/shadcn.png',
-    name: 'John Doe React',
-    userName: '@john_Doe3',
+    name: 'Emily Johnson',
+    userName: '@emily_johnson',
     comment:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.'
+      'The personalized study plans were a game-changer for my SAT preparation.'
   },
   {
     image: 'https://github.com/shadcn.png',
-    name: 'John Doe React',
-    userName: '@john_Doe4',
+    name: 'Michael Brown',
+    userName: '@michael_brown',
     comment:
-      'Lorem ipsum dolor sit amet, tempor incididunt  aliqua. Ut enim ad minim veniam, quis nostrud.'
+      'I loved the gamified practice tests. They made learning fun and engaging.'
   },
   {
     image: 'https://github.com/shadcn.png',
-    name: 'John Doe React',
-    userName: '@john_Doe5',
+    name: 'Sarah Davis',
+    userName: '@sarah_davis',
     comment:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+      'The community support was fantastic. I got tips and resources from other students.'
+  },
+  {
+    image: 'https://github.com/shadcn.png',
+    name: 'David Wilson',
+    userName: '@david_wilson',
+    comment:
+      'The platform is very user-friendly and accessible on all my devices.'
   }
 ];
 
@@ -67,14 +66,13 @@ export const Testimonials = () => {
         Discover Why
         <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
           {' '}
-          People Love{' '}
+          Students Love{' '}
         </span>
-        This Landing Page
+        Our SAT Practice Platform
       </h2>
 
       <p className="text-xl text-muted-foreground pt-4 pb-8">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Non unde error
-        facere hic reiciendis illo
+        Hear from students who have used our platform to prepare for the SAT.
       </p>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 sm:block columns-2  lg:columns-3 lg:gap-6 mx-auto space-y-4 lg:space-y-6">

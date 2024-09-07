@@ -20,7 +20,7 @@ export const Newsletter = () => {
           </span>
         </h3>
         <p className="text-xl text-muted-foreground text-center mt-4 mb-8">
-          Lorem ipsum dolor sit amet consectetur.
+          Stay updated with the latest SAT practice tips and resources.
         </p>
 
         <form
@@ -28,7 +28,7 @@ export const Newsletter = () => {
           onSubmit={handleSubmit}
         >
           <Input
-            placeholder="leomirandadev@gmail.com"
+            placeholder="youremail@example.com"
             className="bg-muted/50 dark:bg-muted/80 "
             aria-label="email"
           />

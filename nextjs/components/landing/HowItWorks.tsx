@@ -18,25 +18,25 @@ const features: FeatureProps[] = [
     icon: <MedalIcon />,
     title: 'Accessibility',
     description:
-      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum quas provident cum'
+      'Our platform is accessible on all devices, ensuring you can practice anytime, anywhere.'
   },
   {
     icon: <MapIcon />,
     title: 'Community',
     description:
-      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum quas provident cum'
+      'Join a community of students and educators to share tips and resources.'
   },
   {
     icon: <PlaneIcon />,
     title: 'Scalability',
     description:
-      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum quas provident cum'
+      'Our platform scales with your needs, offering more resources as you progress.'
   },
   {
     icon: <GiftIcon />,
     title: 'Gamification',
     description:
-      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum quas provident cum'
+      'Engage with our gamified practice tests to make learning fun and effective.'
   }
 ];
 
@@ -51,8 +51,7 @@ export const HowItWorks = () => {
         Step-by-Step Guide
       </h2>
       <p className="md:w-3/4 mx-auto mt-4 mb-8 text-xl text-muted-foreground">
-        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Veritatis
-        dolor pariatur sit!
+        Follow these simple steps to start your SAT practice journey with us.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

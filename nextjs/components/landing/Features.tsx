@@ -16,35 +16,34 @@ interface FeatureProps {
 
 const features: FeatureProps[] = [
   {
-    title: 'Responsive Design',
+    title: 'Comprehensive Practice Tests',
     description:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.',
+      'Access a wide range of practice tests covering all sections of the SAT.',
     image: '/landing/looking-ahead.png'
   },
   {
-    title: 'Intuitive user interface',
+    title: 'Detailed Performance Analytics',
     description:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.',
+      'Get detailed insights into your performance to identify strengths and areas for improvement.',
     image: '/landing/reflecting.png'
   },
   {
-    title: 'AI-Powered insights',
+    title: 'Personalized Study Plans',
     description:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.',
+      'Receive personalized study plans tailored to your performance and goals.',
     image: '/landing/growth.png'
   }
 ];
 
 const featureList: string[] = [
-  'Dark/Light theme',
-  'Reviews',
-  'Features',
-  'Pricing',
-  'Contact form',
-  'Our team',
-  'Responsive design',
-  'Newsletter',
-  'Minimalist'
+  'Practice Tests',
+  'Performance Analytics',
+  'Study Plans',
+  'Progress Tracking',
+  'Responsive Design',
+  'Community Support',
+  'Mobile Access',
+  'Expert Tips'
 ];
 
 export const Features = () => {

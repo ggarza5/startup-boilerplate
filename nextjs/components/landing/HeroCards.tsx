@@ -26,12 +26,12 @@ export const HeroCards = () => {
           </Avatar>
 
           <div className="flex flex-col">
-            <CardTitle className="text-lg">John Doe React</CardTitle>
-            <CardDescription>@john_doe</CardDescription>
+            <CardTitle className="text-lg">Jane Doe</CardTitle>
+            <CardDescription>@jane_doe</CardDescription>
           </div>
         </CardHeader>
 
-        <CardContent>This landing page is awesome!</CardContent>
+        <CardContent>This SAT practice platform is amazing!</CardContent>
       </Card>
 
       {/* Team */}
@@ -44,14 +44,13 @@ export const HeroCards = () => {
           />
           <CardTitle className="text-center">Leo Miranda</CardTitle>
           <CardDescription className="font-normal text-primary">
-            Frontend Developer
+            SAT Prep Expert
           </CardDescription>
         </CardHeader>
 
         <CardContent className="text-center pb-2">
           <p>
-            I really enjoy transforming ideas into functional software that
-            exceeds expectations
+            I really enjoy helping students achieve their best SAT scores.
           </p>
         </CardContent>
 
@@ -121,7 +120,7 @@ export const HeroCards = () => {
           </div>
 
           <CardDescription>
-            Lorem ipsum dolor sit, amet ipsum consectetur adipisicing elit.
+            Access to basic SAT practice questions and quizzes.
           </CardDescription>
         </CardHeader>
 
@@ -133,7 +132,7 @@ export const HeroCards = () => {
 
         <CardFooter className="flex">
           <div className="space-y-4">
-            {['4 Team member', '4 GB Storage', 'Upto 6 pages'].map(
+            {['4 Practice Tests', 'Basic Analytics', 'Community Support'].map(
               (benefit: string) => (
                 <span key={benefit} className="flex">
                   <Check className="text-green-500" />{' '}
@@ -154,8 +153,7 @@ export const HeroCards = () => {
           <div>
             <CardTitle>Light & dark mode</CardTitle>
             <CardDescription className="text-md mt-2">
-              Lorem ipsum dolor sit amet consect adipisicing elit. Consectetur
-              natusm.
+              Practice in your preferred mode, day or night.
             </CardDescription>
           </div>
         </CardHeader>

@@ -15,33 +15,31 @@ interface FAQProps {
 
 const FAQList: FAQProps[] = [
   {
-    question: 'Is this template free?',
-    answer: 'Yes. It is a free ChadcnUI template.',
+    question: 'Is this platform free?',
+    answer: 'Yes. Our basic plan is free and includes access to practice tests and basic analytics.',
     value: 'item-1'
   },
   {
-    question: 'Lorem ipsum dolor sit amet consectetur adipisicing elit?',
+    question: 'How can I track my progress?',
     answer:
-      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint labore quidem quam? Consectetur sapiente iste rerum reiciendis animi nihil nostrum sit quo, modi quod.',
+      'Our platform provides detailed analytics and progress tracking to help you understand your strengths and areas for improvement.',
     value: 'item-2'
   },
   {
-    question:
-      'Lorem ipsum dolor sit amet  Consectetur natus dolores minus quibusdam?',
+    question: 'Can I access the platform on mobile?',
     answer:
-      'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Labore qui nostrum reiciendis veritatis necessitatibus maxime quis ipsa vitae cumque quo?',
+      'Yes, our platform is fully responsive and can be accessed on any device, including mobile phones and tablets.',
     value: 'item-3'
   },
   {
-    question: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit?',
-    answer: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit.',
+    question: 'Do you offer personalized study plans?',
+    answer: 'Yes, we offer personalized study plans based on your performance and goals.',
     value: 'item-4'
   },
   {
-    question:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur natus?',
+    question: 'How do I get started?',
     answer:
-      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint labore quidem quam? Consectetur sapiente iste rerum reiciendis animi nihil nostrum sit quo, modi quod.',
+      'Simply sign up for a free account and start practicing. You can upgrade to a premium plan for additional features.',
     value: 'item-5'
   }
 ];

@@ -18,15 +18,14 @@ export const Hero = () => {
           for{' '}
           <h2 className="inline">
             <span className="inline bg-gradient-to-r from-[#61DAFB] via-[#1fc0f1] to-[#03a3d7] text-transparent bg-clip-text">
-              React
+              SAT
             </span>{' '}
-            developers
+            practice
           </h2>
         </main>
 
         <p className="text-xl text-muted-foreground md:w-10/12 mx-auto lg:mx-0">
-          Build your React landing page effortlessly with the required sections
-          to your project.
+          Practice for the SAT effortlessly with the required sections for your preparation, including quizzes, results, and more.
         </p>
 
         <div className="space-y-4 md:space-y-0 md:space-x-4">

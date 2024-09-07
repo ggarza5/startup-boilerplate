@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import '@fortawesome/fontawesome-free/css/all.min.css'; // Import Font Awesome CSS
 import { Section } from '../types'; // Import the Section type
 import NewSectionButton from './NewSectionButton'; // Import the new component
-import '../styles/customScrollbar.css'; // Import custom scrollbar styles
+import { Loader } from '@/components/ui/loader';
 
 interface SidebarProps {
   sections: Section[];
@@ -12,10 +12,16 @@ interface SidebarProps {
   setIsCreatingSection: (isCreatingSection: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ sections, onSelectSection, onAddSection, isCreatingSection, setIsCreatingSection }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+const Sidebar: React.FC<SidebarProps> = ({ 
+  sections, 
+  onSelectSection, 
+  onAddSection, 
+  isCreatingSection, 
+  setIsCreatingSection 
+}: SidebarProps) => {
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [dynamicSections, setDynamicSections] = useState<Section[]>(sections);
-  const [isLoadingSections, setIsLoadingSections] = useState(false);
+  const [isLoadingSections, setIsLoadingSections] = useState<boolean>(false);
   const fetchSections = async () => {
 	setIsLoadingSections(true); // Set loading state to true
 	const response = await fetch('/api/sections');
@@ -33,15 +39,14 @@ const Sidebar: React.FC<SidebarProps> = ({ sections, onSelectSection, onAddSecti
       fetchSections();
     }
   }, [isCreatingSection]);
-
   const renderSections = () => {
-    const sectionsWithDate = dynamicSections.filter((section) => section.createdAt);
-    const sortedSections = sectionsWithDate.sort((a, b) => {
+    const sectionsWithDate = dynamicSections.filter((section: Section) => section.createdAt);
+    const sortedSections = sectionsWithDate.sort((a: Section, b: Section) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return dateB - dateA;
     });
-    const sectionsByDate = sortedSections.reduce((acc, section) => {
+    const sectionsByDate = sortedSections.reduce((acc: Record<string, Section[]>, section: Section) => {
       const date = section.createdAt?.split('T')[0];
       if (date) {
         if (!acc[date]) acc[date] = [];
@@ -50,17 +55,18 @@ const Sidebar: React.FC<SidebarProps> = ({ sections, onSelectSection, onAddSecti
       return acc;
     }, {} as Record<string, Section[]>);
 
+    const mostRecentDate = Object.keys(sectionsByDate)[0]; // Get the most recent date
+
     return (
-      <>
-        
+      <>        
         {Object.entries(sectionsByDate).map(([date, sections]) => (
           <div key={date}>
             {!isCollapsed && <h3 className="text-gray-400">{date}</h3>}
-			{isCreatingSection && (
-				<div className="mb-2 p-2 text-gray-500 dark:text-gray-400">
-					Generating...
-				</div>
-			)}
+            {isCreatingSection && date === mostRecentDate && (
+              <div className="mb-2 p-2 text-gray-500 dark:text-gray-400">
+                Generating...
+              </div>
+            )}
             {sections.map((section) => (
               <div 
                 key={section.id} 
@@ -84,7 +90,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sections, onSelectSection, onAddSecti
       <div className="flex justify-between items-center p-4 border-b border-gray-700 dark:border-gray-800">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="py-2 text-gray-400 hover:text-white dark:text-gray-500 dark:hover:text-gray-300"
+          className="py-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
         >
           {isCollapsed ? '>' : '<'}
         </button>
@@ -96,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sections, onSelectSection, onAddSecti
           style={{ overflowY: 'auto', height: 'calc(100vh - 130px)' }}
         >
           {isLoadingSections ? (
-            <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+            <Loader className='margin-auto h-full'/>
           ) : (
             renderSections()
           )}

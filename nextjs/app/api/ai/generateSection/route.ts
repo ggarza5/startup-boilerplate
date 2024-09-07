@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateSection } from '../../../services/generateSectionService';
 
+// API handler to generate a new section using OpenAI
 export async function POST(request: NextRequest) {
   try {
     const requestBody = await request.json(); // Store the result of request.json() in a variable

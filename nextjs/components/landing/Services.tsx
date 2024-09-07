@@ -15,21 +15,21 @@ interface ServiceProps {
 
 const serviceList: ServiceProps[] = [
   {
-    title: 'Code Collaboration',
+    title: 'Practice Tests',
     description:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.',
+      'Access a variety of practice tests to prepare for all sections of the SAT.',
     icon: <ChartIcon />
   },
   {
-    title: 'Project Management',
+    title: 'Performance Analytics',
     description:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.',
+      'Get detailed insights into your performance to help you improve.',
     icon: <WalletIcon />
   },
   {
-    title: 'Task Automation',
+    title: 'Study Plans',
     description:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.',
+      'Receive personalized study plans based on your performance and goals.',
     icon: <MagnifierIcon />
   }
 ];
@@ -41,14 +41,13 @@ export const Services = () => {
         <div>
           <h2 className="text-3xl md:text-4xl font-bold">
             <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
-              Client-Centric{' '}
+              SAT Practice{' '}
             </span>
             Services
           </h2>
 
           <p className="text-muted-foreground text-xl mt-4 mb-8 ">
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Veritatis
-            dolor.
+            Our platform offers a range of services to help you excel in the SAT.
           </p>
 
           <div className="flex flex-col gap-8">

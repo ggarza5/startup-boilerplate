@@ -2,11 +2,12 @@ import { createClient } from '@supabase/supabase-js';
 import { Section } from '../types'; // Import the Section type
 import { fetchQuestionsBySectionId } from './questionService';
 
+// Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Function to fetch all sections
 export const fetchSections = async (): Promise<Section[]> => {
     try {
         console.log('we are inside the fetchSections');
@@ -36,6 +37,7 @@ export const fetchSections = async (): Promise<Section[]> => {
     }
 };
 
+// Function to fetch a section by its name
 export const fetchSectionByName = async (name: string): Promise<Section | null> => {
     try {
         const { data, error } = await supabase
@@ -66,7 +68,7 @@ export const fetchSectionByName = async (name: string): Promise<Section | null> 
             createdAt: data[0].created_at
         };
 
-        //get the questions from the questions table
+        // Get the questions from the questions table
         const questions = await fetchQuestionsBySectionId(section.id);
         section.questions = questions;
 

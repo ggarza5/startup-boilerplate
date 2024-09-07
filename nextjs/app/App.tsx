@@ -1,10 +1,9 @@
 import React from 'react';
 import Sidebar from './components/Sidebar';
-
+import { useState } from 'react';
 const App = () => {
     return (
         <div className="flex">
-            <Sidebar />
             <div className="flex-1 p-4">
                 {/* Main content goes here */}
             </div>

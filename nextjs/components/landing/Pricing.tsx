@@ -39,47 +39,44 @@ const pricingList: PricingProps[] = [
     popular: 0,
     price: 0,
     description:
-      'Lorem ipsum dolor sit, amet ipsum consectetur adipisicing elit.',
+      'Access to basic SAT practice questions and quizzes.',
     buttonText: 'Get Started',
     benefitList: [
-      '1 Team member',
-      '2 GB Storage',
-      'Up to 4 pages',
-      'Community support',
-      'lorem ipsum dolor'
+      '1 Practice Test',
+      'Basic Analytics',
+      'Community Support',
+      'Limited Access'
     ],
     redirectURL: '/account'
   },
   {
     id: 'price_1Pdy8yFttF99a1NCLpDa83xf',
-    title: 'Hobby',
+    title: 'Standard',
     popular: 1,
     price: 10,
     description:
-      'Lorem ipsum dolor sit, amet ipsum consectetur adipisicing elit.',
+      'Access to all practice tests and detailed performance analytics.',
     buttonText: 'Subscribe Now',
     benefitList: [
-      '4 Team member',
-      '4 GB Storage',
-      'Upto 6 pages',
-      'Priority support',
-      'lorem ipsum dolor'
+      '4 Practice Tests',
+      'Detailed Analytics',
+      'Priority Support',
+      'Full Access'
     ]
   },
   {
     id: 'price_1Pdy8zFttF99a1NCGQJc5ZTZ',
-    title: 'Freelancer',
+    title: 'Premium',
     popular: 0,
     price: 20,
     description:
-      'Lorem ipsum dolor sit, amet ipsum consectetur adipisicing elit.',
+      'All features of the Standard plan plus personalized study plans.',
     buttonText: 'Subscribe Now',
     benefitList: [
-      '10 Team member',
-      '8 GB Storage',
-      'Upto 10 pages',
-      'Priority support',
-      'lorem ipsum dolor'
+      'Unlimited Practice Tests',
+      'Advanced Analytics',
+      'Personalized Study Plans',
+      'Priority Support'
     ]
   }
 ];
@@ -138,8 +135,7 @@ export const Pricing = ({ user }: { user: User | null }) => {
         Access
       </h2>
       <h3 className="text-xl text-center text-muted-foreground pt-4 pb-8">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias
-        reiciendis.
+        Practice for the SAT effortlessly with the required sections for your preparation, including quizzes, results, and more.
       </h3>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {pricingList.map((pricing: PricingProps) => (

@@ -19,7 +19,7 @@ export const Footer = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-lg">Follow US</h3>
+          <h3 className="font-bold text-lg">Follow Us</h3>
           <div>
             <a
               rel="noreferrer noopener"
@@ -153,7 +153,7 @@ export const Footer = () => {
 
       <section className="container pb-14 text-center">
         <h3>
-          &copy; 2024 Landing page made by{' '}
+          &copy; 2024 SAT Practice Platform by{' '}
           <a
             rel="noreferrer noopener"
             target="_blank"
