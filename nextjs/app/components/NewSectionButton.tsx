@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 interface NewSectionButtonProps {
-  onAddSection: (type: string, sectionName: string) => void;
+  onAddSection: (type: string, sectionName: string) => Promise<void>; // Update to return a Promise
   setIsCreatingSection: (isCreatingSection: boolean) => void;
 }
 
@@ -9,12 +9,12 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({ onAddSection, setIs
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const handleAddSection = (type: string) => {
-	setIsCreatingSection(true);
+  const handleAddSection = async (type: string) => { // Update to async
+    setIsCreatingSection(true);
     const date = new Date();
     const uniqueId = `${type}-${date.toISOString()}`;
-    onAddSection(type, uniqueId);
-	// setIsCreatingSection(false);
+    await onAddSection(type, uniqueId); // Wait for the section to be created
+    setIsCreatingSection(false);
     setShowMenu(false);
   };
 

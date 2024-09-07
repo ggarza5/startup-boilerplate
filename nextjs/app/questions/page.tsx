@@ -22,10 +22,12 @@ const IndexPage: React.FC = () => {
 // Main component for the Index Page
 const QuestionsPage: React.FC = () => {
   const queryVariables = useSearchParams();
+  console.log(queryVariables)
   const querySectionId = queryVariables?.get('sectionId');
   const querySectionName = queryVariables?.get('sectionName');
   let queryAddSection = queryVariables?.get('addSection');
   const queryType = queryVariables?.get('type');
+  console.log(querySectionId, querySectionName, queryAddSection, queryType);
 
   const [sections, setSections] = useState<Section[]>([]);
   const [currentSection, setCurrentSection] = useState<Section | null>(null); 
@@ -40,6 +42,24 @@ const QuestionsPage: React.FC = () => {
 
   const [sectionsLoaded, setSectionsLoaded] = useState(false);
   const { user, userLoading } = useUser();
+
+
+  // Handle section selection based on query parameters
+  useEffect(() => {
+    if (sectionsLoaded && querySectionId) 
+      handleSelectSection(querySectionName as string, querySectionId as string);    
+  }, [sectionsLoaded, querySectionId]);
+
+
+  // Handle adding a new section based on query parameters
+  useEffect(() => {
+    if (queryAddSection) {
+      console.log('Now inside iff, so we gonna call handleADd')
+      queryAddSection = null;
+      handleAddSection(queryType as string, querySectionName as string);
+    }
+  }, [sectionsLoaded, queryAddSection]);
+
 
   // Fetch sections from the API when the component mounts
   useEffect(() => {
@@ -56,28 +76,7 @@ const QuestionsPage: React.FC = () => {
       setSectionsLoaded(true);
     };
     fetchSections();
-    console.log(sections);
   }, [user, userLoading]);
-
-  // Handle section selection based on query parameters
-  useEffect(() => {
-    if (sectionsLoaded && querySectionId) {
-      handleSelectSection(querySectionName as string, querySectionId as string);
-    }
-  }, [sectionsLoaded, querySectionId]);
-
-  // Handle adding a new section based on query parameters
-  useEffect(() => {
-    if (sectionsLoaded && queryAddSection) {
-      queryAddSection = null;
-      handleAddSection(queryType as string, querySectionName as string);
-    }
-  }, [sectionsLoaded, queryAddSection]);
-
-  // Log the current section whenever it changes
-  useEffect(() => {
-    console.log('currentSection', currentSection);
-  }, [currentSection]);
 
   // Function to handle section selection
   const handleSelectSection = async (sectionName: string, sectionId: string) => {
@@ -104,7 +103,7 @@ const QuestionsPage: React.FC = () => {
       setCurrentSection(existingSection);
       setCurrentQuestionIndex(0);
       setStartTimer(true);
-      handleSelectSection(sectionName, existingSection.id);
+      await handleSelectSection(sectionName, existingSection.id); // Wait for section selection
       return;
     }
 
@@ -118,7 +117,6 @@ const QuestionsPage: React.FC = () => {
         }
       });
       const data = await response.json();
-      console.log('data', data);
       const newSection = {
         id: data.sectionId,
         name: data.name,
@@ -127,7 +125,7 @@ const QuestionsPage: React.FC = () => {
         created_at: data.created_at
       };
       setSections([newSection, ...sections]);
-      await handleSelectSection(data.name, data.sectionId);
+      await handleSelectSection(data.name, data.sectionId); // Wait for section selection
     } catch (error) {
       console.error('Error creating section:', error);
     } finally {
@@ -146,13 +144,10 @@ const QuestionsPage: React.FC = () => {
     if (currentSection && currentQuestionIndex < currentSection.questions.length - 1) {
       const radios = document.getElementsByName(`question-${currentQuestionIndex}`);
       const selectedAnswer = Array.from(radios).find((radio) => (radio as HTMLInputElement).checked);
-
-      if (selectedAnswer) {
+      if (selectedAnswer) 
         setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: (selectedAnswer as HTMLInputElement).value }));
-      } else {
-        setUnansweredQuestions((prev) => new Set(prev).add(currentQuestionIndex));
-      }
-
+      else 
+        setUnansweredQuestions((prev) => new Set(prev).add(currentQuestionIndex));      
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       resetSelectedAnswer();
     }
