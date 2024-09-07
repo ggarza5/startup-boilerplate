@@ -2,7 +2,7 @@
 
 // This file defines the results page component for displaying the results of a quiz section.
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/landing/Navbar';
 import Sidebar from '../components/Sidebar';
@@ -12,10 +12,18 @@ import '@fortawesome/fontawesome-free/css/all.min.css'; // Import Font Awesome C
 import { faCheck, faTimes, faQuestion } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useUser } from '@/context/UserContext'; // Import useUser
+import { Loader } from '@/components/ui/loader';
 
+const Results: React.FC = () => {
+  return (
+    <Suspense fallback={<Loader />}>
+      <ResultsPage />
+    </Suspense>
+  );
+};
 
 // Main component for the Results Page
-const Results: React.FC = () => {
+const ResultsPage: React.FC = () => {
   const { user, userLoading } = useUser(); // Use the useUser hook
   const router = useRouter();
   const queryVariables = useSearchParams();
