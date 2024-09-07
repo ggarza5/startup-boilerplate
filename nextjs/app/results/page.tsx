@@ -13,12 +13,9 @@ import { faCheck, faTimes, faQuestion } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useUser } from '@/context/UserContext'; // Import useUser
 
-interface ResultsProps {
-  sections: Section[];
-}
 
 // Main component for the Results Page
-const Results: React.FC<ResultsProps> = () => {
+const Results: React.FC = () => {
   const { user, userLoading } = useUser(); // Use the useUser hook
   const router = useRouter();
   const queryVariables = useSearchParams();
