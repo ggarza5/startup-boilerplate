@@ -149,7 +149,7 @@ const ResultsPage: React.FC = () => {
               <p className="text-md text-gray-700 dark:text-gray-300 mt-4">{selectedQuestion.explanation}</p>
               <button
                 onClick={handleBackToResults}
-                className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                className="mt-4 bg-gray-500 hover:bg-gray-700 dark:bg-gray-700 hover:dark:bg-gray-600 dark:text-white font-bold py-2 px-4 rounded"
               >
                 Back to Results
               </button>

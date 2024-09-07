@@ -40,7 +40,7 @@ export function AuthForm({ state }: { state: AuthState }) {
         try {
           await api.passwordSignup({ email, password });
           await api.passwordSignin({ email, password });
-          router.refresh();
+          router.push("/questions")
         } catch (e) {
           if (e instanceof Error) {
             toast({
@@ -63,7 +63,7 @@ export function AuthForm({ state }: { state: AuthState }) {
         setLoading(true);
         try {
           await api.passwordSignin({ email, password });
-          router.refresh();
+          router.push("/questions")
         } catch (e) {
           if (e instanceof Error) {
             toast({

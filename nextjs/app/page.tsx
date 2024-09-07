@@ -23,9 +23,9 @@ export default async function LandingPage() {
   const { data } = await supabase.auth.getUser();
 
   // Redirect to /questions if the user is logged in
-  // if (data.user) {
-  //   redirect('/questions');
-  // }
+  if (data.user) {
+    redirect('/questions');
+  }
 
   // Render the landing page if the user is not logged in
   return (

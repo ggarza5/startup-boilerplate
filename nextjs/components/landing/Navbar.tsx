@@ -49,7 +49,6 @@ const routeList: RouteProps[] = [
 ];
 
 export const Navbar = ({ user }: { user: User | null }) => {
-  console.log(user);
   const router = useRouter();
   const { toast } = useToast();
   const api = createApiClient(createClient());

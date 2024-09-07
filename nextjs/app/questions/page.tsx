@@ -7,9 +7,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Timer from '../components/Timer';
 import { Section, Question } from '../types';
-import { Navbar } from '@/components/landing/Navbar';
 import { Loader } from '@/components/ui/loader';
-import { useUser } from '@/context/UserContext'; // Import useUser
+import { createClient } from '@/utils/supabase/client';
+import { Navbar } from '../components/ui/Navbar';
 
 const IndexPage: React.FC = () => {
   return (
@@ -22,12 +22,10 @@ const IndexPage: React.FC = () => {
 // Main component for the Index Page
 const QuestionsPage: React.FC = () => {
   const queryVariables = useSearchParams();
-  console.log(queryVariables)
   const querySectionId = queryVariables?.get('sectionId');
   const querySectionName = queryVariables?.get('sectionName');
   let queryAddSection = queryVariables?.get('addSection');
   const queryType = queryVariables?.get('type');
-  console.log(querySectionId, querySectionName, queryAddSection, queryType);
 
   const [sections, setSections] = useState<Section[]>([]);
   const [currentSection, setCurrentSection] = useState<Section | null>(null); 
@@ -41,7 +39,23 @@ const QuestionsPage: React.FC = () => {
   const router = useRouter();
 
   const [sectionsLoaded, setSectionsLoaded] = useState(false);
-  const { user, userLoading } = useUser();
+  const [user, setUser] = useState(null);
+  const supabase = createClient();
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        router.push('/login'); // Redirect if not logged in
+        return;
+      } else {
+        setUser(data.user as any); // Type assertion to avoid type mismatch
+      }
+      setLoading(false);
+    };
+    fetchUser();
+  }, []);
 
 
   // Handle section selection based on query parameters
@@ -63,11 +77,6 @@ const QuestionsPage: React.FC = () => {
 
   // Fetch sections from the API when the component mounts
   useEffect(() => {
-    if (userLoading) return; // Wait for user to load
-    if (!user) {
-      router.push('/login'); // Redirect to login if no user
-      return;
-    }
 
     const fetchSections = async () => {
       const response = await fetch('/api/sections');
@@ -76,7 +85,7 @@ const QuestionsPage: React.FC = () => {
       setSectionsLoaded(true);
     };
     fetchSections();
-  }, [user, userLoading]);
+  }, [])
 
   // Function to handle section selection
   const handleSelectSection = async (sectionName: string, sectionId: string) => {
@@ -176,7 +185,7 @@ const QuestionsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col h-screen bg-muted/40 ">
       <Navbar user={user} /> {/* Pass user to Navbar */}
       <div className="flex grow">
         <Sidebar sections={sections} onSelectSection={handleSelectSection} onAddSection={handleAddSection} isCreatingSection={isCreatingSection} setIsCreatingSection={setIsCreatingSection}/>
