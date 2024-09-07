@@ -13,8 +13,13 @@ import {
 import { Check, Linkedin } from 'lucide-react';
 import { LightBulbIcon } from '@/components/landing/Icons';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
+import { useRouter } from 'next/navigation';
 
 export const HeroCards = () => {
+  const router = useRouter();
+  const handleAuth = async () => {
+    router.push('/auth');
+  };
   return (
     <div className="hidden lg:flex flex-row flex-wrap gap-8 relative w-[700px] h-[500px]">
       {/* Testimonial */}
@@ -125,7 +130,7 @@ export const HeroCards = () => {
         </CardHeader>
 
         <CardContent>
-          <Button className="w-full">Start Free Trial</Button>
+          <Button className="w-full" onClick={handleAuth}>Start Free Trial</Button>
         </CardContent>
 
         <hr className="w-4/5 m-auto mb-4" />

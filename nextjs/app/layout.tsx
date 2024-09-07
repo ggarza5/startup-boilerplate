@@ -12,7 +12,7 @@ const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
 });
 
 const meta = {
-  title: 'SAT Prep Bot',
+  title: 'SAT Practice Bot',
   description: 'Infinite SAT Practice',
   cardImage: '/og.png',
   robots: 'follow, index',
