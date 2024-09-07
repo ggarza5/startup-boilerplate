@@ -9,6 +9,7 @@ import Timer from '../components/Timer';
 import { Section, Question } from '../types';
 import { Navbar } from '@/components/landing/Navbar';
 import { Loader } from '@/components/ui/loader';
+import { useUser } from '@/context/UserContext'; // Import useUser
 
 // Main component for the Index Page
 const IndexPage: React.FC = () => {
@@ -30,9 +31,16 @@ const IndexPage: React.FC = () => {
   const router = useRouter();
 
   const [sectionsLoaded, setSectionsLoaded] = useState(false);
+  const { user, userLoading } = useUser();
 
   // Fetch sections from the API when the component mounts
   useEffect(() => {
+    if (userLoading) return; // Wait for user to load
+    if (!user) {
+      router.push('/login'); // Redirect to login if no user
+      return;
+    }
+
     const fetchSections = async () => {
       const response = await fetch('/api/sections');
       const data = await response.json();
@@ -41,7 +49,7 @@ const IndexPage: React.FC = () => {
     };
     fetchSections();
     console.log(sections);
-  }, []);
+  }, [user, userLoading]);
 
   // Handle section selection based on query parameters
   useEffect(() => {
@@ -166,7 +174,7 @@ const IndexPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
-      <Navbar user={null} />
+      <Navbar user={user} /> {/* Pass user to Navbar */}
       <div className="flex grow">
         <Sidebar sections={sections} onSelectSection={handleSelectSection} onAddSection={handleAddSection} isCreatingSection={isCreatingSection} setIsCreatingSection={setIsCreatingSection}/>
         <div className="flex grow flex-col p-4">

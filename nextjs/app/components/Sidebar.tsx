@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             {sections.map((section) => (
               <div 
                 key={section.id} 
-                className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-black dark:text-gray-300" 
+                className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300" 
                 onClick={() => onSelectSection(section.name, section.id)}
               >
                 {section.name}

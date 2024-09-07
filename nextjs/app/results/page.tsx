@@ -11,6 +11,7 @@ import { Section, Question } from '../types';
 import '@fortawesome/fontawesome-free/css/all.min.css'; // Import Font Awesome CSS
 import { faCheck, faTimes, faQuestion } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useUser } from '@/context/UserContext'; // Import useUser
 
 interface ResultsProps {
   sections: Section[];
@@ -18,6 +19,7 @@ interface ResultsProps {
 
 // Main component for the Results Page
 const Results: React.FC<ResultsProps> = () => {
+  const { user, userLoading } = useUser(); // Use the useUser hook
   const router = useRouter();
   const queryVariables = useSearchParams();
   const userAnswersQuery = queryVariables?.get('userAnswers');
@@ -30,13 +32,19 @@ const Results: React.FC<ResultsProps> = () => {
     
   // Fetch sections from the API when the component mounts
   useEffect(() => {
+    if (userLoading) return; // Wait for user to load
+    if (!user) {
+      router.push('/login'); // Redirect to login if no user
+      return;
+    }
+
     const fetchSections = async () => {
       const response = await fetch('/api/sections');
       const data = await response.json();
       setSections(data);
     };
     fetchSections();
-  }, []);
+  }, [user, userLoading]);
 
   // Set the current section based on the section name from the query parameters
   useEffect(() => {
@@ -108,7 +116,7 @@ const Results: React.FC<ResultsProps> = () => {
 
   return (
     <div className="flex flex-col bg-gray-100 dark:bg-gray-900">
-      <Navbar user={null} />
+      <Navbar user={user} /> {/* Pass user to Navbar */}
       <div className="flex scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark" >
         <Sidebar sections={sections} onSelectSection={handleSelectSection} onAddSection={handleAddSection} isCreatingSection={false} setIsCreatingSection={() => {}} />
         <div className="flex flex-col p-4" style={{height: 'calc(100vh - 57px)'}} >
