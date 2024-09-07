@@ -2,7 +2,7 @@
 
 // This file defines the main page component for handling sections and questions in a quiz application.
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Timer from '../components/Timer';
@@ -11,8 +11,16 @@ import { Navbar } from '@/components/landing/Navbar';
 import { Loader } from '@/components/ui/loader';
 import { useUser } from '@/context/UserContext'; // Import useUser
 
-// Main component for the Index Page
 const IndexPage: React.FC = () => {
+  return (
+    <Suspense fallback={<Loader />}>
+      <QuestionsPage />
+    </Suspense>
+  );
+};
+
+// Main component for the Index Page
+const QuestionsPage: React.FC = () => {
   const queryVariables = useSearchParams();
   const querySectionId = queryVariables?.get('sectionId');
   const querySectionName = queryVariables?.get('sectionName');
