@@ -10,6 +10,7 @@ import { Section, Question } from '../types';
 import { Loader } from '@/components/ui/loader';
 import { createClient } from '@/utils/supabase/client';
 import { Navbar } from '../components/ui/Navbar';
+import { User } from '@supabase/supabase-js';
 
 const IndexPage: React.FC = () => {
   return (
@@ -39,22 +40,32 @@ const QuestionsPage: React.FC = () => {
   const router = useRouter();
 
   const [sectionsLoaded, setSectionsLoaded] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null); // Update state type to User | null
   const supabase = createClient();
 
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      console.log(data)
-      if (!data.user) {
-        router.push('/auth'); // Redirect if not logged in
-        return;
-      } else {
-        setUser(data.user as any); // Type assertion to avoid type mismatch
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error("Error fetching user:", error.message);
+          router.push('/auth'); // Redirect to auth if not logged in
+          return;
+        }
+        
+        if (data && data.user) {
+          setUser(data.user as User); // Cast to User type
+        } else {
+          console.log("No user data available:", data);
+          router.push('/auth'); // Redirect to auth if not logged in
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
       }
       setLoading(false);
     };
+  
     fetchUser();
   }, []);
 
