@@ -46,6 +46,7 @@ const QuestionsPage: React.FC = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
+      console.log(data)
       if (!data.user) {
         router.push('/auth'); // Redirect if not logged in
         return;
