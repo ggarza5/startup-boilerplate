@@ -47,7 +47,7 @@ const QuestionsPage: React.FC = () => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
       if (!data.user) {
-        router.push('/login'); // Redirect if not logged in
+        router.push('/auth'); // Redirect if not logged in
         return;
       } else {
         setUser(data.user as any); // Type assertion to avoid type mismatch
@@ -202,7 +202,7 @@ const QuestionsPage: React.FC = () => {
             </div>
           ) : (
             currentSection ? (
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-between h-full">
                 <Timer startTimer={startTimer} />
                 <div className="mb-4" style={{ width: '600px', overflowX: 'auto' }}>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Question {currentQuestionIndex + 1}</h2>
@@ -264,16 +264,29 @@ const QuestionsPage: React.FC = () => {
                     </div>
                   </div>
                 )}
+                <div className="p-4 text-center mt-auto">
+                  <p>
+                    By using SAT Practice Bot, you agree to our <a href="/privacy-policy" className="text-blue-500 underline">Privacy Policy</a> and have read our <a href="/terms-of-service" className="text-blue-500 underline">Terms of Service</a>.
+                  </p>
+                </div>
               </div>
             ) : (
-              <div className="flex flex-col justify-center items-center h-full">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome!</h2>
-                <p className="text-gray-700 dark:text-gray-300">Click a section in the sidebar or generate a new one to get started practicing.</p>
+              <div className="flex flex-col justify-between items-center h-full">
+                <div className="flex flex-col justify-center items-center h-full">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome!</h2>
+                  <p className="text-gray-700 dark:text-gray-300">Click a section in the sidebar or generate a new one to get started practicing.</p>
+                </div>
+                <div className="p-4 text-center">
+                  <p>
+                    By using SAT Practice Bot, you agree to our <a href="/privacy-policy" className="text-blue-500 underline">Privacy Policy</a> and have read our <a href="/terms-of-service" className="text-blue-500 underline">Terms of Service</a>.
+                  </p>
+                </div>
               </div>
             )
           )}
         </div>
       </div>
+      
     </div>
   );
 };

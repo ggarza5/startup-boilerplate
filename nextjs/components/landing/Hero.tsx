@@ -17,7 +17,7 @@ export const Hero = () => {
             <span className="inline bg-gradient-to-r from-[#F596D3]  to-[#D247BF] text-transparent bg-clip-text">
               SAT Practice Bot
             </span>{' '}
-            - A Test Prep Bot
+            - A Test Prep AI
           </h1>{' '}
           for{' '}
           <h2 className="inline">

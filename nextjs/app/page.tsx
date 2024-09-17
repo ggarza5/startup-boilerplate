@@ -38,7 +38,7 @@ export default async function LandingPage() {
       <Services />
       <Cta />
       <Testimonials />
-      <Team />
+      {/* <Team /> */}
       <Pricing user={data.user} />
       <Newsletter />
       <FAQ />

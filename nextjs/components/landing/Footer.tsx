@@ -16,73 +16,7 @@ export const Footer = () => {
             <LogoIcon />
             {process.env.NEXT_PUBLIC_PROJECT_NAME}
           </a>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-lg">Follow Us</h3>
-          <div>
-            <a
-              rel="noreferrer noopener"
-              href="#"
-              className="opacity-60 hover:opacity-100"
-            >
-              Github
-            </a>
-          </div>
-
-          <div>
-            <a
-              rel="noreferrer noopener"
-              href="#"
-              className="opacity-60 hover:opacity-100"
-            >
-              Twitter
-            </a>
-          </div>
-
-          <div>
-            <a
-              rel="noreferrer noopener"
-              href="#"
-              className="opacity-60 hover:opacity-100"
-            >
-              Dribbble
-            </a>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-lg">Platforms</h3>
-          <div>
-            <a
-              rel="noreferrer noopener"
-              href="#"
-              className="opacity-60 hover:opacity-100"
-            >
-              Web
-            </a>
-          </div>
-
-          <div>
-            <a
-              rel="noreferrer noopener"
-              href="#"
-              className="opacity-60 hover:opacity-100"
-            >
-              Mobile
-            </a>
-          </div>
-
-          <div>
-            <a
-              rel="noreferrer noopener"
-              href="#"
-              className="opacity-60 hover:opacity-100"
-            >
-              Desktop
-            </a>
-          </div>
-        </div>
+        </div>        
 
         <div className="flex flex-col gap-2">
           <h3 className="font-bold text-lg">About</h3>
@@ -115,6 +49,25 @@ export const Footer = () => {
               FAQ
             </a>
           </div>
+
+          <div>
+            <a
+              rel="noreferrer noopener"
+              href="/privacy-policy"
+              className="opacity-60 hover:opacity-100"
+            >
+              Privacy Policy
+            </a>
+          </div>
+          <div>
+            <a
+              rel="noreferrer noopener"
+              href="/terms-of-service"
+              className="opacity-60 hover:opacity-100"
+            >
+              Terms of Service
+            </a>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -139,13 +92,22 @@ export const Footer = () => {
             </a>
           </div>
 
-          <div>
+          {/* <div>
             <a
               rel="noreferrer noopener"
               href="#"
               className="opacity-60 hover:opacity-100"
             >
               Twitch
+            </a>
+          </div> */}
+          <div>
+            <a
+              rel="noreferrer noopener"
+              href="#"
+              className="opacity-60 hover:opacity-100"
+            >
+              X
             </a>
           </div>
         </div>
@@ -157,10 +119,10 @@ export const Footer = () => {
           <a
             rel="noreferrer noopener"
             target="_blank"
-            href="https://github.com/leoMirandaa"
+            href="https://x.com/garzagabe"
             className="text-primary transition-all border-primary hover:border-b-2"
           >
-            Leo Miranda
+            Gabriel Garza
           </a>
         </h3>
       </section>

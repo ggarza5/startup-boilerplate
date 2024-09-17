@@ -39,7 +39,7 @@ const ResultsPage: React.FC = () => {
   useEffect(() => {
     if (userLoading) return; // Wait for user to load
     if (!user) {
-      router.push('/login'); // Redirect to login if no user
+      router.push('/auth'); // Redirect to login if no user
       return;
     }
 

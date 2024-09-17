@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
-import { useState } from 'react';
+import { User } from '@supabase/supabase-js';
+import { Navbar } from './components/ui/Navbar';
+import { createClient } from '@/utils/supabase/client';
+
 const App = () => {
-    console.log('is this the entry piint')
+    const [user, setUser] = useState<User | null>(null);
+    const supabase = createClient();
+
+    const getUser = async () => {
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
+    }
+    useEffect(() => {
+        getUser();
+    }, []);
+
     return (
         <div className="flex">
             <div className="flex-1 p-4">
+            <Navbar user={user} />
                 {/* Main content goes here */}
             </div>
         </div>

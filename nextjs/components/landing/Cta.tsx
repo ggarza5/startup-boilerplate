@@ -26,10 +26,7 @@ export const Cta = () => {
         </div>
 
         <div className="space-y-4 lg:col-start-2">
-          <Button className="w-full md:mr-4 md:w-auto" onClick={handleAuth}>Start Practicing</Button>
-          <Button variant="outline" className="w-full md:w-auto">
-            Learn More
-          </Button>
+          <Button className="w-full md:mr-4 md:w-auto" onClick={handleAuth}>Start Practicing</Button>        
         </div>
       </div>
     </section>

@@ -70,7 +70,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
               className="ml-2 font-bold text-xl flex"
             >
               <LogoIcon />
-              {process.env.NEXT_PUBLIC_PROJECT_NAME}
+              SAT Practice Bot
             </a>
           </NavigationMenuItem>
 
