@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { redirect } from 'next/navigation'; // New redirect method in App Router
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/client';
 import { About } from '@/components/landing/About';
 import { Cta } from '@/components/landing/Cta';
 import { FAQ } from '@/components/landing/FAQ';
