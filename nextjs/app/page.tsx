@@ -16,20 +16,29 @@ import { Services } from '@/components/landing/Services';
 import { Team } from '@/components/landing/Team';
 import { Testimonials } from '@/components/landing/Testimonials';
 import { UserProvider } from '@/context/UserContext';
+//nextjs app
+import { NextRequest } from 'next/server';
 
 // This is now an async server component to fetch user data.
-export default async function LandingPage() {
+export default async function LandingPage({
+  params,
+  searchParams,
+}: {
+  params: { slug: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {    
   const supabase = createClient();
   const { data } = await supabase.auth.getUser();
+  const code = searchParams?.code;
 
-  console.log(data);
 
-  // Redirect to /questions if the user is logged in
-  if (data.user) {
+
+  // Redirect to /questions if the user is logged in or if a code is present in the URL
+  if (data.user || code) {
     redirect('/questions');
   }
 
-  // Render the landing page if the user is not logged in
+  // Render the landing page if the user is not logged in and no code is present
   return (
     <>
       <Navbar user={data.user} /> {/* Ensure user prop is passed here */}
