@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button';
 import { HeroCards } from './HeroCards';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
+//test
 import { useRouter } from 'next/navigation';
 export const Hero = () => {
   const router = useRouter();
