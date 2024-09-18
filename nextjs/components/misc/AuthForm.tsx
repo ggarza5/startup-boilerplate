@@ -263,13 +263,6 @@ export function AuthForm({ state }: { state: AuthState }) {
               >
                 <SiGoogle className="h-4 w-4 mr-2" /> Google
               </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => api.oauthSignin('github')}
-              >
-                <SiGithub className="h-4 w-4 mr-2" /> Github
-              </Button>
             </>
           )}
         </div>
