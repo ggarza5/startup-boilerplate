@@ -13,7 +13,8 @@ export const Footer = () => {
             href="/"
             className="font-bold text-xl flex"
           >
-            <LogoIcon />
+            {/* <LogoIcon /> */}
+            <img src="/SATPracticeBotLogo-removebg.png" alt="SAT Practice Bot" className="w-8 h-8 mr-2" />
             {process.env.NEXT_PUBLIC_PROJECT_NAME}
           </a>
         </div>        

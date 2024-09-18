@@ -45,7 +45,8 @@ export const Navbar = ({ user }: { user: User | null }) => {
               href="/"
               className="ml-2 font-bold text-xl flex"
             >
-              <LogoIcon />
+              {/* <LogoIcon /> */}
+              <img src="/SATPracticeBotLogo-removebg.png" alt="SAT Practice Bot" className="w-8 h-8 mr-2" />
               {process.env.NEXT_PUBLIC_PROJECT_NAME}
             </a>
           </NavigationMenuItem>
