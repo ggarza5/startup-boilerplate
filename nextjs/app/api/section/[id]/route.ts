@@ -3,12 +3,9 @@ import { fetchQuestionsBySectionId } from '../../../services/questionService';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
     const sectionId = params.id;
-    if (!sectionId) {
+    if (!sectionId) 
         return NextResponse.json({ error: 'Section ID is required' }, { status: 400 });
-    }
-
-    console.log('we are in righ!!');
-
+    
     try {
         // Fetch questions using the service
         const questions = await fetchQuestionsBySectionId(sectionId);

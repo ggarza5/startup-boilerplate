@@ -67,15 +67,20 @@ const Sidebar: React.FC<SidebarProps> = ({
                 Generating...
               </div>
             )}
-            {sections.map((section) => (
-              <div 
-                key={section.id} 
-                className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300" 
-                onClick={() => onSelectSection(section.name, section.id)}
-              >
-                {section.name}
-              </div>
-            ))}
+            {sections.map((section) => {
+              const datePart = section.name.split('-').slice(1, 4).join('-'); // Extract date part
+              const formattedDate = new Date(datePart).toLocaleDateString(); // Format date
+              const sectionName = section.name.split('-')[0]; // Extract section name
+              return (
+                <div 
+                  key={section.id} 
+                  className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300" 
+                  onClick={() => onSelectSection(section.name, section.id)}
+                >
+                  {`${sectionName} (${formattedDate})`} {/* Display section name with formatted date */}
+                </div>
+              );
+            })}
           </div>
         ))}
       </>
@@ -85,7 +90,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div
       className={`bg-muted/40 text-white transition-width duration-300 border-r border-gray-700 dark:border-gray-800 ${isCollapsed ? 'w-16' : 'w-64'}`}
-      style={{ height: 'calc(100vh - 57px)' }}
+      style={{ height: 'calc(100vh - 57px)', minWidth: '250px' }} 
     >
       <div className="flex justify-between items-center p-4 border-b border-gray-700 dark:border-gray-800">
         <button

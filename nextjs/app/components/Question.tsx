@@ -7,7 +7,7 @@ interface QuestionProps {
 
 const QuestionComponent: React.FC<QuestionProps> = ({ question }) => {
 	return (
-		<div className="question">
+		<div className="question" style={{ minWidth: '600px' }}> {/* Set a minimum width */}
 			<h2>{question.question}</h2>
 			<ul>
 				{question.answer_choices.map((choice, index) => (

@@ -103,7 +103,7 @@ export default function AccountPage({
                 </form>
               </CardContent>
             </Card>
-            <Card x-chunk="dashboard-04-chunk-2">
+            {/* <Card x-chunk="dashboard-04-chunk-2">
               <CardHeader>
                 <CardTitle>Your Plan</CardTitle>
                 <CardDescription>
@@ -117,7 +117,7 @@ export default function AccountPage({
                   Manage subscription
                 </Button>
               </CardFooter>
-            </Card>
+            </Card> */}
             <Card x-chunk="dashboard-04-chunk-3">
               <CardHeader>
                 <CardTitle>Sign out</CardTitle>

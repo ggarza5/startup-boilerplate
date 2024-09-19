@@ -8,7 +8,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Function to fetch questions by section ID
 export const fetchQuestionsBySectionId = async (sectionId: string) => {
     try {
-        console.log(sectionId);
         // Fetch questions associated with the section
         const { data: questions, error: questionsError } = await supabase
             .from('questions') // Replace with your actual questions table name

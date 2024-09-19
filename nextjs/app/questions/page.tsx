@@ -80,7 +80,6 @@ const QuestionsPage: React.FC = () => {
   // Handle adding a new section based on query parameters
   useEffect(() => {
     if (queryAddSection) {
-      console.log('Now inside iff, so we gonna call handleADd')
       queryAddSection = null;
       handleAddSection(queryType as string, querySectionName as string);
     }

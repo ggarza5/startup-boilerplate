@@ -10,12 +10,12 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({ onAddSection, setIs
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleAddSection = async (type: string) => { // Update to async
+    setShowMenu(false);
     setIsCreatingSection(true);
     const date = new Date();
     const uniqueId = `${type}-${date.toISOString()}`;
     await onAddSection(type, uniqueId); // Wait for the section to be created
     setIsCreatingSection(false);
-    setShowMenu(false);
   };
 
   const handleClickOutside = (event: MouseEvent) => {

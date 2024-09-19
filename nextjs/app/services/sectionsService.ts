@@ -14,7 +14,6 @@ export const fetchSections = async (): Promise<Section[]> => {
         const { data, error } = await supabase
             .from('sections')
             .select('*');
-        console.log(data);
 
         if (error) {
             console.error('Error fetching sections:', error);

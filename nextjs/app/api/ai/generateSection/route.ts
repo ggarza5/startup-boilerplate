@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     const result = await generateSection(name, type);
     return NextResponse.json(result);
   } catch (error) {
+    console.log(error);
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
