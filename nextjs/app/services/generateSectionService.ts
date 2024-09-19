@@ -24,7 +24,7 @@ const SectionSchema = z.object({
 // Function to generate a new section using OpenAI and store it in Supabase
 export const generateSection = async (sectionName: string, sectionType: string) => {
   console.log(`generating a ${sectionType} section`);
-  const prompt = `Generate a ${sectionType} SAT question section with questions, answers, and explanations that address each choice. Return in json format. I need these fields: question, answer_choices, answer, explanation. Answer_choices should be an array of strings, others should be string. Reading questions that refer to a passage should include the passasge in the question field`;
+  const prompt = `Generate a 10 question ${sectionType} SAT question section with questions, answers, and explanations that address each choice. Return in json format. I need these fields: question, answer_choices, answer, explanation. Answer_choices should be an array of strings, others should be string. Reading questions that refer to a passage should include the passasge in the question field`;
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY

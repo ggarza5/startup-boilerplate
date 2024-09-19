@@ -11,6 +11,7 @@ import { Loader } from '@/components/ui/loader';
 import { createClient } from '@/utils/supabase/client';
 import { Navbar } from '../components/ui/Navbar';
 import { User } from '@supabase/supabase-js';
+import QuestionComponent from '../components/Question'; // Import QuestionComponent
 
 const IndexPage: React.FC = () => {
   return (
@@ -33,7 +34,7 @@ const QuestionsPage: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [startTimer, setStartTimer] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isFetchingSection, setisFetchingSection] = useState(false);
+  const [isFetchingSection, setIsFetchingSection] = useState(false);
   const [isCreatingSection, setIsCreatingSection] = useState(false);
   const [unansweredQuestions, setUnansweredQuestions] = useState<Set<number>>(new Set());
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
@@ -42,6 +43,7 @@ const QuestionsPage: React.FC = () => {
   const [sectionsLoaded, setSectionsLoaded] = useState(false);
   const [user, setUser] = useState<User | null>(null); // Update state type to User | null
   const supabase = createClient();
+  const [selectedAnswerState, setSelectedAnswerState] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -98,10 +100,39 @@ const QuestionsPage: React.FC = () => {
     fetchSections();
   }, [])
 
+
+useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case 'ArrowUp':
+      case 'ArrowLeft':
+        event.preventDefault(); // Prevent default behavior of arrow keys
+        handlePreviousQuestion(); // Move to the previous question
+        break;
+      case 'ArrowDown':
+      case 'ArrowRight':
+      case 'Enter':
+        event.preventDefault(); // Prevent default behavior of arrow keys
+        handleNextQuestion(); // Move to the next question
+        break;      
+      default:
+        break;
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+}, [currentQuestionIndex, currentSection]); // Add dependencies
+
   // Function to handle section selection
   const handleSelectSection = async (sectionName: string, sectionId: string) => {
     setLoading(true);
-    setisFetchingSection(true);
+    setIsFetchingSection(true);
+    setUnansweredQuestions(new Set());
+    setUserAnswers({});
     try {
       const response = await fetch(`/api/section/${sectionId}`);
       const data = await response.json();
@@ -112,7 +143,7 @@ const QuestionsPage: React.FC = () => {
       console.error('Error fetching section:', error);
     } finally {
       setLoading(false);
-      setisFetchingSection(false);
+      setIsFetchingSection(false);
     }
   };
 
@@ -155,6 +186,17 @@ const QuestionsPage: React.FC = () => {
 
   // Function to handle submitting answers
   const handleSubmitAnswers = () => {
+    const radios = document.getElementsByName(`question-${currentQuestionIndex}`);
+    const selectedAnswer = Array.from(radios).find((radio) => (radio as HTMLInputElement).checked);
+    if (selectedAnswer) {
+      setSelectedAnswerState((selectedAnswer as HTMLInputElement).value);
+      setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: (selectedAnswer as HTMLInputElement).value }));
+      setUnansweredQuestions((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(currentQuestionIndex); // Remove from unanswered if answered
+        return newSet;
+      });
+    }
     setStartTimer(false);
     router.push(`/results?userAnswers=${encodeURIComponent(JSON.stringify(userAnswers))}&sectionId=${currentSection?.id}`);
   };
@@ -164,10 +206,17 @@ const QuestionsPage: React.FC = () => {
     if (currentSection && currentQuestionIndex < currentSection.questions.length - 1) {
       const radios = document.getElementsByName(`question-${currentQuestionIndex}`);
       const selectedAnswer = Array.from(radios).find((radio) => (radio as HTMLInputElement).checked);
-      if (selectedAnswer) 
+      if (selectedAnswer) {
         setUserAnswers((prev) => ({ ...prev, [currentQuestionIndex]: (selectedAnswer as HTMLInputElement).value }));
-      else 
+        setUnansweredQuestions((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(currentQuestionIndex); // Remove from unanswered if answered
+          return newSet;
+        });
+      } else {
+        if (!userAnswers[currentQuestionIndex]) 
         setUnansweredQuestions((prev) => new Set(prev).add(currentQuestionIndex));      
+      }
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       resetSelectedAnswer();
     }
@@ -176,6 +225,15 @@ const QuestionsPage: React.FC = () => {
   // Function to handle moving to the previous question
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
+      const radios = document.getElementsByName(`question-${currentQuestionIndex}`);
+      const selectedAnswer = Array.from(radios).find((radio) => (radio as HTMLInputElement).checked);
+      if (selectedAnswer) {
+        setUnansweredQuestions((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(currentQuestionIndex); // Remove from unanswered if answered
+          return newSet;
+        });
+      }
       setCurrentQuestionIndex(currentQuestionIndex - 1);
       resetSelectedAnswer();
     }
@@ -195,6 +253,115 @@ const QuestionsPage: React.FC = () => {
     });
   };
 
+  const handleAnswerSelect = (index: number, value: string) => {
+    console.log('handleAnswerSelect', index, value);
+    setSelectedAnswerState(value);
+    setUserAnswers((prev) => ({ ...prev, [index]: value })); // Update user answers
+  };
+
+  const renderUnansweredQuestions = () => {
+    return (
+      <div className="mt-4">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Unanswered Questions:</h3>
+        <div className="flex flex-wrap gap-2">  
+          { unansweredQuestions.size > 0 ? 
+            Array.from(unansweredQuestions).map((index) => (
+              <button
+              key={index}
+              onClick={() => handleGoToQuestion(index)}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              >
+              Question {index + 1}
+            </button>
+            )) : <p className="text-gray-500 dark:text-gray-400 py-2">All questions answered!</p>}
+        </div>
+      </div>
+    );
+  }
+
+const renderButtons = () => {
+  if (currentSection) return (
+    <div className="flex justify-between mt-4">
+      <button
+        onClick={handlePreviousQuestion}
+        disabled={currentQuestionIndex === 0}
+        className={`bg-gray-500 text-white font-bold py-2 px-4 rounded ${currentQuestionIndex === 0 ? 'opacity-50 ' : 'hover:bg-gray-700'}`}
+      >
+        Previous
+      </button>
+      {currentSection.questions && currentQuestionIndex < currentSection.questions.length - 1 ? (
+        <button
+          onClick={handleNextQuestion}
+          className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded dark:bg-gray-400 dark:hover:bg-gray-300 dark:text-gray-800"
+        >
+          Next
+        </button>
+      ) : (
+        <button
+          onClick={handleSubmitAnswers}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Submit
+        </button>
+      )}
+    </div>
+  )
+  else return null;
+}
+
+const renderSection = () => {
+  if (currentSection) 
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-between h-full">
+        <Timer startTimer={startTimer} />
+        <div className="flex-grow mb-4" style={{ width: '600px', overflowX: 'auto' }}>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Question {currentQuestionIndex + 1}</h2>
+            {currentSection.questions && currentSection.questions[currentQuestionIndex] && (
+              <QuestionComponent 
+                question={currentSection.questions[currentQuestionIndex]} 
+                currentQuestionIndex={currentQuestionIndex} // Pass currentQuestionIndex
+                handleAnswerSelect={handleAnswerSelect} // Pass handleAnswerSelect
+                selectedAnswer={selectedAnswerState} // Pass selectedAnswer
+              />
+            )}
+        </div>
+        {renderButtons()}
+        {renderUnansweredQuestions()}
+        {renderDisclaimer()}
+      </div>
+    );  
+  else return (
+    <div className="flex flex-col justify-between items-center h-full">
+      <div className="flex flex-col justify-center items-center h-full">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome!</h2>
+        <p className="text-gray-700 dark:text-gray-300">Click a section in the sidebar or generate a new one to get started practicing.</p>
+      </div>
+      {renderDisclaimer()}
+    </div>
+  );
+}
+
+const renderDisclaimer = () => {
+  return (
+    <div className="p-4 text-center mt-auto">
+      <p>
+        By using SAT Practice Bot, you agree to our <a href="/privacy-policy" className="text-blue-500 underline">Privacy Policy</a> and have read our <a href="/terms-of-service" className="text-blue-500 underline">Terms of Service</a>.
+      </p>
+    </div>
+  )
+}
+
+const renderLoaders = () => 
+  <div className="flex flex-col justify-center items-center h-full">
+    <Loader />
+    {isFetchingSection && !isCreatingSection && (
+      <div className="text-center text-gray-500 dark:text-gray-400">Fetching section, please wait...</div>
+    )}
+    {isCreatingSection &&  (
+      <div className="text-center text-gray-500 dark:text-gray-400">Creating section, please wait...</div>
+    )}
+  </div>
+
   return (
     <div className="flex flex-col h-screen bg-muted/40 ">
       <Navbar user={user} /> {/* Pass user to Navbar */}
@@ -202,98 +369,9 @@ const QuestionsPage: React.FC = () => {
         <Sidebar sections={sections} onSelectSection={handleSelectSection} onAddSection={handleAddSection} isCreatingSection={isCreatingSection} setIsCreatingSection={setIsCreatingSection}/>
         <div className="flex grow flex-col p-4">
           {loading || isFetchingSection || isCreatingSection ? (
-            <div className="flex flex-col justify-center items-center h-full">
-              <Loader />
-              {isFetchingSection && !isCreatingSection && (
-                <div className="text-center text-gray-500 dark:text-gray-400">Fetching section, please wait...</div>
-              )}
-              {isCreatingSection &&  (
-                <div className="text-center text-gray-500 dark:text-gray-400">Creating section, please wait...</div>
-              )}
-            </div>
+            renderLoaders()
           ) : (
-            currentSection ? (
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-between h-full">
-                <Timer startTimer={startTimer} />
-                <div className="mb-4" style={{ width: '600px', overflowX: 'auto' }}>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Question {currentQuestionIndex + 1}</h2>
-                  {currentSection.questions && currentSection.questions[currentQuestionIndex] && (
-                    <>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        {currentSection.questions[currentQuestionIndex].question}
-                      </p>
-                      <div className="mt-4">
-                        {currentSection.questions[currentQuestionIndex].answer_choices && currentSection.questions[currentQuestionIndex].answer_choices.map((choice, index) => (
-                          <div key={index} className="mb-2">
-                            <label className="inline-flex items-center">
-                              <input type="radio" name={`question-${currentQuestionIndex}`} value={choice} className="form-radio" />
-                              <span className="ml-2 text-gray-700 dark:text-gray-300">{choice}</span>
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="flex justify-between">
-                  <button
-                    onClick={handlePreviousQuestion}
-                    disabled={currentQuestionIndex === 0}
-                    className={`bg-gray-500 text-white font-bold py-2 px-4 rounded ${currentQuestionIndex === 0 ? 'opacity-50 ' : 'hover:bg-gray-700'}`}
-                  >
-                    Previous
-                  </button>
-                  {currentSection.questions && currentQuestionIndex < currentSection.questions.length - 1 ? (
-                    <button
-                      onClick={handleNextQuestion}
-                      className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded dark:bg-gray-400 dark:hover:bg-gray-300 dark:text-gray-800"
-                    >
-                      Next
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleSubmitAnswers}
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                      Submit
-                    </button>
-                  )}
-                </div>
-                {unansweredQuestions.size > 0 && (
-                  <div className="mt-4">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Unanswered Questions:</h3>
-                    <div className="flex flex-wrap">
-                      {Array.from(unansweredQuestions).map((index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleGoToQuestion(index)}
-                          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-3 m-1 rounded"
-                        >
-                          Question {index + 1}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div className="p-4 text-center mt-auto">
-                  <p>
-                    By using SAT Practice Bot, you agree to our <a href="/privacy-policy" className="text-blue-500 underline">Privacy Policy</a> and have read our <a href="/terms-of-service" className="text-blue-500 underline">Terms of Service</a>.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col justify-between items-center h-full">
-                <div className="flex flex-col justify-center items-center h-full">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome!</h2>
-                  <p className="text-gray-700 dark:text-gray-300">Click a section in the sidebar or generate a new one to get started practicing.</p>
-                </div>
-                <div className="p-4 text-center">
-                  <p>
-                    By using SAT Practice Bot, you agree to our <a href="/privacy-policy" className="text-blue-500 underline">Privacy Policy</a> and have read our <a href="/terms-of-service" className="text-blue-500 underline">Terms of Service</a>.
-                  </p>
-                </div>
-              </div>
-            )
+            renderSection()
           )}
         </div>
       </div>
@@ -301,5 +379,6 @@ const QuestionsPage: React.FC = () => {
     </div>
   );
 };
+
 
 export default IndexPage;
