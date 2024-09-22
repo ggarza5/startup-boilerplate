@@ -1,8 +1,7 @@
-"use client"
+'use client';
 // app/page.tsx (Landing Page in App Router)
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { redirect } from 'next/navigation'; // New redirect method in App Router
 import { createClient } from '@/utils/supabase/client';
 import { About } from '@/components/landing/About';
 import { Cta } from '@/components/landing/Cta';
@@ -41,15 +40,10 @@ export default function LandingPage() {
     checkUser();
   }, []);
 
-  // Redirect to /questions if the user is logged in or if a code is present in the URL
-  // if (data.user || code) {
-  //   redirect('/questions');
-  // }
-
   // Render the landing page if the user is not logged in and no code is present
   return (
     <>
-      <Navbar user={null}/> 
+      <Navbar user={null} />
       <Hero />
       <About />
       <HowItWorks />
@@ -58,7 +52,7 @@ export default function LandingPage() {
       <Cta />
       <Testimonials />
       {/* <Team /> */}
-      <Pricing user={null}/>
+      <Pricing user={null} />
       <Newsletter />
       <FAQ />
       <Footer />

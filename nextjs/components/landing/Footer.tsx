@@ -14,10 +14,14 @@ export const Footer = () => {
             className="font-bold text-xl flex"
           >
             {/* <LogoIcon /> */}
-            <img src="/SATPracticeBotLogo-removebg.png" alt="SAT Practice Bot" className="w-8 h-8 mr-2" />
+            <img
+              src="/SATPracticeBotLogo-removebg.png"
+              alt="SAT Practice Bot"
+              className="w-8 h-8 mr-2"
+            />
             {process.env.NEXT_PUBLIC_PROJECT_NAME}
           </a>
-        </div>        
+        </div>
 
         <div className="flex flex-col gap-2">
           <h3 className="font-bold text-lg">About</h3>
@@ -113,10 +117,9 @@ export const Footer = () => {
           </div>
         </div>
       </section>
-
       <section className="container pb-14 text-center">
         <h3>
-          &copy; 2024 SAT Practice Platform by{' '}
+          &copy; 2024 SAT Practice Bot by{' '}
           <a
             rel="noreferrer noopener"
             target="_blank"

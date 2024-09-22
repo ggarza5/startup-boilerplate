@@ -10,7 +10,6 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Navbar } from '@/components/landing/Navbar';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { useState } from 'react';
@@ -19,6 +18,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import { createApiClient } from '@/utils/supabase/api';
 import { SubscriptionWithPriceAndProduct } from '@/utils/types';
+import { Navbar } from '@/app/components/ui/Navbar';
 
 export default function AccountPage({
   user,

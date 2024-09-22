@@ -23,6 +23,7 @@ import { createApiClient } from '@/utils/supabase/api';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
+import ConsultationButton from '@/app/components/ui/ConsultationButton';
 
 interface RouteProps {
   href: string;
@@ -104,6 +105,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
                       {label}
                     </a>
                   ))}
+                  <ConsultationButton />
                   <Button
                     variant="secondary"
                     onClick={handleAuth}
@@ -133,6 +135,7 @@ export const Navbar = ({ user }: { user: User | null }) => {
           </nav>
 
           <div className="hidden md:flex gap-2">
+            <ConsultationButton />
             <Button
               onClick={handleAuth}
               className={`border`}

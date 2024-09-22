@@ -23,6 +23,7 @@ import { createApiClient } from '@/utils/supabase/api';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
+import ConsultationButton from './ConsultationButton';
 
 export const Navbar = ({ user }: { user: User | null }) => {
   const router = useRouter();
@@ -76,19 +77,21 @@ export const Navbar = ({ user }: { user: User | null }) => {
                   >
                     {user ? 'Account' : 'Sign In'}
                   </Button>
+                  <ConsultationButton />
                 </nav>
               </SheetContent>
             </Sheet>
           </span>          
 
           <div className="hidden md:flex gap-2">
+            <ConsultationButton />
             <Button
               onClick={handleAuth}
               className={`border`}
-              variant="secondary"
+              variant="outline"
             >
               {user ? 'Account' : 'Sign In'}
-            </Button>
+            </Button>            
             <ModeToggle />
           </div>
         </NavigationMenuList>
