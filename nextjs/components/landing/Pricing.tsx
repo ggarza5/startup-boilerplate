@@ -38,9 +38,8 @@ const pricingList: PricingProps[] = [
     title: 'Free',
     popular: 0,
     price: 0,
-    description:
-      'Access to basic SAT practice questions and quizzes.',
-    buttonText: 'Get Started',
+    description: 'Access to basic SAT practice questions and quizzes.',
+    buttonText: 'Start Practicing',
     benefitList: [
       '1 Practice Test',
       'Basic Analytics',
@@ -135,7 +134,8 @@ export const Pricing = ({ user }: { user: User | null }) => {
         Access
       </h2>
       <h3 className="text-xl text-center text-muted-foreground pt-4 pb-8">
-        Practice for the SAT effortlessly with the required sections for your preparation, including quizzes, results, and more.
+        Practice for the SAT effortlessly with the required sections for your
+        preparation, including quizzes, results, and more.
       </h3>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {pricingList.map((pricing: PricingProps) => (

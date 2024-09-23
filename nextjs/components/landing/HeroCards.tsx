@@ -54,9 +54,7 @@ export const HeroCards = () => {
         </CardHeader>
 
         <CardContent className="text-center pb-2">
-          <p>
-            I really enjoy helping students achieve their best SAT scores.
-          </p>
+          <p>I really enjoy helping students achieve their best SAT scores.</p>
         </CardContent>
 
         <CardFooter>
@@ -130,7 +128,9 @@ export const HeroCards = () => {
         </CardHeader>
 
         <CardContent>
-          <Button className="w-full" onClick={handleAuth}>Start Free Trial</Button>
+          <Button className="w-full" onClick={handleAuth}>
+            Start Practicing
+          </Button>
         </CardContent>
 
         <hr className="w-4/5 m-auto mb-4" />

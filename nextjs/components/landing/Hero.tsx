@@ -24,15 +24,18 @@ export const Hero = () => {
           <h2 className="inline">
             <span className="inline bg-gradient-to-r from-[#61DAFB] via-[#1fc0f1] to-[#03a3d7] text-transparent bg-clip-text">
               SAT Practice
-            </span>{' '}            
+            </span>{' '}
           </h2>
         </main>
         <p className="text-xl text-muted-foreground md:w-10/12 mx-auto lg:mx-0">
-          Practice for the SAT effortlessly with infinite practice for your preparation, including quizzes, results, and more.
+          Practice for the SAT effortlessly with infinite practice for your
+          preparation, including quizzes, results, and more.
         </p>
 
         <div className="space-y-4 md:space-y-0 md:space-x-4">
-          <Button className="w-full md:w-1/3" onClick={handleAuth}>Get Started</Button>          
+          <Button className="w-full md:w-1/3" onClick={handleAuth}>
+            Start Practicing
+          </Button>
         </div>
       </div>
 
