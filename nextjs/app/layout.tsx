@@ -6,10 +6,13 @@ import { PHProvider } from './providers';
 import { ThemeProvider } from '@/components/landing/theme-provider';
 import dynamic from 'next/dynamic';
 import { Toaster } from '@/components/ui/toaster';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false
 });
+
+const GoogleAnalyticsID = 'G-J8XQH1YH0C';
 
 const meta = {
   title: 'SAT Practice Bot',
@@ -68,6 +71,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
           </body>
         </PHProvider>
       </ThemeProvider>
+      <GoogleAnalytics gaId={GoogleAnalyticsID} />
     </html>
   );
 }
