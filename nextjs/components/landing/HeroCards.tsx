@@ -137,14 +137,16 @@ export const HeroCards = () => {
 
         <CardFooter className="flex">
           <div className="space-y-4">
-            {['4 Practice Tests', 'Basic Analytics', 'Community Support'].map(
-              (benefit: string) => (
-                <span key={benefit} className="flex">
-                  <Check className="text-green-500" />{' '}
-                  <h3 className="ml-2">{benefit}</h3>
-                </span>
-              )
-            )}
+            {[
+              'Unlimited Sections',
+              'Performance Analytics',
+              'Community Support'
+            ].map((benefit: string) => (
+              <span key={benefit} className="flex">
+                <Check className="text-green-500" />{' '}
+                <h3 className="ml-2">{benefit}</h3>
+              </span>
+            ))}
           </div>
         </CardFooter>
       </Card>

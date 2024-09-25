@@ -41,43 +41,42 @@ const pricingList: PricingProps[] = [
     description: 'Access to basic SAT practice questions and quizzes.',
     buttonText: 'Start Practicing',
     benefitList: [
-      '1 Practice Test',
-      'Basic Analytics',
-      'Community Support',
-      'Limited Access'
+      'Unlimited Sections',
+      'Performance Analytics',
+      'Community Support'
     ],
     redirectURL: '/account'
-  },
-  {
-    id: 'price_1Pdy8yFttF99a1NCLpDa83xf',
-    title: 'Standard',
-    popular: 1,
-    price: 10,
-    description:
-      'Access to all practice tests and detailed performance analytics.',
-    buttonText: 'Subscribe Now',
-    benefitList: [
-      '4 Practice Tests',
-      'Detailed Analytics',
-      'Priority Support',
-      'Full Access'
-    ]
-  },
-  {
-    id: 'price_1Pdy8zFttF99a1NCGQJc5ZTZ',
-    title: 'Premium',
-    popular: 0,
-    price: 20,
-    description:
-      'All features of the Standard plan plus personalized study plans.',
-    buttonText: 'Subscribe Now',
-    benefitList: [
-      'Unlimited Practice Tests',
-      'Advanced Analytics',
-      'Personalized Study Plans',
-      'Priority Support'
-    ]
   }
+  //   {
+  //     id: 'price_1Pdy8yFttF99a1NCLpDa83xf',
+  //     title: 'Standard',
+  //     popular: 1,
+  //     price: 10,
+  //     description:
+  //       'Access to all practice tests and detailed performance analytics.',
+  //     buttonText: 'Subscribe Now',
+  //     benefitList: [
+  //       '4 Practice Tests',
+  //       'Detailed Analytics',
+  //       'Priority Support',
+  //       'Full Access'
+  //     ]
+  //   },
+  //   {
+  //     id: 'price_1Pdy8zFttF99a1NCGQJc5ZTZ',
+  //     title: 'Premium',
+  //     popular: 0,
+  //     price: 20,
+  //     description:
+  //       'All features of the Standard plan plus personalized study plans.',
+  //     buttonText: 'Subscribe Now',
+  //     benefitList: [
+  //       'Unlimited Practice Tests',
+  //       'Advanced Analytics',
+  //       'Personalized Study Plans',
+  //       'Priority Support'
+  //     ]
+  //   }
 ];
 
 export const Pricing = ({ user }: { user: User | null }) => {
