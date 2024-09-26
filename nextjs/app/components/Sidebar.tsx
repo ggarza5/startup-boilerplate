@@ -12,22 +12,22 @@ interface SidebarProps {
   setIsCreatingSection: (isCreatingSection: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ 
-  sections, 
-  onSelectSection, 
-  onAddSection, 
-  isCreatingSection, 
-  setIsCreatingSection 
+const Sidebar: React.FC<SidebarProps> = ({
+  sections,
+  onSelectSection,
+  onAddSection,
+  isCreatingSection,
+  setIsCreatingSection
 }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [dynamicSections, setDynamicSections] = useState<Section[]>(sections);
   const [isLoadingSections, setIsLoadingSections] = useState<boolean>(false);
   const fetchSections = async () => {
-	setIsLoadingSections(true); // Set loading state to true
-	const response = await fetch('/api/sections');
-	const data = await response.json();
-	setDynamicSections(data);
-	setIsLoadingSections(false); // Reset loading state
+    setIsLoadingSections(true); // Set loading state to true
+    const response = await fetch('/api/sections');
+    const data = await response.json();
+    setDynamicSections(data);
+    setIsLoadingSections(false); // Reset loading state
   };
 
   useEffect(() => {
@@ -40,25 +40,30 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [isCreatingSection]);
   const renderSections = () => {
-    const sectionsWithDate = dynamicSections.filter((section: Section) => section.createdAt);
+    const sectionsWithDate = dynamicSections.filter(
+      (section: Section) => section.createdAt
+    );
     const sortedSections = sectionsWithDate.sort((a: Section, b: Section) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return dateB - dateA;
     });
-    const sectionsByDate = sortedSections.reduce((acc: Record<string, Section[]>, section: Section) => {
-      const date = section.createdAt?.split('T')[0];
-      if (date) {
-        if (!acc[date]) acc[date] = [];
-        acc[date].push(section);
-      }
-      return acc;
-    }, {} as Record<string, Section[]>);
+    const sectionsByDate = sortedSections.reduce(
+      (acc: Record<string, Section[]>, section: Section) => {
+        const date = section.createdAt?.split('T')[0];
+        if (date) {
+          if (!acc[date]) acc[date] = [];
+          acc[date].push(section);
+        }
+        return acc;
+      },
+      {} as Record<string, Section[]>
+    );
 
     const mostRecentDate = Object.keys(sectionsByDate)[0]; // Get the most recent date
 
     return (
-      <>        
+      <>
         {Object.entries(sectionsByDate).map(([date, sections]) => (
           <div key={date}>
             {!isCollapsed && <h3 className="text-gray-400">{date}</h3>}
@@ -72,12 +77,14 @@ const Sidebar: React.FC<SidebarProps> = ({
               const formattedDate = new Date(datePart).toLocaleDateString(); // Format date
               const sectionName = section.name.split('-')[0]; // Extract section name
               return (
-                <div 
-                  key={section.id} 
-                  className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300" 
+                // avoid text unwrapping as sidebar expands
+                <div
+                  key={section.id}
+                  className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300" // Added whitespace-nowrap
                   onClick={() => onSelectSection(section.name, section.id)}
                 >
-                  {`${sectionName} (${formattedDate})`} {/* Display section name with formatted date */}
+                  {`${sectionName} (${formattedDate})`}{' '}
+                  {/* Display section name with formatted date */}
                 </div>
               );
             })}
@@ -89,17 +96,33 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div
-      className={`bg-muted/40 text-white transition-width duration-300 border-r border-gray-700 dark:border-gray-800 ${isCollapsed ? 'w-16' : ''}`}
-      style={{ height: 'calc(100vh - 57px)', width: isCollapsed ? '':'250px' }} 
+      className={`bg-muted/40 text-white border-r border-gray-700 dark:border-gray-800 ${isCollapsed ? 'w-16' : ''}`}
+      style={{
+        height: 'calc(100vh - 57px)',
+        width: isCollapsed ? '' : '250px'
+      }}
     >
       <div className="flex justify-between items-center p-4 border-b border-gray-700 dark:border-gray-800">
+        {/* rotate 180 degrees if isCollapsed is true, and transition with an animation */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="py-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+          className={`text-black font-bold py-2 rounded dark:bg-gray-600 dark:hover:bg-gray-400 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
         >
-          {isCollapsed ? '>' : '<'}
+          <svg
+            className="w-6 h-6 fill-current"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M10.7 18.7l1.4-1.4L7.8 13H20v-2H7.8l4.3-4.3-1.4-1.4L4 12z" />
+          </svg>
         </button>
-        {!isCollapsed && <NewSectionButton onAddSection={onAddSection} setIsCreatingSection={setIsCreatingSection} />} {/* Pass handleAddSection */}
+        {!isCollapsed && (
+          <NewSectionButton
+            onAddSection={onAddSection}
+            setIsCreatingSection={setIsCreatingSection}
+          />
+        )}{' '}
+        {/* Pass handleAddSection */}
       </div>
       {!isCollapsed && (
         <div
@@ -107,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           style={{ overflowY: 'auto', height: 'calc(100vh - 130px)' }}
         >
           {isLoadingSections ? (
-            <Loader className='margin-auto h-full'/>
+            <Loader className="margin-auto h-full" />
           ) : (
             renderSections()
           )}

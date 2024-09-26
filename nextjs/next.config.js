@@ -7,5 +7,6 @@ module.exports = {
         destination: '/auth/signin'
       }
     ];
-  }
+  },
+  productionBrowserSourceMaps: false,
 };

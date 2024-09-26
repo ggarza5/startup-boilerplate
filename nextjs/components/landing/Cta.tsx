@@ -21,12 +21,15 @@ export const Cta = () => {
             In One Platform
           </h2>
           <p className="text-muted-foreground text-xl mt-4 mb-8 lg:mb-0">
-            Our platform offers everything you need to excel in the SAT, from practice tests to detailed performance analytics.
+            Our platform offers everything you need to excel on the SAT, from
+            practice sections to detailed performance analytics.
           </p>
         </div>
 
         <div className="space-y-4 lg:col-start-2">
-          <Button className="w-full md:mr-4 md:w-auto" onClick={handleAuth}>Start Practicing</Button>        
+          <Button className="w-full md:mr-4 md:w-auto" onClick={handleAuth}>
+            Start Practicing
+          </Button>
         </div>
       </div>
     </section>

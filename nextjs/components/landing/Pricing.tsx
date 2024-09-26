@@ -38,7 +38,7 @@ const pricingList: PricingProps[] = [
     title: 'Free',
     popular: 0,
     price: 0,
-    description: 'Access to basic SAT practice questions and quizzes.',
+    description: 'Access unlimited SAT practice sections.',
     buttonText: 'Start Practicing',
     benefitList: [
       'Unlimited Sections',
@@ -136,7 +136,8 @@ export const Pricing = ({ user }: { user: User | null }) => {
         Practice for the SAT effortlessly with the required sections for your
         preparation, including quizzes, results, and more.
       </h3>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* place in the middle */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
         {pricingList.map((pricing: PricingProps) => (
           <Card
             key={pricing.title}

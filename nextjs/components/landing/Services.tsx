@@ -15,13 +15,13 @@ interface ServiceProps {
 
 const serviceList: ServiceProps[] = [
   {
-    title: 'Practice Tests',
+    title: 'Practice Sections',
     description:
-      'Access a variety of practice tests to prepare for all sections of the SAT.',
+      'Access an unlimited number of practice sessions to prepare for the SAT.',
     icon: <ChartIcon />
   },
   {
-    title: 'Performance Analytics',
+    title: 'Analytics',
     description:
       'Get detailed insights into your performance to help you improve.',
     icon: <WalletIcon />
@@ -43,11 +43,11 @@ export const Services = () => {
             <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
               SAT Practice{' '}
             </span>
-            Services
           </h2>
 
           <p className="text-muted-foreground text-xl mt-4 mb-8 ">
-            Our platform offers a range of services to help you excel in the SAT.
+            Our platform offers a range of features to help you excel on the
+            SAT.
           </p>
 
           <div className="flex flex-col gap-8">

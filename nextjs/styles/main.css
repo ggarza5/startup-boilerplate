@@ -58,3 +58,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+#pricing .grid > *:only-child {
+  grid-column: 2 / span 1; /* Center the item horizontally */
+  justify-self: center; /* Ensures it's centered */
+}

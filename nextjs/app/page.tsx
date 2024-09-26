@@ -45,13 +45,13 @@ export default function LandingPage() {
     <>
       <Navbar user={null} />
       <Hero />
-      <About />
+      {/* <About /> */}
       <HowItWorks />
       <Features />
       <Services />
       <Cta />
-      <Testimonials />
-      {/* <Team /> */}
+      {/* <Testimonials /> */}
+      <Team />
       <Pricing user={null} />
       <Newsletter />
       <FAQ />
