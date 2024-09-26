@@ -43,11 +43,15 @@ export const Navbar = ({ user }: { user: User | null }) => {
           <NavigationMenuItem className="font-bold flex">
             <a
               rel="noreferrer noopener"
-              href="/"
+              href="/questions"
               className="ml-2 font-bold text-xl flex"
             >
               {/* <LogoIcon /> */}
-              <img src="/SATPracticeBotLogo-removebg.png" alt="SAT Practice Bot" className="w-8 h-8 mr-2" />
+              <img
+                src="/SATPracticeBotLogo-removebg.png"
+                alt="SAT Practice Bot"
+                className="w-8 h-8 mr-2"
+              />
               {process.env.NEXT_PUBLIC_PROJECT_NAME}
             </a>
           </NavigationMenuItem>
@@ -81,17 +85,13 @@ export const Navbar = ({ user }: { user: User | null }) => {
                 </nav>
               </SheetContent>
             </Sheet>
-          </span>          
+          </span>
 
           <div className="hidden md:flex gap-2">
             <ConsultationButton />
-            <Button
-              onClick={handleAuth}
-              className={`border`}
-              variant="outline"
-            >
+            <Button onClick={handleAuth} className={`border`} variant="outline">
               {user ? 'Account' : 'Sign In'}
-            </Button>            
+            </Button>
             <ModeToggle />
           </div>
         </NavigationMenuList>
