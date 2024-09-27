@@ -90,10 +90,28 @@ export const Footer = () => {
           <div>
             <a
               rel="noreferrer noopener"
-              href="#"
+              href="https://discord.gg/xVs2qRwe"
               className="opacity-60 hover:opacity-100"
             >
               Discord
+            </a>
+          </div>
+          <div>
+            <a
+              rel="noreferrer noopener"
+              href="https://discord.gg/xVs2qRwe"
+              className="opacity-60 hover:opacity-100"
+            >
+              TikTok
+            </a>
+          </div>
+          <div>
+            <a
+              rel="noreferrer noopener"
+              href="https://discord.gg/xVs2qRwe"
+              className="opacity-60 hover:opacity-100"
+            >
+              Instagram
             </a>
           </div>
 

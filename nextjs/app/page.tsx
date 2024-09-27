@@ -51,7 +51,7 @@ export default function LandingPage() {
       <Services />
       <Cta />
       {/* <Testimonials /> */}
-      <Team />
+      {/* <Team /> */}
       <Pricing user={null} />
       <Newsletter />
       <FAQ />
