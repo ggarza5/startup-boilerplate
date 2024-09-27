@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateSection } from '../../../services/generateSectionService';
 
+export const maxDuration = 45; 
+export const dynamic = 'force-dynamic';
 // API handler to generate a new section using OpenAI
 export async function POST(request: NextRequest) {
   try {

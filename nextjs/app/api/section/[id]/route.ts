@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { fetchQuestionsBySectionId } from '../../../services/questionService';
 
+export const maxDuration = 45; 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request, { params }: { params: { id: string } }) {
     const sectionId = params.id;
     if (!sectionId) 
