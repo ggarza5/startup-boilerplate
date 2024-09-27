@@ -41,7 +41,7 @@ export const generateSection = async (sectionName: string, sectionType: string) 
   // Call OpenAI API to generate the section with timeout
   const completion: any = await Promise.race([
     openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "o1-preview",
       messages: [{ role: "user", content: prompt }],
       response_format: zodResponseFormat(SectionSchema, "section"),
     }),

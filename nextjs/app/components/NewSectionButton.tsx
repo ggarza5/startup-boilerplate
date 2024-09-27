@@ -5,11 +5,15 @@ interface NewSectionButtonProps {
   setIsCreatingSection: (isCreatingSection: boolean) => void;
 }
 
-const NewSectionButton: React.FC<NewSectionButtonProps> = ({ onAddSection, setIsCreatingSection }) => {
+const NewSectionButton: React.FC<NewSectionButtonProps> = ({
+  onAddSection,
+  setIsCreatingSection
+}) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const handleAddSection = async (type: string) => { // Update to async
+  const handleAddSection = async (type: string) => {
+    // Update to async
     setShowMenu(false);
     setIsCreatingSection(true);
     const date = new Date();
@@ -33,22 +37,22 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({ onAddSection, setIs
 
   return (
     <div className="relative" ref={menuRef}>
-      <button 
-        onClick={() => setShowMenu(!showMenu)} 
-        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded dark:bg-gray-600 dark:hover:bg-gray-400"
+      <button
+        onClick={() => setShowMenu(!showMenu)}
+        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded dark:bg-gray-700 dark:hover:bg-gray-600"
       >
         <i className="fas fa-plus"></i>
       </button>
       {showMenu && (
         <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg">
-          <button 
-            onClick={() => handleAddSection('Math')} 
+          <button
+            onClick={() => handleAddSection('Math')}
             className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             New Math Section
           </button>
-          <button 
-            onClick={() => handleAddSection('Reading')} 
+          <button
+            onClick={() => handleAddSection('Reading')}
             className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
             New Reading Section

@@ -106,7 +106,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         {/* rotate 180 degrees if isCollapsed is true, and transition with an animation */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`text-black font-bold py-2 rounded dark:bg-gray-600 dark:hover:bg-gray-400 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+          // on dark mode, the button should be white
+          className={`text-black hover:text-gray-500 dark:text-white dark:hover:text-gray-400 font-bold py-1 rounded transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
         >
           <svg
             className="w-6 h-6 fill-current"

@@ -397,11 +397,17 @@ const QuestionsPage: React.FC = () => {
       <div className="p-4 text-center mt-auto">
         <p>
           By using SAT Practice Bot, you agree to our{' '}
-          <a href="/privacy-policy" className="text-blue-500 underline">
+          <a
+            href="/privacy-policy"
+            className="text-[#1fc0f1]  hover:text-[#03a3d7] underline"
+          >
             Privacy Policy
           </a>{' '}
           and have read our{' '}
-          <a href="/terms-of-service" className="text-blue-500 underline">
+          <a
+            href="/terms-of-service"
+            className="text-[#1fc0f1]  hover:text-[#03a3d7] underline"
+          >
             Terms of Service
           </a>
           .
