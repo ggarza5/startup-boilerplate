@@ -30,26 +30,12 @@ export const generateSection = async (sectionName: string, sectionType: string) 
     apiKey: process.env.OPENAI_API_KEY
   });
 
-  // Create a timeout promise
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("Request timed out")), 40000) // 10-second timeout
-  );
-
-  // Start timing the OpenAI API call
-  console.time("OpenAI API Call Time");
-
-  // Call OpenAI API to generate the section with timeout
-  const completion: any = await Promise.race([
-    openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      response_format: zodResponseFormat(SectionSchema, "section"),
-    }),
-    timeoutPromise
-  ]);
-
-  // End timing and log the duration
-  console.timeEnd("OpenAI API Call Time");
+  // Call OpenAI API to generate the section
+  const completion: any = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }],
+    response_format: zodResponseFormat(SectionSchema, "section"),
+  });
 
   const generatedText = completion["choices"][0].message.content;
   if (!generatedText) {
