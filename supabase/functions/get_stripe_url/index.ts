@@ -42,6 +42,9 @@ clientRequestHandlerWithUser(async (req, user) => {
   return new Response(JSON.stringify({ redirect_url }), {
     headers: {
       "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*", // Allow all origins
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS", // Allowed methods
+      "Access-Control-Allow-Headers": "Content-Type", // Allowed headers
     },
   });
 });

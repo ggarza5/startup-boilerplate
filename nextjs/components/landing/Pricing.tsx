@@ -46,22 +46,22 @@ const pricingList: PricingProps[] = [
       'Community Support'
     ],
     redirectURL: '/account'
+  },
+  {
+    id: 'price_1Q3TyfKJxpbjCqLb9s8DMf1d',
+    title: 'Standard',
+    popular: 1,
+    price: 5,
+    description:
+      'Access to all practice tests and detailed performance analytics.',
+    buttonText: 'Subscribe Now',
+    benefitList: [
+      '4 Practice Tests',
+      'Detailed Analytics',
+      'Priority Support',
+      'Full Access'
+    ]
   }
-  //   {
-  //     id: 'price_1Pdy8yFttF99a1NCLpDa83xf',
-  //     title: 'Standard',
-  //     popular: 1,
-  //     price: 10,
-  //     description:
-  //       'Access to all practice tests and detailed performance analytics.',
-  //     buttonText: 'Subscribe Now',
-  //     benefitList: [
-  //       '4 Practice Tests',
-  //       'Detailed Analytics',
-  //       'Priority Support',
-  //       'Full Access'
-  //     ]
-  //   },
   //   {
   //     id: 'price_1Pdy8zFttF99a1NCGQJc5ZTZ',
   //     title: 'Premium',

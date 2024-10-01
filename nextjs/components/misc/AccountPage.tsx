@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { createApiClient } from '@/utils/supabase/api';
 import { SubscriptionWithPriceAndProduct } from '@/utils/types';
 import { Navbar } from '@/app/components/ui/Navbar';
+import { Pricing } from '../landing/Pricing';
 
 export default function AccountPage({
   user,
@@ -40,6 +41,7 @@ export default function AccountPage({
       }
     });
     if (error) {
+      console.log(error);
       setLoading(false);
       return toast({
         title: 'Error Occured',
@@ -103,7 +105,7 @@ export default function AccountPage({
                 </form>
               </CardContent>
             </Card>
-            {/* <Card x-chunk="dashboard-04-chunk-2">
+            <Card x-chunk="dashboard-04-chunk-2">
               <CardHeader>
                 <CardTitle>Your Plan</CardTitle>
                 <CardDescription>
@@ -117,7 +119,8 @@ export default function AccountPage({
                   Manage subscription
                 </Button>
               </CardFooter>
-            </Card> */}
+            </Card>
+            <Pricing user={user} />
             <Card x-chunk="dashboard-04-chunk-3">
               <CardHeader>
                 <CardTitle>Sign out</CardTitle>
