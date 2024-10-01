@@ -95,6 +95,7 @@ export const Pricing = ({ user }: { user: User | null }) => {
       return router.push('/auth/signup');
     }
 
+    //Just check
     const { data, error } = await supabase.functions.invoke('get_stripe_url', {
       body: {
         return_url: getURL('/#pricing'),
