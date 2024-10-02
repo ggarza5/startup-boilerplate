@@ -48,12 +48,12 @@ const pricingList: PricingProps[] = [
     redirectURL: '/account'
   },
   {
-    id: 'price_1Q3TyfKJxpbjCqLb9s8DMf1d',
+    id: 'price_1Q5I5mKJxpbjCqLbcq2lrfJp',
     title: 'Standard',
     popular: 1,
     price: 5,
     description:
-      'Access to all practice tests and detailed performance analytics.',
+      'Access to unlimited practice sections and detailed performance analytics.',
     buttonText: 'Subscribe Now',
     benefitList: [
       '4 Practice Tests',
