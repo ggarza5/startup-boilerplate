@@ -28,11 +28,11 @@ export async function POST(request: NextRequest) {
       }
     }
   }
-  
+
   // Handle the event
   switch (event.type) {
     case 'checkout.session.completed':
-      console.log('Checkout Session Completed:', event.data.object);
+      console.log('Checkout Session Completed:', event.data.object);      
       return NextResponse.json({ message: 'Checkout Session Completed' }, { status: 200 });
       break;
     case 'payment_intent.succeeded':
