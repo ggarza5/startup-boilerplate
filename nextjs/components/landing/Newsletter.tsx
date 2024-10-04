@@ -1,8 +1,11 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useState } from 'react'; // Import useState
 
 export const Newsletter = () => {
+  const [subscriptionMessage, setSubscriptionMessage] = useState(''); // Add state for subscription message
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const email = e.target[0].value; // Get the email from the input
@@ -22,9 +25,13 @@ export const Newsletter = () => {
         throw new Error(result.error || 'Failed to subscribe');
       }
 
+      setSubscriptionMessage(
+        'Subscribed! Thank you for joining our newsletter.'
+      ); // Set success message
       console.log('Subscribed!', result.data);
     } catch (error) {
       console.error('Error subscribing:', error);
+      setSubscriptionMessage('Error subscribing. Please try again.'); // Set error message
     }
   };
 
@@ -42,6 +49,10 @@ export const Newsletter = () => {
         <p className="text-xl text-muted-foreground text-center mt-4 mb-8">
           Stay updated with the latest SAT practice tips and resources.
         </p>
+
+        {subscriptionMessage && ( // Display subscription message if it exists
+          <p className="text-center text-green-500">{subscriptionMessage}</p>
+        )}
 
         <form
           className="flex flex-col w-full md:flex-row md:w-6/12 lg:w-4/12 mx-auto gap-4 md:gap-2"
