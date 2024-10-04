@@ -22,16 +22,23 @@ export const Newsletter = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to subscribe');
+        if (response.status === 409) {
+          setSubscriptionMessage('This email has already been subscribed.'); // Set message for already subscribed
+        } else {
+          throw new Error(result.error || 'Failed to subscribe');
+        }
+      } else {
+        setSubscriptionMessage(
+          'Subscribed! Thank you for joining our newsletter.'
+        ); // Set success message
+        console.log('Subscribed!', result.data);
       }
-
-      setSubscriptionMessage(
-        'Subscribed! Thank you for joining our newsletter.'
-      ); // Set success message
-      console.log('Subscribed!', result.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error subscribing:', error);
-      setSubscriptionMessage('Error subscribing. Please try again.'); // Set error message
+      // Only set the error message if it wasn't a 409 error
+      if (error.message !== 'This email has already been subscribed.') {
+        setSubscriptionMessage('Error subscribing. Please try again.'); // Set error message
+      }
     }
   };
 
