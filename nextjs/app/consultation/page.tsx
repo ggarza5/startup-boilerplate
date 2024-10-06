@@ -8,6 +8,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/router';
 import ConsultationButton from '../components/ui/ConsultationButton';
 import GabrielCard from '../components/GabrielCard';
+import { logErrorIfNotProduction } from '../utils/helpers';
 
 const SalesPage = () => {
   const supabase = createClient();
@@ -18,14 +19,14 @@ const SalesPage = () => {
       try {
         const { data, error } = await supabase.auth.getUser();
         if (error) {
-          console.error('Error fetching user:', error.message);
+          logErrorIfNotProduction(error);
           return;
         }
         if (data && data.user) {
           setUser(data.user as User); // Cast to User type
         }
-      } catch (err) {
-        console.error('Unexpected error:', err);
+      } catch (err: any) {
+        logErrorIfNotProduction(err);
       }
       setLoading(false);
     };

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 // This file defines the results page component for displaying the results of a quiz section.
 
@@ -9,10 +9,16 @@ import Sidebar from '../components/Sidebar';
 import Confetti from 'react-confetti';
 import { Section, Question } from '../types';
 import '@fortawesome/fontawesome-free/css/all.min.css'; // Import Font Awesome CSS
-import { faCheck, faTimes, faQuestion } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCheck,
+  faTimes,
+  faQuestion
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useUser } from '@/context/UserContext'; // Import useUser
 import { Loader } from '@/components/ui/loader';
+import { calculateScore } from '../utils/helpers';
+import { ProgressButton } from '../components/ProgressButton';
 
 const Results: React.FC = () => {
   return (
@@ -30,11 +36,27 @@ const ResultsPage: React.FC = () => {
   const userAnswersQuery = queryVariables?.get('userAnswers');
   const sectionName = queryVariables?.get('sectionName'); // Get sectionName from URL
   const sectionId = queryVariables?.get('sectionId'); // Get sectionId from URL
-  const userAnswers = userAnswersQuery ? JSON.parse(decodeURIComponent(userAnswersQuery)) : {};
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const userAnswers = userAnswersQuery
+    ? JSON.parse(decodeURIComponent(userAnswersQuery))
+    : {};
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  );
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
-    
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Check if window is defined
+      // Your logic that requires window
+    }
+  }, []);
+
+  useEffect(() => {
+    setIsClient(true); // Set to true when the component mounts on the client
+  }, []);
+
   // Fetch sections from the API when the component mounts
   useEffect(() => {
     if (userLoading) return; // Wait for user to load
@@ -54,7 +76,7 @@ const ResultsPage: React.FC = () => {
   // Set the current section based on the section name from the query parameters
   useEffect(() => {
     if (sections.length > 0 && sectionName) {
-      const section = sections.find(sec => sec.name === sectionName);
+      const section = sections.find((sec) => sec.name === sectionName);
       setCurrentSection(section || null);
     }
   }, [sections, sectionName]);
@@ -101,8 +123,10 @@ const ResultsPage: React.FC = () => {
       else unanswered++;
     });
 
-    const total = currentSection?.questions.length || 0;
-    const percentageCorrect = total > 0 ? (correct / total) * 100 : 0;
+    const percentageCorrect = calculateScore(
+      currentSection as Section,
+      userAnswers
+    );
 
     return { correct, incorrect, unanswered, percentageCorrect };
   };
@@ -110,25 +134,42 @@ const ResultsPage: React.FC = () => {
   const summary = calculateSummary();
 
   // Handle selecting a section from the sidebar
-  const handleSelectSection = async (sectionName: string, sectionId: string) => {
+  const handleSelectSection = async (
+    sectionName: string,
+    sectionId: string
+  ) => {
     router.push(`/questions?section=${sectionName}&sectionId=${sectionId}`); // Add this line to update the URL with sectionId
   };
 
   // Handle adding a new section from the sidebar
   const handleAddSection = async (type: string, sectionName: string) => {
-    router.push(`/questions?addSection=true&type=${type}&sectionName=${sectionName}`);
+    router.push(
+      `/questions?addSection=true&type=${type}&sectionName=${sectionName}`
+    );
   };
 
   return (
     <div className="flex flex-col bg-gray-100 dark:bg-gray-900">
       <Navbar user={user} /> {/* Pass user to Navbar */}
-      <div className="flex scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark" >
-        <Sidebar sections={sections} onSelectSection={handleSelectSection} onAddSection={handleAddSection} isCreatingSection={false} setIsCreatingSection={() => {}} />
-        <div className="flex flex-col p-4" style={{height: 'calc(100vh - 57px)'}} >
+      <div className="flex scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
+        <Sidebar
+          onSelectSection={handleSelectSection}
+          onAddSection={handleAddSection}
+          isCreatingSection={false}
+          setIsCreatingSection={() => {}}
+        />
+        <div
+          className="flex flex-col p-4"
+          style={{ height: 'calc(100vh - 57px)' }}
+        >
           {selectedQuestion ? (
-            <div  className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Question Review</h2>
-              <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">{selectedQuestion.question}</p>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                Question Review
+              </h2>
+              <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
+                {selectedQuestion.question}
+              </p>
               <div className="w-full text-left">
                 {selectedQuestion?.answer_choices?.map((choice, index) => (
                   <div
@@ -137,40 +178,54 @@ const ResultsPage: React.FC = () => {
                       choice === selectedQuestion.answer
                         ? 'bg-green-200 dark:bg-green-800'
                         : choice === userAnswers[selectedQuestion.id]
-                        ? 'bg-red-200'
-                        : 'bg-transparent'
+                          ? 'bg-red-200'
+                          : 'bg-transparent'
                     }`}
                   >
-                    <span className="font-bold mr-2 text-gray-700 dark:text-gray-300">{String.fromCharCode(65 + index)}.</span> {/* Render choice letter */}
+                    <span className="font-bold mr-2 text-gray-700 dark:text-gray-300">
+                      {String.fromCharCode(65 + index)}.
+                    </span>{' '}
+                    {/* Render choice letter */}
                     {choice}
                   </div>
                 ))}
               </div>
-              <p className="text-md text-gray-700 dark:text-gray-300 mt-4">{selectedQuestion.explanation}</p>
+              <p className="text-md text-gray-700 dark:text-gray-300 mt-4">
+                {selectedQuestion.explanation}
+              </p>
               <button
                 onClick={handleBackToResults}
-                className="mt-4 bg-gray-500 hover:bg-gray-700 dark:bg-gray-700 hover:dark:bg-gray-600 dark:text-white font-bold py-2 px-4 rounded"
+                className="mt-4 bg-gray-500 hover:bg-gray-700 dark:bg-gray-700 hover:dark:bg-gray-600 text-white dark:text-black font-bold py-2 px-4 rounded"
               >
                 Back to Results
               </button>
             </div>
           ) : (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center w-full overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
-              {/* confetti full width minus sidebar */}
-              <Confetti
-                width={window.innerWidth - 312}
-                height={window.innerHeight}
-                numberOfPieces={200}
-                recycle={false}
-              />
+              {isClient && ( // Only render Confetti on the client
+                <Confetti
+                  width={window.innerWidth - 312} // Now safe to access window
+                  height={window.innerHeight} // Now safe to access window
+                  numberOfPieces={200}
+                  recycle={false}
+                />
+              )}
               <div className="flex flex-col items-center ">
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Congratulations!</h1>
-                <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">You have completed the section.</p>
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                  Congratulations!
+                </h1>
+                <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
+                  You have completed the section.
+                </p>
                 <div className="w-full text-center">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Your Results</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    Your Results
+                  </h2>
                   <div className="mt-4">
                     <p className="text-lg text-gray-700 dark:text-gray-300">
-                      Correct: {summary.correct}, Incorrect: {summary.incorrect}, Unanswered: {summary.unanswered}, Percentage Correct: {summary.percentageCorrect.toFixed(2)}%
+                      Correct: {summary.correct}, Incorrect: {summary.incorrect}
+                      , Unanswered: {summary.unanswered}, Percentage Correct:{' '}
+                      {summary.percentageCorrect.toFixed(2)}%
                     </p>
                     {currentSection ? (
                       currentSection.questions?.map((question, index) => (
@@ -179,29 +234,51 @@ const ResultsPage: React.FC = () => {
                           className="text-left mb-4 p-4 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer"
                           onClick={() => handleQuestionClick(question)}
                         >
-                          <p className="text-lg font-bold text-gray-900 dark:text-gray-100 inline">{index + 1}. {question.question}</p>
+                          <p className="text-lg font-bold text-gray-900 dark:text-gray-100 inline">
+                            {index + 1}. {question.question}
+                          </p>
                           <p className="text-md text-gray-700 dark:text-gray-300 mt-2 inline ml-3">
-                            <FontAwesomeIcon icon={getQuestionStatus(question, index) === 'correct' ? faCheck : getQuestionStatus(question, index) === 'incorrect' ? faTimes : faQuestion} />
+                            <FontAwesomeIcon
+                              icon={
+                                getQuestionStatus(question, index) === 'correct'
+                                  ? faCheck
+                                  : getQuestionStatus(question, index) ===
+                                      'incorrect'
+                                    ? faTimes
+                                    : faQuestion
+                              }
+                            />
                           </p>
                           <p className="text-md text-gray-700 dark:text-gray-300 mt-2">
                             Your Answer: {userAnswers[index] || 'Unanswered'}
                           </p>
                           <div className="mt-2">
-                            {question.answer_choices.map((choice, choiceIndex) => (
-                              <div key={choiceIndex} className="text-md text-gray-700 dark:text-gray-300">
-                                <span className="font-bold mr-2">{String.fromCharCode(65 + choiceIndex)}.</span> {/* Render choice letter */}
-                                {choice}
-                              </div>
-                            ))}
-                          </div>                          
+                            {question.answer_choices.map(
+                              (choice, choiceIndex) => (
+                                <div
+                                  key={choiceIndex}
+                                  className="text-md text-gray-700 dark:text-gray-300"
+                                >
+                                  <span className="font-bold mr-2">
+                                    {String.fromCharCode(65 + choiceIndex)}.
+                                  </span>{' '}
+                                  {/* Render choice letter */}
+                                  {choice}
+                                </div>
+                              )
+                            )}
+                          </div>
                         </div>
                       ))
                     ) : (
-                      <p className="text-lg text-gray-700 dark:text-gray-300">No questions available for this section.</p>
+                      <p className="text-lg text-gray-700 dark:text-gray-300">
+                        No questions available for this section.
+                      </p>
                     )}
                   </div>
                 </div>
               </div>
+              <ProgressButton />
             </div>
           )}
         </div>
@@ -211,4 +288,3 @@ const ResultsPage: React.FC = () => {
 };
 
 export default Results;
-

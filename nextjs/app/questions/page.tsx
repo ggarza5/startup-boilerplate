@@ -1,6 +1,5 @@
+// Main component for the Index Page
 'use client';
-
-// This file defines the main page component for handling sections and questions in a quiz application.
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -11,7 +10,14 @@ import { Loader } from '@/components/ui/loader';
 import { createClient } from '@/utils/supabase/client';
 import { Navbar } from '../components/ui/Navbar';
 import { User } from '@supabase/supabase-js';
-import QuestionComponent from '../components/Question'; // Import QuestionComponent
+import QuestionComponent from '../components/Question';
+import {
+  calculateScore,
+  logErrorIfNotProduction,
+  logIfNotProduction
+} from '../utils/helpers';
+import { useSections } from '@/context/SectionsContext';
+import { ProgressButton } from '../components/ProgressButton';
 
 const IndexPage: React.FC = () => {
   return (
@@ -29,7 +35,7 @@ const QuestionsPage: React.FC = () => {
   let queryAddSection = queryVariables?.get('addSection');
   const queryType = queryVariables?.get('type');
 
-  const [sections, setSections] = useState<Section[]>([]);
+  const { sections, fetchSections, isLoadingSections } = useSections();
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [startTimer, setStartTimer] = useState(false);
@@ -43,7 +49,7 @@ const QuestionsPage: React.FC = () => {
   const router = useRouter();
 
   const [sectionsLoaded, setSectionsLoaded] = useState(false);
-  const [user, setUser] = useState<User | null>(null); // Update state type to User | null
+  const [user, setUser] = useState<User | null>(null);
   const supabase = createClient();
   const [selectedAnswerState, setSelectedAnswerState] = useState<string | null>(
     null
@@ -54,19 +60,19 @@ const QuestionsPage: React.FC = () => {
       try {
         const { data, error } = await supabase.auth.getUser();
         if (error) {
-          console.error('Error fetching user:', error.message);
-          router.push('/auth'); // Redirect to auth if not logged in
+          logErrorIfNotProduction(error);
+          router.push('/auth');
           return;
         }
 
         if (data && data.user) {
-          setUser(data.user as User); // Cast to User type
+          setUser(data.user as User);
         } else {
-          console.log('No user data available:', data);
-          router.push('/auth'); // Redirect to auth if not logged in
+          logIfNotProduction('No user data available:', data);
+          router.push('/auth');
         }
-      } catch (err) {
-        console.error('Unexpected error:', err);
+      } catch (err: any) {
+        logErrorIfNotProduction(err);
       }
       setLoading(false);
     };
@@ -76,8 +82,9 @@ const QuestionsPage: React.FC = () => {
 
   // Handle section selection based on query parameters
   useEffect(() => {
-    if (sectionsLoaded && querySectionId)
+    if (sectionsLoaded && querySectionId) {
       handleSelectSection(querySectionName as string, querySectionId as string);
+    }
   }, [sectionsLoaded, querySectionId]);
 
   // Handle adding a new section based on query parameters
@@ -88,30 +95,25 @@ const QuestionsPage: React.FC = () => {
     }
   }, [sectionsLoaded, queryAddSection]);
 
-  // Fetch sections from the API when the component mounts
   useEffect(() => {
-    const fetchSections = async () => {
-      const response = await fetch('/api/sections');
-      const data = await response.json();
-      setSections(data);
+    if (sections.length > 0) {
       setSectionsLoaded(true);
-    };
-    fetchSections();
-  }, []);
+    }
+  }, [sections]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {
         case 'ArrowUp':
         case 'ArrowLeft':
-          event.preventDefault(); // Prevent default behavior of arrow keys
-          handlePreviousQuestion(); // Move to the previous question
+          event.preventDefault();
+          handlePreviousQuestion();
           break;
         case 'ArrowDown':
         case 'ArrowRight':
         case 'Enter':
-          event.preventDefault(); // Prevent default behavior of arrow keys
-          handleNextQuestion(); // Move to the next question
+          event.preventDefault();
+          handleNextQuestion();
           break;
         default:
           break;
@@ -123,7 +125,7 @@ const QuestionsPage: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentQuestionIndex, currentSection]); // Add dependencies
+  }, [currentQuestionIndex, currentSection]);
 
   // Function to handle section selection
   const handleSelectSection = async (
@@ -140,8 +142,8 @@ const QuestionsPage: React.FC = () => {
       setCurrentQuestionIndex(0);
       setCurrentSection(data);
       setStartTimer(true);
-    } catch (error) {
-      console.error('Error fetching section:', error);
+    } catch (error: any) {
+      logErrorIfNotProduction(error);
     } finally {
       setLoading(false);
       setIsFetchingSection(false);
@@ -151,13 +153,13 @@ const QuestionsPage: React.FC = () => {
   // Function to handle adding a new section
   const handleAddSection = async (type: string, sectionName: string) => {
     const existingSection = sections.find(
-      (section) => section.name === sectionName
+      (section: Section) => section.name === sectionName
     );
     if (existingSection) {
       setCurrentSection(existingSection);
       setCurrentQuestionIndex(0);
       setStartTimer(true);
-      await handleSelectSection(sectionName, existingSection.id); // Wait for section selection
+      await handleSelectSection(sectionName, existingSection.id);
       return;
     }
 
@@ -178,17 +180,19 @@ const QuestionsPage: React.FC = () => {
         questions: data.questions,
         created_at: data.created_at
       };
-      setSections([newSection, ...sections]);
-      await handleSelectSection(data.name, data.sectionId); // Wait for section selection
-    } catch (error) {
-      console.error('Error creating section:', error);
+      // Update sections by refetching
+      await fetchSections();
+      await handleSelectSection(data.name, data.sectionId);
+    } catch (error: any) {
+      logErrorIfNotProduction(error);
     } finally {
       setIsCreatingSection(false);
     }
   };
 
   // Function to handle submitting answers
-  const handleSubmitAnswers = () => {
+  const handleSubmitAnswers = async () => {
+    // Changed to async
     const radios = document.getElementsByName(
       `question-${currentQuestionIndex}`
     );
@@ -208,6 +212,32 @@ const QuestionsPage: React.FC = () => {
       });
     }
     setStartTimer(false);
+    try {
+      const response = await fetch('/api/results', {
+        // Call the POST route
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: user?.id, // Assuming user?.id is the user ID
+          sectionId: currentSection?.id, // Current section ID
+          score: calculateScore(
+            currentSection as Section,
+            Object.values(userAnswers)
+          ) // Function to calculate score based on userAnswers
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit answers');
+      }
+
+      const result = await response.json();
+      console.log('Submission result:', result); // Log the result
+    } catch (error: any) {
+      logErrorIfNotProduction(error);
+    }
     router.push(
       `/results?userAnswers=${encodeURIComponent(JSON.stringify(userAnswers))}&sectionId=${currentSection?.id}`
     );
@@ -382,11 +412,12 @@ const QuestionsPage: React.FC = () => {
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               Welcome!
             </h2>
-            <p className="text-gray-700 dark:text-gray-300">
+            <p className="text-gray-700 dark:text-gray-300 text-center">
               Click a section in the sidebar or generate a new one to get
               started practicing.
             </p>
           </div>
+          <ProgressButton />
           {renderDisclaimer()}
         </div>
       );
@@ -434,10 +465,9 @@ const QuestionsPage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-muted/40 ">
-      <Navbar user={user} /> {/* Pass user to Navbar */}
+      <Navbar user={user} />
       <div className="flex grow">
         <Sidebar
-          sections={sections}
           onSelectSection={handleSelectSection}
           onAddSection={handleAddSection}
           isCreatingSection={isCreatingSection}

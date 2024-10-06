@@ -10,13 +10,13 @@ const Timer: React.FC<TimerProps> = ({ startTimer }) => {
   useEffect(() => {
     if (startTimer) {
       const interval = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
-      }, 1000);
+        setTime((prevTime) => prevTime + 0.1);
+      }, 100);
       return () => clearInterval(interval);
     }
   }, [startTimer]);
 
-  return <div>Time: {time}s</div>;
+  return <div>Time: {time.toFixed(1)}s</div>; // Updated to show 2 decimal places
 };
 
 export default Timer;
