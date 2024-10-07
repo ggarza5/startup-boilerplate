@@ -91,9 +91,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div
-      className={`bg-muted/40 text-white border-r border-gray-700 dark:border-gray-800 ${isCollapsed ? 'w-16' : ''}`}
+      className={`bg-muted/40 text-white border-r border-gray-700 dark:border-gray-800 h-vh-minus-navbar ${isCollapsed ? 'w-16' : ''}`}
       style={{
-        height: 'calc(100vh - 57px)',
         minWidth: isCollapsed ? '' : '230px'
       }}
     >

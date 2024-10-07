@@ -158,10 +158,7 @@ const ResultsPage: React.FC = () => {
           isCreatingSection={false}
           setIsCreatingSection={() => {}}
         />
-        <div
-          className="flex flex-col p-4"
-          style={{ height: 'calc(100vh - 57px)' }}
-        >
+        <div className="flex flex-col p-4 h-vh-minus-navbar">
           {selectedQuestion ? (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">

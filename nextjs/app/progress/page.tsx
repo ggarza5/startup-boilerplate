@@ -141,19 +141,19 @@ const ProgressPage: React.FC = () => {
   return (
     <div className="flex flex-col h-screen bg-muted/40 ">
       <Navbar user={user} /> {/* Pass user to Navbar */}
-      <div className="flex grow">
+      <div className="flex">
         <Sidebar
           onSelectSection={handleSelectSection}
           onAddSection={handleAddSection}
           isCreatingSection={isCreatingSection}
           setIsCreatingSection={setIsCreatingSection}
         />
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 overflow-y-scroll h-vh-minus-navbar">
           <h1 className="text-2xl font-bold mb-4">Your Progress</h1>
           <div className="mb-8">
             <Line data={chartData} options={chartOptions} />
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-scroll">
             <table className="min-w-full bg-white dark:bg-gray-800">
               <thead>
                 <tr>
