@@ -94,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       className={`bg-muted/40 text-white border-r border-gray-700 dark:border-gray-800 ${isCollapsed ? 'w-16' : ''}`}
       style={{
         height: 'calc(100vh - 57px)',
-        width: isCollapsed ? '' : '250px'
+        minWidth: isCollapsed ? '' : '230px'
       }}
     >
       <div className="flex justify-between items-center p-4 border-b border-gray-700 dark:border-gray-800">
