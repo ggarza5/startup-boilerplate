@@ -89,7 +89,8 @@ export default function AccountPage({
             <Link href="#" className="font-semibold text-primary">
               General
             </Link>
-            <Link href="mailto:">Support</Link>
+            <Link href="mailto:gabriel@garzaconsulting.co">Support</Link>
+            <Link href="/progress">Progress</Link>
           </nav>
           <div className="grid gap-6">
             <Card x-chunk="dashboard-04-chunk-1">
@@ -120,7 +121,10 @@ export default function AccountPage({
                 </Button>
               </CardFooter>
             </Card>
-            <Pricing user={user} />
+            {/* Don't show pricing if user is on a plan other than free */}
+            {subscription?.prices?.products?.name !== 'Free' && (
+              <Pricing user={user} />
+            )}
             <Card x-chunk="dashboard-04-chunk-3">
               <CardHeader>
                 <CardTitle>Sign out</CardTitle>

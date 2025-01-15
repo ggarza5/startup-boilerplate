@@ -45,6 +45,7 @@ const ResultsPage: React.FC = () => {
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -66,9 +67,16 @@ const ResultsPage: React.FC = () => {
     }
 
     const fetchSections = async () => {
-      const response = await fetch('/api/sections');
-      const data = await response.json();
-      setSections(data);
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/sections');
+        const data = await response.json();
+        setSections(data);
+      } catch (error) {
+        console.error('Error fetching sections:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchSections();
   }, [user, userLoading]);
@@ -85,9 +93,16 @@ const ResultsPage: React.FC = () => {
   useEffect(() => {
     const fetchCurrentSection = async () => {
       if (sectionId) {
-        const response = await fetch(`/api/section/${sectionId}`);
-        const data = await response.json();
-        setCurrentSection(data);
+        try {
+          setIsLoading(true);
+          const response = await fetch(`/api/section/${sectionId}`);
+          const data = await response.json();
+          setCurrentSection(data);
+        } catch (error) {
+          console.error('Error fetching section:', error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
     fetchCurrentSection();
@@ -149,7 +164,7 @@ const ResultsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col bg-muted/40">
       <Navbar user={user} /> {/* Pass user to Navbar */}
       <div className="flex scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
         <Sidebar
@@ -158,8 +173,12 @@ const ResultsPage: React.FC = () => {
           isCreatingSection={false}
           setIsCreatingSection={() => {}}
         />
-        <div className="flex flex-col p-4 h-vh-minus-navbar">
-          {selectedQuestion ? (
+        <div className="flex flex-col p-4 h-vh-minus-navbar w-fill-available">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full">
+              <Loader />
+            </div>
+          ) : selectedQuestion ? (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                 Question Review
@@ -198,7 +217,7 @@ const ResultsPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center w-full overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center w-fill-available overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
               {isClient && ( // Only render Confetti on the client
                 <Confetti
                   width={window.innerWidth - 312} // Now safe to access window
@@ -211,8 +230,9 @@ const ResultsPage: React.FC = () => {
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                   Congratulations!
                 </h1>
-                <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
-                  You have completed the section.
+                <p className="text-lg text-gray-700 dark:text-gray-300 text-center mb-8 ">
+                  You have completed the section.<br></br>Select a question to
+                  see its explanation.
                 </p>
                 <div className="w-full text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">

@@ -6,7 +6,7 @@ export const ProgressButton = () => {
   return (
     <button
       onClick={() => router.push('/progress')} // Add this line for navigation
-      className="mt-4 bg-gray-500 hover:bg-gray-700 dark:bg-gray-700 hover:dark:bg-gray-600 text-white dark:text-black font-bold py-2 px-4 rounded"
+      className="mt-4 bg-gray-500 hover:bg-gray-700 dark:bg-gray-700 hover:dark:bg-gray-600 dark:text-white text-white  font-bold py-2 px-4 rounded"
     >
       Go to Progress
     </button>

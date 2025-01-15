@@ -24,6 +24,7 @@ module.exports = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        text: 'hsl(var(--text))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))'
@@ -39,6 +40,10 @@ module.exports = {
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))'
+        },
+        vibrant: {
+          DEFAULT: 'hsl(var(--vibrant))',
+          foreground: 'hsl(var(--vibrant-foreground))'
         },
         accent: {
           DEFAULT: 'hsl(var(--accent))',
@@ -83,12 +88,30 @@ module.exports = {
       minWidth: {
         'sidebar-collapsed': '',
         'sidebar-expanded': '230px'
+      },
+      width: {
+        'w-fill-available': [
+          '-webkit-fill-available',
+          '-moz-available',
+          'stretch',
+          'fill-available'
+        ]
       }
     }
   },
   plugins: [
     require('tailwind-scrollbar'),
-    require('tailwindcss-animate')
+    require('tailwindcss-animate'),
+    function({ addUtilities }) {
+      addUtilities({
+        '.w-fill-available': {
+          width: '-webkit-fill-available',
+          width: '-moz-available',
+          width: 'stretch',
+          width: 'fill-available',
+        },
+      })
+    }
   ],
   variants: {
     scrollbar: ['dark'],

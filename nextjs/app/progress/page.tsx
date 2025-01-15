@@ -139,9 +139,9 @@ const ProgressPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-muted/40 ">
-      <Navbar user={user} /> {/* Pass user to Navbar */}
-      <div className="flex">
+    <div className="flex flex-col h-screen">
+      <Navbar user={user} />
+      <div className="flex bg-muted/40">
         <Sidebar
           onSelectSection={handleSelectSection}
           onAddSection={handleAddSection}
@@ -154,7 +154,7 @@ const ProgressPage: React.FC = () => {
             <Line data={chartData} options={chartOptions} />
           </div>
           <div className="overflow-x-auto overflow-y-scroll">
-            <table className="min-w-full bg-white dark:bg-gray-800">
+            <table className="w-full bg-white dark:bg-gray-800">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b">Date</th>

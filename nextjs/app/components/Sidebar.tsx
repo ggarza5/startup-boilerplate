@@ -76,7 +76,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               return (
                 <div
                   key={section.id}
-                  className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300"
+                  className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-muted/40 text-gray-800 dark:text-gray-300"
                   onClick={() => onSelectSection(section.name, section.id)}
                 >
                   {`${sectionName} (${formattedDate})`}{' '}
@@ -91,10 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div
-      className={`bg-muted/40 text-white border-r border-gray-700 dark:border-gray-800 h-vh-minus-navbar ${isCollapsed ? 'w-16' : ''}`}
-      style={{
-        minWidth: isCollapsed ? '' : '230px'
-      }}
+      className={`text-white border-r border-gray-700 dark:border-gray-800 h-vh-minus-navbar ${isCollapsed ? 'w-16 min-w-16' : 'w-64 min-w-64'}`}
     >
       <div className="flex justify-between items-center p-4 border-b border-gray-700 dark:border-gray-800">
         <button
@@ -125,12 +122,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Loader className="margin-auto h-full" />
           ) : (
             <>
-              {renderSections()}
               <Link href="/progress">
                 <span className="block mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300">
-                  Progress
+                  View Your Progress
                 </span>
               </Link>
+              {renderSections()}
             </>
           )}
         </div>

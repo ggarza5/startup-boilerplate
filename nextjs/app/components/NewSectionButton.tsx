@@ -39,7 +39,7 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded dark:bg-gray-700 dark:hover:bg-gray-600"
+        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded dark:bg-muted dark:hover:bg-muted/40"
       >
         <i className="fas fa-plus"></i>
       </button>

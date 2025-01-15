@@ -49,7 +49,7 @@ const pricingList: PricingProps[] = [
   },
   {
     id: 'price_1Q5I5mKJxpbjCqLbcq2lrfJp',
-    title: 'Standard',
+    title: 'Study',
     popular: 1,
     price: 5,
     description:
@@ -62,21 +62,6 @@ const pricingList: PricingProps[] = [
       'Full Access'
     ]
   }
-  //   {
-  //     id: 'price_1Pdy8zFttF99a1NCGQJc5ZTZ',
-  //     title: 'Premium',
-  //     popular: 0,
-  //     price: 20,
-  //     description:
-  //       'All features of the Standard plan plus personalized study plans.',
-  //     buttonText: 'Subscribe Now',
-  //     benefitList: [
-  //       'Unlimited Practice Tests',
-  //       'Advanced Analytics',
-  //       'Personalized Study Plans',
-  //       'Priority Support'
-  //     ]
-  //   }
 ];
 
 export const Pricing = ({ user }: { user: User | null }) => {
@@ -84,6 +69,9 @@ export const Pricing = ({ user }: { user: User | null }) => {
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState<boolean>(false);
+
+  const isLoggedIn = user != null;
+
   const handleClick = async (price: PricingProps) => {
     if (price.redirectURL) {
       return router.push(price.redirectURL);
@@ -139,56 +127,59 @@ export const Pricing = ({ user }: { user: User | null }) => {
       </h3>
       {/* place in the middle */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
-        {pricingList.map((pricing: PricingProps) => (
-          <Card
-            key={pricing.title}
-            className={
-              pricing.popular === PopularPlanType.YES
-                ? 'drop-shadow-xl shadow-black/10 dark:shadow-white/10'
-                : ''
-            }
-          >
-            <CardHeader>
-              <CardTitle className="flex item-center justify-between">
-                {pricing.title}
-                {pricing.popular === PopularPlanType.YES ? (
-                  <Badge variant="secondary" className="text-sm text-primary">
-                    Most popular
-                  </Badge>
-                ) : null}
-              </CardTitle>
-              <div>
-                <span className="text-3xl font-bold">${pricing.price}</span>
-                <span className="text-muted-foreground"> /month</span>
-              </div>
+        {pricingList.map((pricing: PricingProps) =>
+          // If logged in, skip first plan
+          isLoggedIn && pricing.title === 'Free' ? null : (
+            <Card
+              key={pricing.title}
+              className={
+                pricing.popular === PopularPlanType.YES
+                  ? 'drop-shadow-xl shadow-black/10 dark:shadow-white/10'
+                  : ''
+              }
+            >
+              <CardHeader>
+                <CardTitle className="flex item-center justify-between">
+                  {pricing.title} Plan
+                  {pricing.popular === PopularPlanType.YES && !isLoggedIn ? (
+                    <Badge variant="secondary" className="text-sm text-primary">
+                      Most popular
+                    </Badge>
+                  ) : null}
+                </CardTitle>
+                <div>
+                  <span className="text-3xl font-bold">${pricing.price}</span>
+                  <span className="text-muted-foreground"> /month</span>
+                </div>
 
-              <CardDescription>{pricing.description}</CardDescription>
-            </CardHeader>
+                <CardDescription>{pricing.description}</CardDescription>
+              </CardHeader>
 
-            <CardContent>
-              <Button
-                className="w-full"
-                onClick={() => handleClick(pricing)}
-                disabled={loading}
-              >
-                {pricing.buttonText}
-              </Button>
-            </CardContent>
+              <CardContent>
+                <Button
+                  className="w-full"
+                  onClick={() => handleClick(pricing)}
+                  disabled={loading}
+                >
+                  {pricing.buttonText}
+                </Button>
+              </CardContent>
 
-            <hr className="w-4/5 m-auto mb-4" />
+              <hr className="w-4/5 m-auto mb-4" />
 
-            <CardFooter className="flex">
-              <div className="space-y-4">
-                {pricing.benefitList.map((benefit: string) => (
-                  <span key={benefit} className="flex">
-                    <Check className="text-green-500" />{' '}
-                    <h3 className="ml-2">{benefit}</h3>
-                  </span>
-                ))}
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
+              <CardFooter className="flex">
+                <div className="space-y-4">
+                  {pricing.benefitList.map((benefit: string) => (
+                    <span key={benefit} className="flex">
+                      <Check className="text-green-500" />{' '}
+                      <h3 className="ml-2">{benefit}</h3>
+                    </span>
+                  ))}
+                </div>
+              </CardFooter>
+            </Card>
+          )
+        )}
       </div>
     </section>
   );

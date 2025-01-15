@@ -51,9 +51,10 @@ const QuestionsPage: React.FC = () => {
   const [sectionsLoaded, setSectionsLoaded] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClient();
-  const [selectedAnswerState, setSelectedAnswerState] = useState<string | null>(
-    null
-  );
+  const [selectedAnswerState, setSelectedAnswerState] = useState<
+    Record<number, string>
+  >({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -192,6 +193,7 @@ const QuestionsPage: React.FC = () => {
 
   // Function to handle submitting answers
   const handleSubmitAnswers = async () => {
+    setIsSubmitting(true);
     // Changed to async
     const radios = document.getElementsByName(
       `question-${currentQuestionIndex}`
@@ -200,7 +202,10 @@ const QuestionsPage: React.FC = () => {
       (radio) => (radio as HTMLInputElement).checked
     );
     if (selectedAnswer) {
-      setSelectedAnswerState((selectedAnswer as HTMLInputElement).value);
+      setSelectedAnswerState((prev) => ({
+        ...prev,
+        [currentQuestionIndex]: (selectedAnswer as HTMLInputElement).value
+      }));
       setUserAnswers((prev) => ({
         ...prev,
         [currentQuestionIndex]: (selectedAnswer as HTMLInputElement).value
@@ -234,13 +239,16 @@ const QuestionsPage: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log('Submission result:', result); // Log the result
+      console.log('Submission result:', result);
+
+      router.push(
+        `/results?userAnswers=${encodeURIComponent(JSON.stringify(userAnswers))}&sectionId=${currentSection?.id}`
+      );
     } catch (error: any) {
       logErrorIfNotProduction(error);
+    } finally {
+      setIsSubmitting(false);
     }
-    router.push(
-      `/results?userAnswers=${encodeURIComponent(JSON.stringify(userAnswers))}&sectionId=${currentSection?.id}`
-    );
   };
 
   // Function to handle moving to the next question
@@ -249,6 +257,7 @@ const QuestionsPage: React.FC = () => {
       currentSection &&
       currentQuestionIndex < currentSection.questions.length - 1
     ) {
+      clearSelection();
       const radios = document.getElementsByName(
         `question-${currentQuestionIndex}`
       );
@@ -279,6 +288,7 @@ const QuestionsPage: React.FC = () => {
   // Function to handle moving to the previous question
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
+      clearSelection();
       const radios = document.getElementsByName(
         `question-${currentQuestionIndex}`
       );
@@ -315,8 +325,23 @@ const QuestionsPage: React.FC = () => {
 
   const handleAnswerSelect = (index: number, value: string) => {
     console.log('handleAnswerSelect', index, value);
-    setSelectedAnswerState(value);
-    setUserAnswers((prev) => ({ ...prev, [index]: value })); // Update user answers
+
+    // Update the selected answer state for the specific question index
+    setSelectedAnswerState((prev) => ({ ...prev, [index]: value }));
+    setUserAnswers((prev) => ({ ...prev, [index]: value }));
+
+    // If the selected answer is the same as the current selected answer for this specific question
+    if (selectedAnswerState[index] === value) {
+      // Check if we're on the last question
+      if (
+        currentSection &&
+        currentQuestionIndex === currentSection.questions.length - 1
+      ) {
+        handleSubmitAnswers();
+      } else {
+        handleNextQuestion();
+      }
+    }
   };
 
   const renderUnansweredQuestions = () => {
@@ -346,6 +371,8 @@ const QuestionsPage: React.FC = () => {
     );
   };
 
+  const buttonStyle = 'bg-gray-500 text-white font-bold py-2 px-4 rounded';
+
   const renderButtons = () => {
     if (currentSection)
       return (
@@ -353,24 +380,29 @@ const QuestionsPage: React.FC = () => {
           <button
             onClick={handlePreviousQuestion}
             disabled={currentQuestionIndex === 0}
-            className={`bg-gray-500 text-white font-bold py-2 px-4 rounded ${currentQuestionIndex === 0 ? 'opacity-50 ' : 'hover:bg-gray-700'}`}
+            className={`${buttonStyle} ${currentQuestionIndex === 0 ? 'opacity-50 ' : 'hover:bg-gray-700'}`}
           >
             Previous
           </button>
           {currentSection.questions &&
           currentQuestionIndex < currentSection.questions.length - 1 ? (
-            <button
-              onClick={handleNextQuestion}
-              className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded dark:bg-gray-400 dark:hover:bg-gray-300 dark:text-gray-800"
-            >
+            <button onClick={handleNextQuestion} className={buttonStyle}>
               Next
             </button>
           ) : (
             <button
               onClick={handleSubmitAnswers}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              disabled={isSubmitting}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
             >
-              Submit
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Submitting...
+                </>
+              ) : (
+                'Submit'
+              )}
             </button>
           )}
         </div>
@@ -381,7 +413,7 @@ const QuestionsPage: React.FC = () => {
   const renderSection = () => {
     if (currentSection)
       return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col justify-between h-full">
+        <div className="p-6 rounded-lg shadow-md flex flex-col justify-between h-full">
           <Timer startTimer={startTimer} />
           <div
             className="flex-grow mb-4"
@@ -394,9 +426,9 @@ const QuestionsPage: React.FC = () => {
               currentSection.questions[currentQuestionIndex] && (
                 <QuestionComponent
                   question={currentSection.questions[currentQuestionIndex]}
-                  currentQuestionIndex={currentQuestionIndex} // Pass currentQuestionIndex
-                  handleAnswerSelect={handleAnswerSelect} // Pass handleAnswerSelect
-                  selectedAnswer={selectedAnswerState} // Pass selectedAnswer
+                  currentQuestionIndex={currentQuestionIndex}
+                  handleAnswerSelect={handleAnswerSelect}
+                  selectedAnswer={selectedAnswerState[currentQuestionIndex]}
                 />
               )}
           </div>
@@ -463,10 +495,16 @@ const QuestionsPage: React.FC = () => {
     </div>
   );
 
+  const clearSelection = () => {
+    if (window.getSelection) {
+      window.getSelection()?.removeAllRanges();
+    }
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-muted/40 ">
+    <div className="flex flex-col h-screen">
       <Navbar user={user} />
-      <div className="flex grow">
+      <div className="flex grow bg-muted/40">
         <Sidebar
           onSelectSection={handleSelectSection}
           onAddSection={handleAddSection}
