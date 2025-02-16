@@ -89,23 +89,29 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  return (
-    <div
-      className={`text-white border-r border-gray-700 dark:border-gray-800 h-vh-minus-navbar ${isCollapsed ? 'w-16 min-w-16' : 'w-64 min-w-64'}`}
-    >
-      <div className="flex justify-between items-center p-4 border-b border-gray-700 dark:border-gray-800">
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`text-black hover:text-gray-500 dark:text-white dark:hover:text-gray-400 font-bold py-1 rounded transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+  // Collapse button in the sidebar header
+  const renderCollapseButton = () => {
+    return (
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className={`text-black hover:text-gray-500 dark:text-white dark:hover:text-gray-400 font-bold py-1 rounded transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`}
+      >
+        <svg
+          className="w-6 h-6 fill-current"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <svg
-            className="w-6 h-6 fill-current"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M10.7 18.7l1.4-1.4L7.8 13H20v-2H7.8l4.3-4.3-1.4-1.4L4 12z" />
-          </svg>
-        </button>
+          <path d="M10.7 18.7l1.4-1.4L7.8 13H20v-2H7.8l4.3-4.3-1.4-1.4L4 12z" />
+        </svg>
+      </button>
+    );
+  };
+
+  // Sidebar header on top of the sidebar content
+  const renderSidebarHeader = () => {
+    return (
+      <div className="flex justify-between items-center p-4 border-b border-gray-700 dark:border-gray-800">
+        {renderCollapseButton()}
         {!isCollapsed && (
           <NewSectionButton
             onAddSection={onAddSection}
@@ -113,7 +119,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           />
         )}
       </div>
-      {!isCollapsed && (
+    );
+  };
+
+  // Sidebar content below the sidebar header
+  const renderSidebarContent = () => {
+    if (isCollapsed) return null;
+    else
+      return (
         <div
           className="px-4 py-1 scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark"
           style={{ overflowY: 'auto', height: 'calc(100vh - 130px)' }}
@@ -131,7 +144,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             </>
           )}
         </div>
-      )}
+      );
+  };
+
+  return (
+    <div
+      className={`text-white border-r border-gray-700 dark:border-gray-800 h-vh-minus-navbar ${isCollapsed ? 'w-16 min-w-16' : 'w-64 min-w-64'}`}
+    >
+      {renderSidebarHeader()}
+      {renderSidebarContent()}
     </div>
   );
 };
