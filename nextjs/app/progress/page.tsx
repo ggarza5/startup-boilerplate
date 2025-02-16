@@ -21,6 +21,7 @@ import { User } from '@supabase/supabase-js';
 import { Navbar } from '../components/ui/Navbar';
 import Sidebar from '../components/Sidebar';
 import { QuestionsButton } from '../components/QuestionsButton';
+import useFetchUser from '../hooks/useFetchUser';
 
 ChartJS.register(
   CategoryScale,
@@ -35,40 +36,9 @@ ChartJS.register(
 const ProgressPage: React.FC = () => {
   const router = useRouter();
   const [results, setResults] = useState<Result[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCreatingSection, setIsCreatingSection] = useState(false);
 
-  const supabase = createClient();
-
-  const [user, setUser] = useState<User | null>(null);
-  const [selectedAnswerState, setSelectedAnswerState] = useState<string | null>(
-    null
-  );
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const { data, error } = await supabase.auth.getUser();
-        if (error) {
-          logErrorIfNotProduction(error);
-          router.push('/auth'); // Redirect to auth if not logged in
-          return;
-        }
-
-        if (data && data.user) {
-          setUser(data.user as User); // Cast to User type
-        } else {
-          logIfNotProduction('No user data available:', data);
-          router.push('/auth'); // Redirect to auth if not logged in
-        }
-      } catch (err: any) {
-        logErrorIfNotProduction(err);
-      }
-      setLoading(false);
-    };
-
-    fetchUser();
-  }, []);
+  const { user, loading, setLoading, error, refetch } = useFetchUser();
 
   useEffect(() => {
     const fetchResults = async () => {

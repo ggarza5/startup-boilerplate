@@ -36,8 +36,8 @@ const routeList: RouteProps[] = [
     label: 'Features'
   },
   {
-    href: '/#testimonials',
-    label: 'Testimonials'
+    href: '/blog',
+    label: 'Blog'
   },
   {
     href: '/#pricing',
@@ -71,7 +71,11 @@ export const Navbar = ({ user }: { user: User | null }) => {
               className="ml-2 font-bold text-xl flex"
             >
               {/* <LogoIcon /> */}
-              <img src="/SATPracticeBotLogo-removebg.png" alt="SAT Practice Bot" className="w-8 h-8 mr-2" />
+              <img
+                src="/SATPracticeBotLogo-removebg.png"
+                alt="SAT Practice Bot"
+                className="w-8 h-8 mr-2"
+              />
               SAT Practice Bot
             </a>
           </NavigationMenuItem>
