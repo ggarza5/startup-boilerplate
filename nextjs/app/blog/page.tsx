@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       // images: [],
-      url: 'https://blog.satpracticebot.com'
+      url: 'https://satpracticebot.com/blog'
     },
     twitter: {
       title,
