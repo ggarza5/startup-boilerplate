@@ -26,7 +26,7 @@ interface ArticleProps {
 const ArticleCard: React.FC<ArticleProps> = ({ article }) => {
   console.log('ArticleCard rendering with article:', article);
   return (
-    <li className="group relative bg-white dark:bg-gray-800 rounded-lg p-6 transition-all duration-200 hover:shadow-md dark:hover:shadow-gray-800/50">
+    <li className="list-none group relative bg-white dark:bg-gray-800 rounded-lg p-6 transition-all duration-200 hover:shadow-md dark:hover:shadow-gray-800/50">
       <div className="flex flex-wrap gap-2 items-center w-full text-sm text-gray-500 dark:text-gray-400 mb-3">
         <span>
           Published{' '}
