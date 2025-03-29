@@ -1,10 +1,30 @@
 import Link from 'next/link';
 
+interface Article {
+  id: string;
+  slug: string;
+  headline: string;
+  metaDescription: string;
+  image: string;
+  readingTime: number;
+  createdAt: string;
+  updatedAt: string;
+  category: {
+    title: string;
+    slug: string;
+  };
+  tags: Array<{
+    title: string;
+    slug: string;
+  }>;
+}
+
 interface ArticleProps {
-  article: any;
+  article: Article;
 }
 
 const ArticleCard: React.FC<ArticleProps> = ({ article }) => {
+  console.log('ArticleCard rendering with article:', article);
   return (
     <li
       key={article.id}
@@ -13,9 +33,7 @@ const ArticleCard: React.FC<ArticleProps> = ({ article }) => {
       <div className="flex flex-wrap gap-2 items-center w-full text-sm text-gray-500 dark:text-gray-400 mb-3">
         <span>
           Published{' '}
-          {new Date(
-            article.publishedAt || article.createdAt
-          ).toLocaleDateString('en-US', {
+          {new Date(article.createdAt).toLocaleDateString('en-US', {
             day: 'numeric',
             month: 'short',
             year: 'numeric'

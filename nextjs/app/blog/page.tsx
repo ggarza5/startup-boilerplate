@@ -55,8 +55,9 @@ export default async function Blog({
   const posts = articles || [];
   const lastPage = Math.ceil(total / 10);
 
-  // Log the first article to check its structure
-  console.log(articles);
+  // More detailed logging
+  console.log('Articles data:', articles);
+  console.log('First article headline:', articles?.[0]?.headline);
 
   return (
     <>
