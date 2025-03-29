@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BlogClient } from 'seobot';
 import { Navbar } from '@/components/landing/Navbar';
 import { BASE_URL, BLOG_NAME } from '@/utils/constants';
+
 async function getPosts(slug: string, page: number) {
   const key = process.env.SEOBOT_API_KEY;
   if (!key)
