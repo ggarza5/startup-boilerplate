@@ -30,7 +30,7 @@ const ArticleCard: React.FC<ArticleProps> = ({ article }) => {
         className="block mb-3 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors"
       >
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
-          {article.title}
+          {article.headline}
         </h2>
       </Link>
       <div className="text-gray-600 dark:text-gray-300 text-sm sm:text-base line-clamp-2 mb-4">
