@@ -1,3 +1,4 @@
+import React from 'react';
 import ArticleCard from '@/app/components/ArticleCard';
 import Pagination from '@/app/components/Pagination';
 import { type Metadata } from 'next';
@@ -5,9 +6,9 @@ import { BlogClient } from 'seobot';
 import { Navbar } from '@/components/landing/Navbar';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = 'Ace The SAT';
+  const title = 'SAT Practice Blog';
   const description =
-    'Ace The SAT is a blog that helps students prepare for the SAT exam. We offer a variety of resources to help you prepare for the SAT exam, including practice tests, study guides, and more.';
+    'SAT Practice Blog is a blog that helps students prepare for the SAT exam. We offer a variety of resources to help you prepare for the SAT exam, including practice tests, study guides, and more.';
   return {
     title,
     description,
@@ -57,21 +58,27 @@ export default async function Blog({
   return (
     <>
       <Navbar user={null} />
-      <section className="max-w-3xl my-8 lg:mt-10 mx-auto px-4 md:px-8 dark:text-white tracking-normal">
-        <h1 className="text-4xl my-4 font-black">Ace The SAT Blog</h1>
-        <ul>
-          {posts.map((article: any) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </ul>
-        {lastPage > 1 && (
-          <Pagination
-            slug="/blog"
-            pageNumber={pageNumber}
-            lastPage={lastPage}
-          />
-        )}
-      </section>
+      <main className="min-h-screen bg-white dark:bg-gray-900">
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-8">
+            SAT Practice Blog
+          </h1>
+          <div className="space-y-8">
+            {posts.map((article: any) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+          {lastPage > 1 && (
+            <div className="mt-12">
+              <Pagination
+                slug="/blog"
+                pageNumber={pageNumber}
+                lastPage={lastPage}
+              />
+            </div>
+          )}
+        </section>
+      </main>
     </>
   );
 }
