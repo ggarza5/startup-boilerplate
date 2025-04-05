@@ -79,18 +79,17 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
             {sections.map((section) => {
               console.log('Rendering section in Sidebar:', section);
-              const datePart = section.name.split('-').slice(1, 4).join('-');
-              const formattedDate = new Date(datePart).toLocaleDateString();
-              const sectionType = section.name.split('-')[0];
+              const sectionType = section.section_type;
+              const categoryDisplay = section.category || 'Other';
               return (
                 <div
                   key={section.id}
                   className="mb-2 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-muted/40 text-gray-800 dark:text-gray-300"
-                  onClick={() => onSelectSection(section.name, section.id)}
+                  onClick={() => onSelectSection(section.id, section.name)}
                 >
-                  <div className="font-medium">{`${sectionType} (${formattedDate})`}</div>
+                  <div className="font-medium truncate">{section.name}</div>
                   <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    {section.category || 'Other'}
+                    {sectionType} - {categoryDisplay}
                   </div>
                 </div>
               );

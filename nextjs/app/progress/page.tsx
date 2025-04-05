@@ -95,9 +95,12 @@ const ProgressPage: React.FC = () => {
   };
 
   const handleSelectSection = async (
-    sectionName: string,
-    sectionId: string
+    sectionId: string,
+    sectionName?: string
   ) => {
+    console.log(
+      `ProgressPage: handleSelectSection called with id: ${sectionId}, name: ${sectionName}`
+    );
     await router.push(`/questions?sectionId=${sectionId}`);
   };
 

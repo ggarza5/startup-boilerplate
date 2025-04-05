@@ -85,7 +85,7 @@ const QuestionsPage: React.FC = () => {
   // Handle section selection based on query parameters
   useEffect(() => {
     if (sectionsLoaded && querySectionId) {
-      handleSelectSection(querySectionName as string, querySectionId as string);
+      handleSelectSection(querySectionId as string, querySectionName as string);
     }
   }, [sectionsLoaded, querySectionId]);
 
@@ -134,21 +134,31 @@ const QuestionsPage: React.FC = () => {
 
   // Function to handle section selection
   const handleSelectSection = async (
-    sectionName: string,
-    sectionId: string
+    sectionId: string, // ID first
+    sectionName?: string // Name is now optional title
   ) => {
+    console.log(
+      `QuestionsPage: handleSelectSection called with id: ${sectionId}, name: ${sectionName}`
+    );
     setLoading(true);
     setIsFetchingSection(true);
     setUnansweredQuestions(new Set());
     setUserAnswers({});
     try {
+      // Always fetch by ID for accuracy
       const response = await fetch(`/api/section/${sectionId}`);
       const data = await response.json();
+      if (!response.ok || !data) {
+        throw new Error(data.error || 'Failed to fetch section');
+      }
       setCurrentQuestionIndex(0);
       setCurrentSection(data);
       setStartTimer(true);
+      // Update URL to reflect the selected section ID
+      router.push(`/questions?sectionId=${sectionId}`, undefined);
     } catch (error: any) {
       logErrorIfNotProduction(error);
+      setCurrentSection(null); // Clear section on error
     } finally {
       setLoading(false);
       setIsFetchingSection(false);
@@ -158,28 +168,29 @@ const QuestionsPage: React.FC = () => {
   // Function to handle adding a new section
   const handleAddSection = async (
     type: string,
-    sectionName: string,
+    sectionName: string, // This is the unique timestamped name initially
     category?: string
   ) => {
     console.log(
-      `QuestionsPage: handleAddSection called with type: ${type}, sectionName: ${sectionName}, category: ${category}`
+      `QuestionsPage: handleAddSection called with type: ${type}, sectionName (initial): ${sectionName}, category: ${category}`
     );
 
-    // Check if section already exists (this logic might need adjustment if name isn't unique enough)
-    const existingSection = sections.find(
-      (section: Section) => section.name === sectionName
-    );
-    if (existingSection) {
-      // If exists, navigate to it (optional: update URL with category?)
-      await handleSelectSection(sectionName, existingSection.id);
-      return;
-    }
+    // Don't check existing based on timestamped name anymore
+    // const existingSection = sections.find(
+    //   (section: Section) => section.name === sectionName
+    // );
+    // if (existingSection) {
+    //   await handleSelectSection(existingSection.id, existingSection.name);
+    //   return;
+    // }
 
-    // If it doesn't exist, generate it
     setIsCreatingSection(true);
+    let newSectionId: string | null = null;
+    let newSectionTitle: string | null = null;
+
     try {
       const requestBody = {
-        name: sectionName,
+        name: sectionName, // Pass the initial timestamped name to API
         type: type,
         category: category
       };
@@ -188,18 +199,27 @@ const QuestionsPage: React.FC = () => {
       const response = await fetch('/api/ai/generateSection', {
         method: 'POST',
         body: JSON.stringify(requestBody),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
       const data = await response.json();
-
       console.log('generateSection API response:', data);
 
-      // Update sections by refetching (essential after adding)
-      await fetchSections();
-      // Select the newly created section
-      await handleSelectSection(data.name, data.sectionId);
+      if (response.ok && data.sectionId) {
+        newSectionId = data.sectionId;
+        newSectionTitle = data.name; // Get the actual title used
+
+        // Refetch sections via context
+        await fetchSections();
+
+        // Select the new section using its ID and actual title
+        await handleSelectSection(newSectionId, newSectionTitle || undefined);
+      } else {
+        console.error(
+          'Failed to create section via API:',
+          data.error || 'Unknown API error'
+        );
+        logErrorIfNotProduction(new Error(data.error || 'API error'));
+      }
     } catch (error: any) {
       logErrorIfNotProduction(error);
     } finally {

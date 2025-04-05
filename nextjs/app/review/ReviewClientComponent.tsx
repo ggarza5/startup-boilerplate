@@ -95,9 +95,12 @@ const ReviewClientComponent: React.FC = () => {
   }, [sectionId, user]);
 
   const handleSelectSection = async (
-    sectionName: string,
-    sectionId: string
+    sectionId: string,
+    sectionName?: string
   ) => {
+    console.log(
+      `ReviewClientComponent: handleSelectSection called with id: ${sectionId}, name: ${sectionName}`
+    );
     await router.push(`/questions?sectionId=${sectionId}`);
   };
 
