@@ -1,7 +1,7 @@
 // Main component for the Index Page
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Timer from '../components/Timer';
@@ -21,6 +21,7 @@ import { ProgressButton } from '../components/ProgressButton';
 import * as Constants from '../constants'; // Import constants
 import RecentSectionCard from '../components/RecentSectionCard'; // Import the new card
 import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion'; // Import framer-motion
 
 const IndexPage: React.FC = () => {
   return (
@@ -61,6 +62,12 @@ const QuestionsPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generationMessages, setGenerationMessages] = useState<string[]>([]); // State for messages
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0); // State for current message index
+  const processingSectionIdRef = useRef<string | null>(null); // Ref to track processing ID
+  const lastProcessedTimeRef = useRef<Map<string, number>>(new Map()); // NEW: Map to track when a section was last processed
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(
+    null
+  );
+  const DEBOUNCE_INTERVAL = 2000; // 2 seconds debounce interval - ignore repeated calls within this window
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -90,9 +97,30 @@ const QuestionsPage: React.FC = () => {
   // Handle section selection based on query parameters
   useEffect(() => {
     if (sectionsLoaded && querySectionId) {
-      handleSelectSection(querySectionId as string, querySectionName as string);
+      // Get current time and compare with last processed time for this ID
+      const now = Date.now();
+      const lastProcessed = lastProcessedTimeRef.current.get(querySectionId);
+      const timeSinceLastProcessed = lastProcessed
+        ? now - lastProcessed
+        : Infinity;
+
+      // Only call handleSelectSection if it's been at least DEBOUNCE_INTERVAL since we last processed this ID
+      if (timeSinceLastProcessed > DEBOUNCE_INTERVAL)
+        handleSelectSection(
+          querySectionId as string,
+          querySectionName as string
+        );
     }
-  }, [sectionsLoaded, querySectionId]);
+  }, [sectionsLoaded, querySectionId]); // Simplified dependency array
+
+  useEffect(() => {
+    const currentSectionId = currentSection?.id;
+    const searchParamSectionId = queryVariables?.get('sectionId');
+
+    // Only update URL if a section is loaded AND its ID doesn't match the URL param
+    if (currentSectionId && currentSectionId !== searchParamSectionId)
+      router.replace(`/questions?sectionId=${currentSectionId}`, undefined);
+  }, [currentSection?.id, queryVariables, router]);
 
   // Handle adding a new section based on query parameters
   useEffect(() => {
@@ -182,8 +210,21 @@ const QuestionsPage: React.FC = () => {
     sectionId: string,
     sectionName?: string
   ) => {
+    // Record the current time as when we started processing this section ID
+    lastProcessedTimeRef.current.set(sectionId, Date.now());
     console.log(
-      `QuestionsPage: handleSelectSection START - Setting isFetchingSection = true for id: ${sectionId}`
+      `QuestionsPage: handleSelectSection - Recording timestamp for ${sectionId}`
+    );
+
+    // Set the ref at the very beginning
+    processingSectionIdRef.current = sectionId;
+    console.log(
+      `QuestionsPage: handleSelectSection - Set processingIdRef = ${sectionId}`
+    );
+
+    // Log right before setting true
+    console.log(
+      `QuestionsPage: handleSelectSection - About to set isFetchingSection = true for id: ${sectionId}`
     );
     setIsFetchingSection(true);
     setUnansweredQuestions(new Set());
@@ -202,13 +243,6 @@ const QuestionsPage: React.FC = () => {
       // Set the fetched section data
       setCurrentSection(data);
       setStartTimer(true); // Start timer only after data is ready
-
-      // Update URL without full reload, replace state if possible
-      const currentPath = window.location.pathname + window.location.search;
-      const newUrl = `/questions?sectionId=${sectionId}`;
-      if (currentPath !== newUrl) {
-        router.replace(newUrl, undefined); // Use replace to avoid history spam
-      }
     } catch (error: any) {
       logErrorIfNotProduction(
         new Error(`${Constants.ERROR_FETCHING_SECTION}: ${error.message}`)
@@ -216,9 +250,11 @@ const QuestionsPage: React.FC = () => {
       setCurrentSection(null);
     } finally {
       console.log(
-        `QuestionsPage: handleSelectSection FINALLY - Setting isFetchingSection = false for id: ${sectionId}`
+        `QuestionsPage: handleSelectSection FINALLY - Setting isFetchingSection = false, clearing processingIdRef for id: ${sectionId}`
       );
-      setIsFetchingSection(false); // Clear section-specific loading state
+      setIsFetchingSection(false);
+      // Clear the ref in finally block
+      processingSectionIdRef.current = null;
     }
   };
 
@@ -371,6 +407,7 @@ const QuestionsPage: React.FC = () => {
       currentSection.questions &&
       currentQuestionIndex < currentSection.questions.length - 1
     ) {
+      setSlideDirection('right'); // Set direction BEFORE changing index
       clearSelection();
       const radios = document.getElementsByName(
         `question-${currentQuestionIndex}`
@@ -402,6 +439,7 @@ const QuestionsPage: React.FC = () => {
   // Function to handle moving to the previous question
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
+      setSlideDirection('left'); // Set direction BEFORE changing index
       clearSelection();
       const radios = document.getElementsByName(
         `question-${currentQuestionIndex}`
@@ -423,6 +461,18 @@ const QuestionsPage: React.FC = () => {
 
   // Function to handle jumping to a specific question
   const handleGoToQuestion = (index: number) => {
+    // Determine slide direction based on jump
+    if (index > currentQuestionIndex) {
+      setSlideDirection('right');
+    } else if (index < currentQuestionIndex) {
+      setSlideDirection('left');
+    } else {
+      // If jumping to the same question, no direction needed (or set null)
+      // This case likely won't happen with unanswered list, but good practice
+      setSlideDirection(null);
+    }
+
+    // Update the index after setting direction
     setCurrentQuestionIndex(index);
     resetSelectedAnswer();
   };
@@ -498,19 +548,11 @@ const QuestionsPage: React.FC = () => {
     );
   };
 
-  // Consistent button styling using buttonVariants from shadcn/ui
-  // (Assuming you have Button component setup)
   const renderButtons = () => {
     if (!currentSection || !currentSection.questions) return null;
 
     const questionCount = currentSection.questions.length;
     const isLastQuestion = currentQuestionIndex === questionCount - 1;
-
-    // --- Debugging Log ---
-    console.log(
-      `renderButtons: index=${currentQuestionIndex}, count=${questionCount}, isLast=${isLastQuestion}`
-    );
-    // --- End Debugging Log ---
 
     return (
       <div className="flex justify-between mt-6 pt-6 border-t border-border/60">
@@ -545,7 +587,7 @@ const QuestionsPage: React.FC = () => {
           <Button
             variant="default"
             onClick={handleNextQuestion}
-            className="bg-brand-blue-hex dark:bg-brand-blue-hex text-white dark:text-white hover:opacity-90 dark:hover:opacity-90 focus-visible:ring-brand-blue-hex"
+            className="bg-brand-blue-hex dark:bg-brand-blue-hex text-white dark:text-white hover:bg-[#03a3d7] dark:hover:bg-[#03a3d7] focus-visible:ring-brand-blue-hex transition-colors duration-150"
           >
             {Constants.NEXT_QUESTION}
             <i className="fas fa-arrow-right w-3 h-3 ml-2"></i>
@@ -553,6 +595,24 @@ const QuestionsPage: React.FC = () => {
         )}
       </div>
     );
+  };
+
+  // Define animation variants
+  const variants = {
+    enter: (direction: 'left' | 'right') => ({
+      x: direction === 'right' ? '100%' : '-100%',
+      opacity: 0
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: 'left' | 'right') => ({
+      zIndex: 0,
+      x: direction === 'right' ? '-100%' : '100%',
+      opacity: 0
+    })
   };
 
   const renderSection = () => {
@@ -567,22 +627,54 @@ const QuestionsPage: React.FC = () => {
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               Question {currentQuestionIndex + 1}
             </h2>
-            {currentSection.questions &&
-              currentSection.questions[currentQuestionIndex] && (
-                <QuestionComponent
-                  question={currentSection.questions[currentQuestionIndex]}
-                  currentQuestionIndex={currentQuestionIndex}
-                  handleAnswerSelect={handleAnswerSelect}
-                  handleDoubleClickAnswer={handleDoubleClickAnswer}
-                  selectedAnswer={
-                    selectedAnswerState[currentQuestionIndex] || null
-                  }
-                />
-              )}
+            {/* == Scrollable Question Area == */}
+            {/* Use relative positioning for the container to contain the absolute positioned motion divs */}
+            <div className="flex-grow overflow-hidden mb-4 relative">
+              {/* AnimatePresence handles enter/exit animations */}
+              {/* Use `mode="wait"` if you want the old one to exit before the new one enters */}
+              <AnimatePresence
+                initial={false}
+                custom={slideDirection}
+                mode="wait"
+              >
+                {/* motion.div wraps the component to be animated */}
+                {/* Use `key={currentQuestionIndex}` to trigger animation on index change */}
+                <motion.div
+                  key={currentQuestionIndex}
+                  custom={slideDirection}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{
+                    x: { type: 'tween', ease: 'easeInOut', duration: 0.3 },
+                    opacity: { duration: 0.2 }
+                  }}
+                  // Add absolute positioning to allow stacking during transition
+                  className="absolute w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark pr-2"
+                >
+                  {/* Question Component */}
+                  {currentSection.questions &&
+                  currentSection.questions[currentQuestionIndex] ? (
+                    <QuestionComponent
+                      question={currentSection.questions[currentQuestionIndex]}
+                      currentQuestionIndex={currentQuestionIndex}
+                      handleAnswerSelect={handleAnswerSelect}
+                      handleDoubleClickAnswer={handleDoubleClickAnswer}
+                      selectedAnswer={
+                        selectedAnswerState[currentQuestionIndex] || null
+                      }
+                    />
+                  ) : (
+                    <p>Loading question or question not found...</p>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            {renderButtons()}
+            {renderUnansweredQuestions()}
+            {renderDisclaimer()}
           </div>
-          {renderButtons()}
-          {renderUnansweredQuestions()}
-          {renderDisclaimer()}
         </div>
       );
     else
@@ -673,6 +765,7 @@ const QuestionsPage: React.FC = () => {
           onAddSection={handleAddSection}
           isCreatingSection={isCreatingSection}
           setIsCreatingSection={setIsCreatingSection}
+          activeSectionId={currentSection?.id || null}
         />
         <div className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto h-vh-minus-navbar scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
           {isCreatingSection ? (
@@ -691,24 +784,33 @@ const QuestionsPage: React.FC = () => {
             <div className="w-full max-w-3xl mx-auto flex flex-col h-full">
               {/* == Top Fixed Part == */}
               <div>
-                {/* Display Section Title and Category */}
+                {/* Display Section Title, Loader, and Progress */}
                 <div className="flex items-center gap-2 mb-1">
+                  {/* Title */}
                   <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    {currentSection.name || 'Loading Title...'}
+                    {currentSection?.name || 'Loading Title...'}
                   </h1>
-                  {/* Replace temporary text with Loader component */}
+                  {/* Loader */}
                   {isFetchingSection && (
                     <Loader className="w-5 h-5 text-brand-pink dark:text-brand-pink" />
                   )}
+                  {/* Progress Indicator (pushes right) */}
+                  {!isFetchingSection && currentSection?.questions?.length && (
+                    <div className="ml-auto text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Question {currentQuestionIndex + 1} /{' '}
+                      {currentSection.questions.length}
+                    </div>
+                  )}
                 </div>
 
-                {/* Display category only if not fetching and section exists */}
+                {/* Display category only when section exists (already handled) */}
                 {currentSection && (
                   <p className="text-base text-gray-600 dark:text-gray-400 mb-6 pb-4 border-b border-border/60 dark:border-border/40">
                     {currentSection.section_type} -{' '}
                     {currentSection.category || Constants.OTHER_CATEGORY}
                   </p>
                 )}
+
                 {/* Timer Component */}
                 <Timer
                   startTimer={startTimer}
@@ -717,22 +819,49 @@ const QuestionsPage: React.FC = () => {
               </div>
 
               {/* == Scrollable Question Area == */}
-              <div className="flex-grow overflow-y-auto mb-4 scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark pr-2">
-                {/* Question Component */}
-                {currentSection.questions &&
-                currentSection.questions[currentQuestionIndex] ? (
-                  <QuestionComponent
-                    question={currentSection.questions[currentQuestionIndex]}
-                    currentQuestionIndex={currentQuestionIndex}
-                    handleAnswerSelect={handleAnswerSelect}
-                    handleDoubleClickAnswer={handleDoubleClickAnswer}
-                    selectedAnswer={
-                      selectedAnswerState[currentQuestionIndex] || null
-                    }
-                  />
-                ) : (
-                  <p>Loading question or question not found...</p>
-                )}
+              <div className="flex-grow overflow-hidden mb-4 relative">
+                {/* AnimatePresence handles enter/exit animations */}
+                {/* Use `mode="wait"` if you want the old one to exit before the new one enters */}
+                <AnimatePresence
+                  initial={false}
+                  custom={slideDirection}
+                  mode="wait"
+                >
+                  {/* motion.div wraps the component to be animated */}
+                  {/* Use `key={currentQuestionIndex}` to trigger animation on index change */}
+                  <motion.div
+                    key={currentQuestionIndex}
+                    custom={slideDirection}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: 'tween', ease: 'easeInOut', duration: 0.3 },
+                      opacity: { duration: 0.2 }
+                    }}
+                    // Add absolute positioning to allow stacking during transition
+                    className="absolute w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark pr-2"
+                  >
+                    {/* Question Component */}
+                    {currentSection.questions &&
+                    currentSection.questions[currentQuestionIndex] ? (
+                      <QuestionComponent
+                        question={
+                          currentSection.questions[currentQuestionIndex]
+                        }
+                        currentQuestionIndex={currentQuestionIndex}
+                        handleAnswerSelect={handleAnswerSelect}
+                        handleDoubleClickAnswer={handleDoubleClickAnswer}
+                        selectedAnswer={
+                          selectedAnswerState[currentQuestionIndex] || null
+                        }
+                      />
+                    ) : (
+                      <p>Loading question or question not found...</p>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
               {/* == Bottom Fixed Part == */}

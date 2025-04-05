@@ -6,6 +6,7 @@ import { Loader } from '@/components/ui/loader';
 import Link from 'next/link';
 import * as Constants from '../constants'; // Import constants
 import { useSections } from '@/context/SectionsContext';
+import { motion } from 'framer-motion'; // Import motion
 
 interface SidebarProps {
   onSelectSection: (sectionId: string, sectionName: string) => Promise<void>;
@@ -16,6 +17,7 @@ interface SidebarProps {
   ) => Promise<void>; // Update to include category
   isCreatingSection: boolean;
   setIsCreatingSection: (isCreatingSection: boolean) => void;
+  activeSectionId: string | null; // NEW: Receive active ID as prop
 }
 
 // Helper function to get initials for shorthand
@@ -39,37 +41,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   onSelectSection,
   onAddSection,
   isCreatingSection,
-  setIsCreatingSection
+  setIsCreatingSection,
+  activeSectionId
 }) => {
   const { sections, fetchSections, isLoadingSections } = useSections();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [ellipsis, setEllipsis] = useState<string>('...'); // Start with three dots
-  const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
-
-  // UseEffect to update currentSectionId when a section is selected via props
-  // This relies on the parent component managing the actual section selection
-  // and potentially updating the URL, which might trigger a re-render or state update
-  // in the parent that leads to the Sidebar receiving the selected ID indirectly.
-  // A more robust way might involve passing the selected ID as a prop.
-  useEffect(() => {
-    // Example: Read from URL search params if available
-    const params = new URLSearchParams(window.location.search);
-    const sectionIdFromUrl = params.get('sectionId');
-    if (sectionIdFromUrl) {
-      setCurrentSectionId(sectionIdFromUrl);
-    }
-    // Or, if the parent passes the currently active section ID as a prop:
-    // setCurrentSectionId(activeSectionIdProp);
-  }, [
-    /* Dependency array - depends on how parent passes the ID */ window.location
-      .search
-  ]);
-
-  // Update the handler to set the state
-  const handleLocalSelectSection = (sectionId: string, sectionName: string) => {
-    setCurrentSectionId(sectionId); // Set local state for styling
-    onSelectSection(sectionId, sectionName); // Call the original handler
-  };
+  const [flashId, setFlashId] = useState<string | null>(null); // Renamed state for clarity
 
   // Effect for ellipsis animation
   useEffect(() => {
@@ -106,6 +84,18 @@ const Sidebar: React.FC<SidebarProps> = ({
       }
     };
   }, [isCreatingSection]);
+
+  // Handler for clicking a section item
+  const handleItemClick = (sectionId: string, sectionName: string) => {
+    if (sectionId === activeSectionId) {
+      // If already active, trigger flash effect
+      setFlashId(sectionId);
+      setTimeout(() => setFlashId(null), 200); // Reset after flash duration
+    } else {
+      // Otherwise, select the new section
+      onSelectSection(sectionId, sectionName);
+    }
+  };
 
   const renderSections = () => {
     const sectionsWithDate = sections.filter(
@@ -150,7 +140,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* Shorthand Buttons for this Date */}
               <div className="flex flex-col items-center space-y-2 w-full">
                 {dateSections.map((section) => {
-                  const isSelected = section.id === currentSectionId;
+                  const isSelected = section.id === activeSectionId;
+                  const isFlashing = flashId === section.id;
                   const shorthand = getShorthand(
                     section.section_type,
                     section.category
@@ -159,16 +150,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                   return (
                     <div
                       key={section.id}
-                      title={fullTitle} // Simple tooltip on hover
+                      title={fullTitle}
                       className={`w-10 h-10 flex items-center justify-center rounded cursor-pointer font-mono text-xs transition-colors duration-150
-                                  ${
-                                    isSelected
-                                      ? 'bg-brand-blue/20 dark:bg-brand-blue/30 text-brand-blue dark:text-brand-blue/90 ring-1 ring-brand-blue/50'
-                                      : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300'
-                                  }`}
-                      onClick={() =>
-                        handleLocalSelectSection(section.id, section.name)
-                      }
+                        ${
+                          isFlashing
+                            ? 'bg-brand-blue-hex/80 dark:bg-brand-blue-hex/90 text-white dark:text-gray-100 ring-1 ring-brand-blue-hex/60'
+                            : isSelected
+                              ? 'bg-brand-blue-hex/70 dark:bg-brand-blue-hex/80 text-white dark:text-gray-100 ring-1 ring-brand-blue-hex/50'
+                              : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300'
+                        }`}
+                      onClick={() => handleItemClick(section.id, section.name)}
                     >
                       {shorthand}
                     </div>
@@ -214,7 +205,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* Section List - Apply transition here */}
             <div className="transition-all duration-300 ease-in-out">
               {dateSections.map((section) => {
-                const isSelected = section.id === currentSectionId;
+                const isSelected = section.id === activeSectionId;
+                const isFlashing = flashId === section.id;
                 const sectionType = section.section_type;
                 const categoryDisplay =
                   section.category || Constants.OTHER_CATEGORY;
@@ -242,27 +234,36 @@ const Sidebar: React.FC<SidebarProps> = ({
                 return (
                   <div
                     key={section.id}
-                    className={`mb-1 mx-1 px-2 py-2 cursor-pointer rounded-md transition-colors duration-150 
-                                ${
-                                  isSelected
-                                    ? 'bg-brand-blue/20 dark:bg-brand-blue/30'
-                                    : 'hover:bg-gray-200 dark:hover:bg-muted/40 text-gray-800 dark:text-gray-300'
-                                }`}
-                    onClick={() =>
-                      handleLocalSelectSection(section.id, section.name)
-                    }
+                    className={`mb-1 mx-1 px-2 py-2 cursor-pointer rounded-md transition-colors duration-150 flex items-center
+                      ${
+                        isFlashing
+                          ? 'bg-brand-blue-hex/20 dark:bg-brand-blue-hex/30'
+                          : isSelected
+                            ? 'bg-brand-blue-hex/10 dark:bg-brand-blue-hex/20'
+                            : 'hover:bg-gray-200 dark:hover:bg-muted/40 text-gray-800 dark:text-gray-300'
+                      }`}
+                    onClick={() => handleItemClick(section.id, section.name)}
                   >
-                    <div
-                      className={`font-medium truncate ${isSelected ? 'text-brand-blue dark:text-brand-blue/90' : 'text-gray-900 dark:text-gray-100'}`}
-                    >
-                      {section.name}
+                    {/* Text content (takes up available space) */}
+                    <div className="flex-grow truncate mr-2">
+                      {/* Use brand-blue-hex for text */}
+                      <div
+                        className={`font-medium ${isSelected ? 'text-brand-blue-hex dark:text-brand-blue-hex/90' : 'text-gray-900 dark:text-gray-100'}`}
+                      >
+                        {section.name}
+                      </div>
+                      <div
+                        className={`text-xs mt-1 ${isSelected ? 'text-brand-blue-hex/80 dark:text-brand-blue-hex/70' : 'text-gray-600 dark:text-gray-400'}`}
+                      >
+                        {`${sectionType} - ${categoryDisplay}`}
+                        {creationTime && ` - ${creationTime}`}
+                      </div>
                     </div>
-                    <div
-                      className={`text-xs mt-1 ${isSelected ? 'text-brand-blue/80 dark:text-brand-blue/70' : 'text-gray-600 dark:text-gray-400'}`}
-                    >
-                      {`${sectionType} - ${categoryDisplay}`}
-                      {creationTime && ` - ${creationTime}`}
-                    </div>
+                    {/* Conditional Dot Indicator (pushes right) */}
+                    {isSelected && (
+                      // Use brand-blue-hex for dot color
+                      <div className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-blue-hex flex-shrink-0"></div>
+                    )}
                   </div>
                 );
               })}
@@ -321,14 +322,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="mb-4 px-2 space-y-1">
             <Link
               href="/progress"
-              className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300 hover:text-brand-blue dark:hover:text-brand-blue p-2 rounded-md hover:bg-brand-blue/10 dark:hover:bg-brand-blue/20 transition-colors duration-150"
+              className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300 hover:text-brand-blue-hex dark:hover:text-brand-blue-hex p-2 rounded-md hover:bg-brand-blue-hex/10 dark:hover:bg-brand-blue-hex/20 transition-colors duration-150"
             >
               <i className="fas fa-chart-line w-4 h-4"></i>
               <span>{Constants.VIEW_YOUR_PROGRESS}</span>
             </Link>
             <Link
               href="/category-performance"
-              className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300 hover:text-brand-blue dark:hover:text-brand-blue p-2 rounded-md hover:bg-brand-blue/10 dark:hover:bg-brand-blue/20 transition-colors duration-150"
+              className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300 hover:text-brand-blue-hex dark:hover:text-brand-blue-hex p-2 rounded-md hover:bg-brand-blue-hex/10 dark:hover:bg-brand-blue-hex/20 transition-colors duration-150"
             >
               <i className="fas fa-tags w-4 h-4"></i>
               <span>{Constants.CATEGORY_PERFORMANCE}</span>
