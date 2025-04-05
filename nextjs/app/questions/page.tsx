@@ -34,6 +34,7 @@ const QuestionsPage: React.FC = () => {
   const querySectionName = queryVariables?.get('sectionName');
   let queryAddSection = queryVariables?.get('addSection');
   const queryType = queryVariables?.get('type');
+  const queryCategory = queryVariables?.get('category');
 
   const { sections, fetchSections, isLoadingSections } = useSections();
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
@@ -90,11 +91,14 @@ const QuestionsPage: React.FC = () => {
 
   // Handle adding a new section based on query parameters
   useEffect(() => {
-    if (queryAddSection) {
-      queryAddSection = null;
-      handleAddSection(queryType as string, querySectionName as string);
+    if (queryAddSection === 'true' && queryType && querySectionName) {
+      console.log(
+        `QuestionsPage useEffect: Triggering addSection with type: ${queryType}, name: ${querySectionName}, category: ${queryCategory}`
+      );
+      handleAddSection(queryType, querySectionName, queryCategory || undefined);
+      router.replace('/questions', undefined);
     }
-  }, [sectionsLoaded, queryAddSection]);
+  }, [queryAddSection, queryType, querySectionName, queryCategory]);
 
   useEffect(() => {
     if (sections.length > 0) {
@@ -174,13 +178,16 @@ const QuestionsPage: React.FC = () => {
     // If it doesn't exist, generate it
     setIsCreatingSection(true);
     try {
+      const requestBody = {
+        name: sectionName,
+        type: type,
+        category: category
+      };
+      console.log('QuestionsPage: Sending to API:', requestBody);
+
       const response = await fetch('/api/ai/generateSection', {
         method: 'POST',
-        body: JSON.stringify({
-          name: sectionName,
-          type: type,
-          category: category
-        }),
+        body: JSON.stringify(requestBody),
         headers: {
           'Content-Type': 'application/json'
         }
