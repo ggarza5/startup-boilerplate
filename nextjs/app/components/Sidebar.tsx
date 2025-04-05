@@ -44,18 +44,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const renderSections = () => {
     const sectionsWithDate = sections.filter(
-      (section: Section) => section.createdAt
+      (section: Section) => section.created_at
     );
 
     const sortedSections = sectionsWithDate.sort((a: Section, b: Section) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
       return dateB - dateA;
     });
 
     const sectionsByDate = sortedSections.reduce(
       (acc: Record<string, Section[]>, section: Section) => {
-        const date = section.createdAt?.split('T')[0];
+        const date = section.created_at?.split('T')[0];
         if (date) {
           if (!acc[date]) acc[date] = [];
           acc[date].push(section);

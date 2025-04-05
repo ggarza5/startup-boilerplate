@@ -279,6 +279,7 @@ const QuestionsPage: React.FC = () => {
   const handleNextQuestion = () => {
     if (
       currentSection &&
+      currentSection.questions &&
       currentQuestionIndex < currentSection.questions.length - 1
     ) {
       clearSelection();
@@ -359,6 +360,7 @@ const QuestionsPage: React.FC = () => {
       // Check if we're on the last question
       if (
         currentSection &&
+        currentSection.questions &&
         currentQuestionIndex === currentSection.questions.length - 1
       ) {
         handleSubmitAnswers();

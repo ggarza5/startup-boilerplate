@@ -130,18 +130,22 @@ const ResultsPage: React.FC = () => {
     let correct = 0;
     let incorrect = 0;
     let unanswered = 0;
+    let percentageCorrect = 0;
 
-    currentSection?.questions.forEach((question, index) => {
-      const status = getQuestionStatus(question, index);
-      if (status === 'correct') correct++;
-      else if (status === 'incorrect') incorrect++;
-      else unanswered++;
-    });
+    if (currentSection && currentSection.questions) {
+      // Added check here
+      currentSection.questions.forEach((question, index) => {
+        const status = getQuestionStatus(question, index);
+        if (status === 'correct') correct++;
+        else if (status === 'incorrect') incorrect++;
+        else unanswered++;
+      });
 
-    const percentageCorrect = calculateScore(
-      currentSection as Section,
-      userAnswers
-    );
+      percentageCorrect = calculateScore(
+        currentSection as Section, // Safe to cast here due to the check
+        userAnswers
+      );
+    }
 
     return { correct, incorrect, unanswered, percentageCorrect };
   };
@@ -184,7 +188,7 @@ const ResultsPage: React.FC = () => {
           isCreatingSection={false}
           setIsCreatingSection={() => {}}
         />
-        <div className="flex flex-col p-4 h-vh-minus-navbar w-fill-available">
+        <div className="flex flex-col p-4 h-vh-minus-navbar w-full">
           {isLoading ? (
             <div className="flex justify-center items-center h-full">
               <Loader />
@@ -228,7 +232,7 @@ const ResultsPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center w-fill-available overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center w-full overflow-y-scroll h-full scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
               {isClient && ( // Only render Confetti on the client
                 <Confetti
                   width={window.innerWidth - 312} // Now safe to access window

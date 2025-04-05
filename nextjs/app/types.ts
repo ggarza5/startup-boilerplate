@@ -4,17 +4,18 @@ export interface Question {
   question: string;
   answer_choices: string[];
   answer: string;
-  explanation?: string;
+  explanation?: string | null;
   created_at: string;
 }
 
 export interface Section {
   id: string;
   name: string;
-  type: string;
-  category?: string;
-  questions: Question[];
-  createdAt?: string;
+  section_type: string;
+  category?: string | null;
+  questions?: Question[];
+  created_at?: string;
+  created_by?: string;
 }
 
 export interface Result {
