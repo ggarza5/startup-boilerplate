@@ -211,8 +211,16 @@ const QuestionsPage: React.FC = () => {
         // Refetch sections via context
         await fetchSections();
 
-        // Select the new section using its ID and actual title
-        await handleSelectSection(newSectionId, newSectionTitle || undefined);
+        // Add a check to ensure newSectionId is a string before calling
+        if (newSectionId) {
+          // Select the new section using its ID and actual title
+          await handleSelectSection(newSectionId, newSectionTitle || undefined);
+        } else {
+          console.error(
+            'Error: sectionId is unexpectedly null after creation.'
+          );
+          // Handle this unlikely case, maybe show an error message
+        }
       } else {
         console.error(
           'Failed to create section via API:',
