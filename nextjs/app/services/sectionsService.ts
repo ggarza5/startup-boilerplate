@@ -18,15 +18,22 @@ export const fetchSections = async (): Promise<Section[]> => {
       return [];
     }
 
+    console.log('Raw sections data from Supabase:', data);
+
     // Map the API response to the Section type
-    const sections: Section[] = data.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      section_type: item.section_type,
-      category: item.category,
-      created_at: item.created_at,
-      created_by: item.created_by
-    }));
+    const sections: Section[] = data.map((item: any) => {
+      console.log('Mapping item:', item);
+      return {
+        id: item.id,
+        name: item.name,
+        section_type: item.section_type,
+        category: item.category,
+        created_at: item.created_at,
+        created_by: item.created_by
+      };
+    });
+
+    console.log('Mapped sections:', sections);
 
     return sections;
   } catch (error) {

@@ -78,6 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
             )}
             {sections.map((section) => {
+              console.log('Rendering section in Sidebar:', section);
               const datePart = section.name.split('-').slice(1, 4).join('-');
               const formattedDate = new Date(datePart).toLocaleDateString();
               const sectionType = section.name.split('-')[0];
@@ -88,11 +89,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => onSelectSection(section.name, section.id)}
                 >
                   <div className="font-medium">{`${sectionType} (${formattedDate})`}</div>
-                  {section.category && (
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {section.category}
-                    </div>
-                  )}
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {section.category || 'Other'}
+                  </div>
                 </div>
               );
             })}
