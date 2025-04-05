@@ -21,6 +21,7 @@ import { Navbar } from '../components/ui/Navbar';
 import Sidebar from '../components/Sidebar';
 import { QuestionsButton } from '../components/QuestionsButton';
 import useFetchUser from '../hooks/useFetchUser';
+import * as Constants from '../constants';
 
 ChartJS.register(
   CategoryScale,
@@ -61,6 +62,10 @@ const CategoryPerformancePage: React.FC = () => {
           // Fetch results
           const resultsResponse = await fetch(`/api/results?userId=${user.id}`);
           const resultsData = await resultsResponse.json();
+          if (!resultsResponse.ok) {
+            console.error(Constants.ERROR_FETCHING_RESULTS, resultsData.error);
+            // Handle error state if needed
+          }
           setResults(resultsData);
 
           // Fetch sections
@@ -70,12 +75,13 @@ const CategoryPerformancePage: React.FC = () => {
             .select('*');
 
           if (sectionsError) {
-            console.error('Error fetching sections:', sectionsError);
+            console.error(Constants.ERROR_FETCHING_SECTIONS, sectionsError);
+            // Handle error state if needed
           } else {
             setSections(sectionsData || []);
           }
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error(Constants.ERROR_FETCHING_RESULTS, error); // Or a more general error
         } finally {
           setLoading(false);
         }
@@ -192,7 +198,7 @@ const CategoryPerformancePage: React.FC = () => {
       },
       title: {
         display: true,
-        text: 'Performance by Category'
+        text: Constants.CATEGORY_PERFORMANCE_TITLE
       }
     }
   };
@@ -208,7 +214,9 @@ const CategoryPerformancePage: React.FC = () => {
           setIsCreatingSection={setIsCreatingSection}
         />
         <div className="container mx-auto p-4 overflow-y-scroll h-vh-minus-navbar">
-          <h1 className="text-2xl font-bold mb-4">Category Performance</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            {Constants.CATEGORY_PERFORMANCE_TITLE}
+          </h1>
           <div className="mb-8">
             <Bar data={chartData} options={chartOptions} />
           </div>

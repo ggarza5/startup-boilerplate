@@ -9,6 +9,7 @@ import { Navbar } from '../components/ui/Navbar';
 import Sidebar from '../components/Sidebar';
 import { QuestionsButton } from '../components/QuestionsButton';
 import useFetchUser from '../hooks/useFetchUser';
+import * as Constants from '../constants'; // Import constants
 
 // This component contains the logic that depends on useSearchParams
 const ReviewClientComponent: React.FC = () => {
@@ -43,8 +44,8 @@ const ReviewClientComponent: React.FC = () => {
           .single();
 
         if (sectionError) {
-          console.error('Error fetching section:', sectionError);
-          setLoading(false); // Ensure loading state is updated on error
+          console.error(Constants.ERROR_FETCHING_SECTION, sectionError);
+          setLoading(false);
           return;
         }
 
@@ -58,8 +59,8 @@ const ReviewClientComponent: React.FC = () => {
           .order('created_at', { ascending: true });
 
         if (questionsError) {
-          console.error('Error fetching questions:', questionsError);
-          setLoading(false); // Ensure loading state is updated on error
+          console.error(Constants.ERROR_FETCHING_QUESTIONS, questionsError);
+          setLoading(false);
           return;
         }
 
@@ -141,10 +142,10 @@ const ReviewClientComponent: React.FC = () => {
           />
           <div className="container mx-auto p-4">
             <div className="text-center py-10">
-              <h1 className="text-2xl font-bold mb-4">No section selected</h1>
-              <p className="mb-4">
-                Please select a section to review from the sidebar.
-              </p>
+              <h1 className="text-2xl font-bold mb-4">
+                {Constants.NO_SECTION_SELECTED_TITLE}
+              </h1>
+              <p className="mb-4">{Constants.NO_SECTION_SELECTED_PROMPT}</p>
               <QuestionsButton />
             </div>
           </div>
@@ -166,7 +167,7 @@ const ReviewClientComponent: React.FC = () => {
         <div className="container mx-auto p-4 overflow-y-scroll h-vh-minus-navbar">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">
-              {section && `Review: ${section.section_type} Section`}
+              {`Review: ${section?.section_type || ''} Section`}
               {section?.category && (
                 <span className="block text-lg font-normal text-gray-600 dark:text-gray-400">
                   {section.category}
@@ -177,7 +178,7 @@ const ReviewClientComponent: React.FC = () => {
               onClick={() => router.push(`/questions?sectionId=${sectionId}`)}
               className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
             >
-              Take Again
+              {Constants.TAKE_AGAIN}
             </button>
           </div>
 
@@ -253,8 +254,8 @@ const ReviewClientComponent: React.FC = () => {
                     className="text-blue-500 hover:text-blue-700 font-medium flex items-center"
                   >
                     {expanded[question.id]
-                      ? 'Hide Explanation'
-                      : 'Show Explanation'}
+                      ? Constants.HIDE_EXPLANATION
+                      : Constants.SHOW_EXPLANATION}
                     <svg
                       className={`w-4 h-4 ml-1 transform ${expanded[question.id] ? 'rotate-180' : ''}`}
                       fill="none"
@@ -274,7 +275,7 @@ const ReviewClientComponent: React.FC = () => {
                     <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
                       <h4 className="font-medium mb-2">Explanation:</h4>
                       <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
-                        {question.explanation || 'No explanation available.'}
+                        {question.explanation || Constants.NO_EXPLANATION}
                       </div>
                     </div>
                   )}

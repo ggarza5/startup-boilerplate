@@ -18,6 +18,7 @@ import {
 } from '../utils/helpers';
 import { useSections } from '@/context/SectionsContext';
 import { ProgressButton } from '../components/ProgressButton';
+import * as Constants from '../constants'; // Import constants
 
 const IndexPage: React.FC = () => {
   return (
@@ -149,7 +150,7 @@ const QuestionsPage: React.FC = () => {
       const response = await fetch(`/api/section/${sectionId}`);
       const data = await response.json();
       if (!response.ok || !data) {
-        throw new Error(data.error || 'Failed to fetch section');
+        throw new Error(data.error || Constants.ERROR_FETCHING_SECTION);
       }
       setCurrentQuestionIndex(0);
       setCurrentSection(data);
@@ -157,7 +158,9 @@ const QuestionsPage: React.FC = () => {
       // Update URL to reflect the selected section ID
       router.push(`/questions?sectionId=${sectionId}`, undefined);
     } catch (error: any) {
-      logErrorIfNotProduction(error);
+      logErrorIfNotProduction(
+        new Error(`${Constants.ERROR_FETCHING_SECTION}: ${error.message}`)
+      );
       setCurrentSection(null); // Clear section on error
     } finally {
       setLoading(false);
@@ -216,20 +219,17 @@ const QuestionsPage: React.FC = () => {
           // Select the new section using its ID and actual title
           await handleSelectSection(newSectionId, newSectionTitle || undefined);
         } else {
-          console.error(
-            'Error: sectionId is unexpectedly null after creation.'
-          );
-          // Handle this unlikely case, maybe show an error message
+          console.error(Constants.ERROR_SECTION_ID_NULL);
         }
       } else {
-        console.error(
-          'Failed to create section via API:',
-          data.error || 'Unknown API error'
-        );
-        logErrorIfNotProduction(new Error(data.error || 'API error'));
+        const errorMsg = data.error || Constants.ERROR_UNKNOWN;
+        console.error(`${Constants.ERROR_CREATING_SECTION_API}:`, errorMsg);
+        logErrorIfNotProduction(new Error(errorMsg));
       }
     } catch (error: any) {
-      logErrorIfNotProduction(error);
+      logErrorIfNotProduction(
+        new Error(`${Constants.ERROR_CREATING_SECTION_API}: ${error.message}`)
+      );
     } finally {
       setIsCreatingSection(false);
     }
@@ -279,7 +279,7 @@ const QuestionsPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit answers');
+        throw new Error(Constants.ERROR_SUBMITTING_ANSWERS);
       }
 
       const result = await response.json();
@@ -313,7 +313,9 @@ const QuestionsPage: React.FC = () => {
       // Redirect to the review page instead of the results page
       router.push(`/review?sectionId=${currentSection?.id}`);
     } catch (error: any) {
-      logErrorIfNotProduction(error);
+      logErrorIfNotProduction(
+        new Error(`${Constants.ERROR_SUBMITTING_ANSWERS}: ${error.message}`)
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -433,7 +435,7 @@ const QuestionsPage: React.FC = () => {
             ))
           ) : (
             <p className="text-gray-500 dark:text-gray-400 py-2">
-              When you skip a question, it will appear here.
+              {Constants.SIDEBAR_QUESTION_SKIP_INFO}
             </p>
           )}
         </div>
@@ -452,12 +454,12 @@ const QuestionsPage: React.FC = () => {
             disabled={currentQuestionIndex === 0}
             className={`${buttonStyle} ${currentQuestionIndex === 0 ? 'opacity-50 ' : 'hover:bg-gray-700'}`}
           >
-            Previous
+            {Constants.PREVIOUS_QUESTION}
           </button>
           {currentSection.questions &&
           currentQuestionIndex < currentSection.questions.length - 1 ? (
             <button onClick={handleNextQuestion} className={buttonStyle}>
-              Next
+              {Constants.NEXT_QUESTION}
             </button>
           ) : (
             <button
@@ -467,11 +469,11 @@ const QuestionsPage: React.FC = () => {
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Submitting...
+                  <Loader />
+                  {Constants.SUBMITTING}
                 </>
               ) : (
-                'Submit'
+                Constants.SUBMIT
               )}
             </button>
           )}

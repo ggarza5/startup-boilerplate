@@ -4,18 +4,7 @@ import { Section } from '../types'; // Import the Section type
 import NewSectionButton from './NewSectionButton'; // Import the new component
 import { Loader } from '@/components/ui/loader';
 import Link from 'next/link';
-
-interface SidebarProps {
-  onSelectSection: (sectionId: string, sectionName: string) => Promise<void>;
-  onAddSection: (
-    type: string,
-    sectionName: string,
-    category?: string
-  ) => Promise<void>; // Update to include category
-  isCreatingSection: boolean;
-  setIsCreatingSection: (isCreatingSection: boolean) => void;
-}
-
+import * as Constants from '../constants'; // Import constants
 import { useSections } from '@/context/SectionsContext';
 
 interface SidebarProps {
@@ -69,18 +58,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     return (
       <>
-        {Object.entries(sectionsByDate).map(([date, sections]) => (
+        {Object.entries(sectionsByDate).map(([date, dateSections]) => (
           <div key={date} className="mb-4">
             {!isCollapsed && <h3 className="text-gray-400 mb-2">{date}</h3>}
             {isCreatingSection && date === mostRecentDate && (
               <div className="mb-2 p-2 text-gray-500 dark:text-gray-400">
-                Generating...
+                {Constants.GENERATING}
               </div>
             )}
-            {sections.map((section) => {
-              console.log('Rendering section in Sidebar:', section);
+            {dateSections.map((section) => {
               const sectionType = section.section_type;
-              const categoryDisplay = section.category || 'Other';
+              const categoryDisplay =
+                section.category || Constants.OTHER_CATEGORY;
               return (
                 <div
                   key={section.id}
@@ -148,12 +137,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             <>
               <Link href="/progress">
                 <span className="block mb-4 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300">
-                  View Your Progress
+                  {Constants.VIEW_YOUR_PROGRESS}
                 </span>
               </Link>
               <Link href="/category-performance">
                 <span className="block mb-4 p-2 cursor-pointer hover:bg-gray-300 hover:rounded-2xl dark:hover:bg-gray-800 text-gray-800 dark:text-gray-300">
-                  Category Performance
+                  {Constants.CATEGORY_PERFORMANCE}
                 </span>
               </Link>
               {renderSections()}

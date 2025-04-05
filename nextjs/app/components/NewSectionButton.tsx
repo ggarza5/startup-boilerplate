@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import * as Constants from '@/app/constants'; // Import all constants
 
 interface NewSectionButtonProps {
   onAddSection: (
@@ -27,9 +28,9 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({
     setShowReadingSubmenu(false);
     setIsCreatingSection(true);
     const date = new Date();
-    const uniqueId = `${type}-${date.toISOString()}`;
+    const uniqueId = `${type}-${date.toISOString()}`; // Keep initial unique ID for API call
     await onAddSection(type, uniqueId, category);
-    setIsCreatingSection(false);
+    // setIsCreatingSection(false); // Let parent handle this after API call
   };
 
   const handleClickOutside = (event: MouseEvent) => {
@@ -56,42 +57,47 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({
         <i className="fas fa-plus"></i>
       </button>
       {showMenu && (
-        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg">
+        <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-10">
           <button
             onClick={() => setShowMathSubmenu(!showMathSubmenu)}
             className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
-            New Math Section
+            {Constants.NEW_MATH_SECTION}
           </button>
           {showMathSubmenu && (
             <div className="ml-4">
               <button
-                onClick={() => handleAddSection('Math', 'Algebra')}
+                onClick={() => handleAddSection('Math', Constants.ALGEBRA)}
                 className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                Algebra
-              </button>
-              <button
-                onClick={() => handleAddSection('Math', 'Advanced Math')}
-                className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-                Advanced Math
+                {Constants.ALGEBRA}
               </button>
               <button
                 onClick={() =>
-                  handleAddSection('Math', 'Problem-Solving and Data Analysis')
+                  handleAddSection('Math', Constants.ADVANCED_MATH)
                 }
                 className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                Problem-Solving and Data Analysis
+                {Constants.ADVANCED_MATH}
               </button>
               <button
                 onClick={() =>
-                  handleAddSection('Math', 'Geometry and Trigonometry')
+                  handleAddSection(
+                    'Math',
+                    Constants.PROBLEM_SOLVING_DATA_ANALYSIS
+                  )
                 }
                 className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                Geometry and Trigonometry
+                {Constants.PROBLEM_SOLVING_DATA_ANALYSIS}
+              </button>
+              <button
+                onClick={() =>
+                  handleAddSection('Math', Constants.GEOMETRY_TRIGONOMETRY)
+                }
+                className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+              >
+                {Constants.GEOMETRY_TRIGONOMETRY}
               </button>
             </div>
           )}
@@ -99,41 +105,44 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({
             onClick={() => setShowReadingSubmenu(!showReadingSubmenu)}
             className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
-            New Reading Section
+            {Constants.NEW_READING_SECTION}
           </button>
           {showReadingSubmenu && (
             <div className="ml-4">
               <button
                 onClick={() =>
-                  handleAddSection('Reading', 'Information and Ideas')
+                  handleAddSection('Reading', Constants.INFO_IDEAS)
                 }
                 className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                Information and Ideas
+                {Constants.INFO_IDEAS}
               </button>
               <button
                 onClick={() =>
-                  handleAddSection('Reading', 'Craft and Structure')
+                  handleAddSection('Reading', Constants.CRAFT_STRUCTURE)
                 }
                 className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                Craft and Structure
+                {Constants.CRAFT_STRUCTURE}
               </button>
               <button
                 onClick={() =>
-                  handleAddSection('Reading', 'Expression of Ideas')
+                  handleAddSection('Reading', Constants.EXPRESSION_IDEAS)
                 }
                 className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                Expression of Ideas
+                {Constants.EXPRESSION_IDEAS}
               </button>
               <button
                 onClick={() =>
-                  handleAddSection('Reading', 'Standard English Conventions')
+                  handleAddSection(
+                    'Reading',
+                    Constants.STANDARD_ENGLISH_CONVENTIONS
+                  )
                 }
                 className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                Standard English Conventions
+                {Constants.STANDARD_ENGLISH_CONVENTIONS}
               </button>
             </div>
           )}

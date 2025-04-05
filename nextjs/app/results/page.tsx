@@ -19,6 +19,7 @@ import { useUser } from '@/context/UserContext'; // Import useUser
 import { Loader } from '@/components/ui/loader';
 import { calculateScore } from '../utils/helpers';
 import { ProgressButton } from '../components/ProgressButton';
+import * as Constants from '../constants'; // Import constants
 
 const Results: React.FC = () => {
   return (
@@ -73,7 +74,7 @@ const ResultsPage: React.FC = () => {
         const data = await response.json();
         setSections(data);
       } catch (error) {
-        console.error('Error fetching sections:', error);
+        console.error(Constants.ERROR_FETCHING_SECTIONS, error);
       } finally {
         setIsLoading(false);
       }
@@ -97,9 +98,12 @@ const ResultsPage: React.FC = () => {
           setIsLoading(true);
           const response = await fetch(`/api/section/${sectionId}`);
           const data = await response.json();
+          if (!response.ok) {
+            console.error(Constants.ERROR_FETCHING_SECTION, data.error);
+          }
           setCurrentSection(data);
         } catch (error) {
-          console.error('Error fetching section:', error);
+          console.error(Constants.ERROR_FETCHING_SECTION, error);
         } finally {
           setIsLoading(false);
         }
@@ -196,7 +200,7 @@ const ResultsPage: React.FC = () => {
           ) : selectedQuestion ? (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Question Review
+                {Constants.QUESTION_REVIEW_TITLE}
               </h2>
               <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
                 {selectedQuestion.question}
@@ -246,15 +250,15 @@ const ResultsPage: React.FC = () => {
                   Congratulations!
                 </h1>
                 <p className="text-lg text-gray-700 dark:text-gray-300 text-center mb-8 ">
-                  You have completed the section.<br></br>Select a question to
-                  see its explanation.
+                  You have completed the section.<br></br>Select a question
+                  below or click Detailed Review.
                 </p>
                 <div className="flex gap-4 mb-6">
                   <button
                     onClick={handleGoToReview}
                     className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded flex items-center"
                   >
-                    <span className="mr-2">Detailed Review</span>
+                    <span className="mr-2">{Constants.DETAILED_REVIEW}</span>
                     <svg
                       className="w-5 h-5"
                       fill="none"
@@ -273,7 +277,7 @@ const ResultsPage: React.FC = () => {
                 </div>
                 <div className="w-full text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Your Results
+                    {Constants.YOUR_PROGRESS} - Summary
                   </h2>
                   <div className="mt-4">
                     <p className="text-lg text-gray-700 dark:text-gray-300">

@@ -22,6 +22,7 @@ import { Navbar } from '../components/ui/Navbar';
 import Sidebar from '../components/Sidebar';
 import { QuestionsButton } from '../components/QuestionsButton';
 import useFetchUser from '../hooks/useFetchUser';
+import * as Constants from '../constants';
 
 ChartJS.register(
   CategoryScale,
@@ -43,19 +44,18 @@ const ProgressPage: React.FC = () => {
   useEffect(() => {
     const fetchResults = async () => {
       if (user) {
-        console.log('Fetching results for user:', user.id); // Log user ID
         try {
           const response = await fetch(`/api/results?userId=${user.id}`);
           const data = await response.json();
-          console.log('Fetched results:', data); // Log fetched results
+          if (!response.ok) {
+            console.error(Constants.ERROR_FETCHING_RESULTS, data.error);
+          }
           setResults(data);
         } catch (error) {
-          console.error('Error fetching results:', error);
+          console.error(Constants.ERROR_FETCHING_RESULTS, error);
         } finally {
           setLoading(false);
         }
-      } else {
-        console.log('No user found, skipping results fetch.'); // Log if no user
       }
     };
 
@@ -104,7 +104,6 @@ const ProgressPage: React.FC = () => {
     await router.push(`/questions?sectionId=${sectionId}`);
   };
 
-  // Handle adding a new section from the sidebar
   const handleAddSection = async (
     type: string,
     sectionName: string,
@@ -131,7 +130,7 @@ const ProgressPage: React.FC = () => {
           setIsCreatingSection={setIsCreatingSection}
         />
         <div className="container mx-auto p-4 overflow-y-scroll h-vh-minus-navbar">
-          <h1 className="text-2xl font-bold mb-4">Your Progress</h1>
+          <h1 className="text-2xl font-bold mb-4">{Constants.YOUR_PROGRESS}</h1>
           <div className="mb-8">
             <Line data={chartData} options={chartOptions} />
           </div>
@@ -143,7 +142,6 @@ const ProgressPage: React.FC = () => {
                   <th className="py-2 px-4 border-b">Score</th>
                 </tr>
               </thead>
-              {/* center text */}
               <tbody className="text-center">
                 {results.map((result) => (
                   <tr
@@ -151,7 +149,7 @@ const ProgressPage: React.FC = () => {
                     className="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                     onClick={() =>
                       router.push(`/questions?sectionId=${result.section_id}`)
-                    } // Route to section on row click
+                    }
                   >
                     <td className="py-2 px-4 border-b">
                       {new Date(result.created_at).toLocaleDateString()}
@@ -159,7 +157,6 @@ const ProgressPage: React.FC = () => {
                     <td className="py-2 px-4 border-b">
                       {result.score.toFixed(2)}%
                     </td>
-                    {/* Removed Actions column */}
                   </tr>
                 ))}
               </tbody>
