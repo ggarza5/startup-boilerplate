@@ -183,9 +183,8 @@ const QuestionsPage: React.FC = () => {
     sectionName?: string
   ) => {
     console.log(
-      `QuestionsPage: handleSelectSection called with id: ${sectionId}`
-    ); // Simplified log
-    // Only set loading specific to section fetch, not global context loading
+      `QuestionsPage: handleSelectSection START - Setting isFetchingSection = true for id: ${sectionId}`
+    );
     setIsFetchingSection(true);
     setUnansweredQuestions(new Set());
     setUserAnswers({});
@@ -216,6 +215,9 @@ const QuestionsPage: React.FC = () => {
       );
       setCurrentSection(null);
     } finally {
+      console.log(
+        `QuestionsPage: handleSelectSection FINALLY - Setting isFetchingSection = false for id: ${sectionId}`
+      );
       setIsFetchingSection(false); // Clear section-specific loading state
     }
   };
@@ -541,11 +543,12 @@ const QuestionsPage: React.FC = () => {
           </Button>
         ) : (
           <Button
+            variant="default"
             onClick={handleNextQuestion}
-            className="bg-brand-blue-hex dark:bg-brand-blue-hex hover:opacity-80 dark:hover:opacity-90 text-white dark:text-white font-bold flex items-center gap-2 transition-opacity duration-150 h-10 px-4 py-2 rounded-md text-sm justify-center whitespace-nowrap"
+            className="bg-brand-blue-hex dark:bg-brand-blue-hex text-white dark:text-white hover:opacity-90 dark:hover:opacity-90 focus-visible:ring-brand-blue-hex"
           >
             {Constants.NEXT_QUESTION}
-            <i className="fas fa-arrow-right w-3 h-3"></i>
+            <i className="fas fa-arrow-right w-3 h-3 ml-2"></i>
           </Button>
         )}
       </div>
@@ -689,18 +692,23 @@ const QuestionsPage: React.FC = () => {
               {/* == Top Fixed Part == */}
               <div>
                 {/* Display Section Title and Category */}
-                {currentSection && (
-                  <div className="mb-6 pb-4 border-b border-border/60 dark:border-border/40">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                      {currentSection.name || 'Loading Title...'}
-                    </h1>
-                    <p className="text-base text-gray-600 dark:text-gray-400">
-                      {currentSection.section_type} -{' '}
-                      {currentSection.category || Constants.OTHER_CATEGORY}
-                    </p>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    {currentSection.name || 'Loading Title...'}
+                  </h1>
+                  {/* Replace temporary text with Loader component */}
+                  {isFetchingSection && (
+                    <Loader className="w-5 h-5 text-brand-pink dark:text-brand-pink" />
+                  )}
+                </div>
 
+                {/* Display category only if not fetching and section exists */}
+                {currentSection && (
+                  <p className="text-base text-gray-600 dark:text-gray-400 mb-6 pb-4 border-b border-border/60 dark:border-border/40">
+                    {currentSection.section_type} -{' '}
+                    {currentSection.category || Constants.OTHER_CATEGORY}
+                  </p>
+                )}
                 {/* Timer Component */}
                 <Timer
                   startTimer={startTimer}
