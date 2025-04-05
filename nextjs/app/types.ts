@@ -1,4 +1,3 @@
-
 export interface Question {
   id: string;
   section_id: string;
@@ -13,6 +12,7 @@ export interface Section {
   id: string;
   name: string;
   type: string;
+  category?: string;
   questions: Question[];
   createdAt?: string;
 }

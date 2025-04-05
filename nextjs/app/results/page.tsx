@@ -157,10 +157,21 @@ const ResultsPage: React.FC = () => {
   };
 
   // Handle adding a new section from the sidebar
-  const handleAddSection = async (type: string, sectionName: string) => {
-    router.push(
-      `/questions?addSection=true&type=${type}&sectionName=${sectionName}`
-    );
+  const handleAddSection = async (
+    type: string,
+    sectionName: string,
+    category?: string
+  ) => {
+    let url = `/questions?addSection=true&type=${type}&sectionName=${sectionName}`;
+    if (category) {
+      url += `&category=${encodeURIComponent(category)}`;
+    }
+    router.push(url);
+  };
+
+  // Handle going to the detailed review page
+  const handleGoToReview = () => {
+    router.push(`/review?sectionId=${sectionId}`);
   };
 
   return (
@@ -234,6 +245,28 @@ const ResultsPage: React.FC = () => {
                   You have completed the section.<br></br>Select a question to
                   see its explanation.
                 </p>
+                <div className="flex gap-4 mb-6">
+                  <button
+                    onClick={handleGoToReview}
+                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded flex items-center"
+                  >
+                    <span className="mr-2">Detailed Review</span>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                  <ProgressButton />
+                </div>
                 <div className="w-full text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     Your Results
@@ -295,7 +328,6 @@ const ResultsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <ProgressButton />
             </div>
           )}
         </div>

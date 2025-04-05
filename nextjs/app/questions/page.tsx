@@ -241,9 +241,33 @@ const QuestionsPage: React.FC = () => {
       const result = await response.json();
       console.log('Submission result:', result);
 
-      router.push(
-        `/results?userAnswers=${encodeURIComponent(JSON.stringify(userAnswers))}&sectionId=${currentSection?.id}`
-      );
+      // Store user answers in Supabase for each question
+      if (currentSection && currentSection.questions) {
+        const answersPromises = currentSection.questions.map(
+          (question, index) => {
+            if (userAnswers[index]) {
+              return fetch('/api/sectionSession/answer', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  userId: user?.id,
+                  sectionId: currentSection.id,
+                  questionId: question.id,
+                  answer: userAnswers[index]
+                })
+              });
+            }
+            return Promise.resolve();
+          }
+        );
+
+        await Promise.all(answersPromises);
+      }
+
+      // Redirect to the review page instead of the results page
+      router.push(`/review?sectionId=${currentSection?.id}`);
     } catch (error: any) {
       logErrorIfNotProduction(error);
     } finally {
