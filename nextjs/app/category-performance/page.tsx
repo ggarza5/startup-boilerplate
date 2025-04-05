@@ -138,6 +138,9 @@ const CategoryPerformancePage: React.FC = () => {
     sectionName: string,
     category?: string
   ) => {
+    console.log(
+      `CategoryPerformancePage: handleAddSection called with type: ${type}, sectionName: ${sectionName}, category: ${category}`
+    );
     let url = `/questions?addSection=true&type=${type}&sectionName=${sectionName}`;
     if (category) {
       url += `&category=${encodeURIComponent(category)}`;

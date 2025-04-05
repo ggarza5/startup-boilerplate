@@ -19,6 +19,9 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleAddSection = async (type: string, category: string) => {
+    console.log(
+      `NewSectionButton: handleAddSection called with type: ${type}, category: ${category}`
+    );
     setShowMenu(false);
     setShowMathSubmenu(false);
     setShowReadingSubmenu(false);

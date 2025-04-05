@@ -152,37 +152,46 @@ const QuestionsPage: React.FC = () => {
   };
 
   // Function to handle adding a new section
-  const handleAddSection = async (type: string, sectionName: string) => {
+  const handleAddSection = async (
+    type: string,
+    sectionName: string,
+    category?: string
+  ) => {
+    console.log(
+      `QuestionsPage: handleAddSection called with type: ${type}, sectionName: ${sectionName}, category: ${category}`
+    );
+
+    // Check if section already exists (this logic might need adjustment if name isn't unique enough)
     const existingSection = sections.find(
       (section: Section) => section.name === sectionName
     );
     if (existingSection) {
-      setCurrentSection(existingSection);
-      setCurrentQuestionIndex(0);
-      setStartTimer(true);
+      // If exists, navigate to it (optional: update URL with category?)
       await handleSelectSection(sectionName, existingSection.id);
       return;
     }
 
+    // If it doesn't exist, generate it
     setIsCreatingSection(true);
     try {
       const response = await fetch('/api/ai/generateSection', {
         method: 'POST',
-        body: JSON.stringify({ name: sectionName, type: type }),
+        body: JSON.stringify({
+          name: sectionName,
+          type: type,
+          category: category
+        }),
         headers: {
           'Content-Type': 'application/json'
         }
       });
       const data = await response.json();
-      const newSection = {
-        id: data.sectionId,
-        name: data.name,
-        type: data.section_type,
-        questions: data.questions,
-        created_at: data.created_at
-      };
-      // Update sections by refetching
+
+      console.log('generateSection API response:', data);
+
+      // Update sections by refetching (essential after adding)
       await fetchSections();
+      // Select the newly created section
       await handleSelectSection(data.name, data.sectionId);
     } catch (error: any) {
       logErrorIfNotProduction(error);

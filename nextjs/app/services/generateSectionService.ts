@@ -28,12 +28,15 @@ export const generateSection = async (
   category?: string
 ) => {
   console.log(
-    `generating a ${sectionType} section with category: ${category || 'none'}`
+    `generateSectionService: generating a ${sectionType} section with category: ${category}`
   );
 
   let prompt;
 
   if (category) {
+    console.log(
+      `generateSectionService: Using category in prompt: ${category}`
+    );
     prompt = `Generate a 10 question ${sectionType} SAT question section focused on the category "${category}" with questions, answers, and explanations that address each choice. 
     Return in json format. I need these fields: question, answer_choices, answer, explanation. 
     Answer_choices should be an array of strings, others should be string. 
@@ -63,6 +66,9 @@ export const generateSection = async (
   }
 
   // Create a new section in Supabase
+  console.log(
+    `generateSectionService: Inserting into Supabase with name: ${sectionName}, type: ${sectionType}, category: ${category}`
+  );
   const { data: sectionData, error: sectionError } = await supabase
     .from('sections')
     .insert([

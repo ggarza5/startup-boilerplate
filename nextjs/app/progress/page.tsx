@@ -102,10 +102,19 @@ const ProgressPage: React.FC = () => {
   };
 
   // Handle adding a new section from the sidebar
-  const handleAddSection = async (type: string, sectionName: string) => {
-    router.push(
-      `/questions?addSection=true&type=${type}&sectionName=${sectionName}`
+  const handleAddSection = async (
+    type: string,
+    sectionName: string,
+    category?: string
+  ) => {
+    console.log(
+      `ProgressPage: handleAddSection called with type: ${type}, sectionName: ${sectionName}, category: ${category}`
     );
+    let url = `/questions?addSection=true&type=${type}&sectionName=${sectionName}`;
+    if (category) {
+      url += `&category=${encodeURIComponent(category)}`;
+    }
+    router.push(url);
   };
 
   return (
