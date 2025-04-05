@@ -17,7 +17,7 @@ interface SidebarProps {
   ) => Promise<void>; // Update to include category
   isCreatingSection: boolean;
   setIsCreatingSection: (isCreatingSection: boolean) => void;
-  activeSectionId: string | null; // NEW: Receive active ID as prop
+  activeSectionId?: string | null; // NEW: Receive active ID as prop
 }
 
 // Helper function to get initials for shorthand
