@@ -20,17 +20,13 @@ const NewSectionButton: React.FC<NewSectionButtonProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleAddSection = async (type: string, category: string) => {
-    console.log(
-      `NewSectionButton: handleAddSection called with type: ${type}, category: ${category}`
-    );
     setShowMenu(false);
     setShowMathSubmenu(false);
     setShowReadingSubmenu(false);
     setIsCreatingSection(true);
     const date = new Date();
-    const uniqueId = `${type}-${date.toISOString()}`; // Keep initial unique ID for API call
+    const uniqueId = `${type}-${date.toISOString()}`;
     await onAddSection(type, uniqueId, category);
-    // setIsCreatingSection(false); // Let parent handle this after API call
   };
 
   const handleClickOutside = (event: MouseEvent) => {

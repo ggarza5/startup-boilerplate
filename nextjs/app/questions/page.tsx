@@ -19,6 +19,8 @@ import {
 import { useSections } from '@/context/SectionsContext';
 import { ProgressButton } from '../components/ProgressButton';
 import * as Constants from '../constants'; // Import constants
+import RecentSectionCard from '../components/RecentSectionCard'; // Import the new card
+import { Button } from '@/components/ui/button';
 
 const IndexPage: React.FC = () => {
   return (
@@ -57,6 +59,8 @@ const QuestionsPage: React.FC = () => {
     Record<number, string>
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [generationMessages, setGenerationMessages] = useState<string[]>([]); // State for messages
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0); // State for current message index
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -93,9 +97,6 @@ const QuestionsPage: React.FC = () => {
   // Handle adding a new section based on query parameters
   useEffect(() => {
     if (queryAddSection === 'true' && queryType && querySectionName) {
-      console.log(
-        `QuestionsPage useEffect: Triggering addSection with type: ${queryType}, name: ${querySectionName}, category: ${queryCategory}`
-      );
       handleAddSection(queryType, querySectionName, queryCategory || undefined);
       router.replace('/questions', undefined);
     }
@@ -133,38 +134,89 @@ const QuestionsPage: React.FC = () => {
     };
   }, [currentQuestionIndex, currentSection]);
 
+  // Define the sequence of messages
+  const GENERATION_FEEDBACK_MESSAGES = [
+    'Asking the SAT Practice Bot...',
+    'Generating unique SAT questions just for you...',
+    'Tailoring explanations...',
+    'Almost there, preparing your section...'
+  ];
+
+  // Effect to cycle through messages during generation
+  useEffect(() => {
+    let messageTimer: NodeJS.Timeout | null = null;
+
+    if (isCreatingSection) {
+      setGenerationMessages(GENERATION_FEEDBACK_MESSAGES);
+      setCurrentMessageIndex(0); // Start from the first message
+
+      const showNextMessage = (index: number) => {
+        if (index < GENERATION_FEEDBACK_MESSAGES.length - 1) {
+          messageTimer = setTimeout(() => {
+            setCurrentMessageIndex(index + 1);
+            showNextMessage(index + 1);
+          }, 4500); // Increased delay to 4.5 seconds
+        }
+      };
+
+      // Set the first message immediately
+      setCurrentMessageIndex(0);
+      // Start timeout chain for the next message
+      showNextMessage(0);
+    } else {
+      // Reset messages when not creating
+      setGenerationMessages([]);
+      setCurrentMessageIndex(0);
+    }
+
+    // Cleanup function
+    return () => {
+      if (messageTimer) {
+        clearTimeout(messageTimer);
+      }
+    };
+  }, [isCreatingSection]);
+
   // Function to handle section selection
   const handleSelectSection = async (
-    sectionId: string, // ID first
-    sectionName?: string // Name is now optional title
+    sectionId: string,
+    sectionName?: string
   ) => {
     console.log(
-      `QuestionsPage: handleSelectSection called with id: ${sectionId}, name: ${sectionName}`
-    );
-    setLoading(true);
+      `QuestionsPage: handleSelectSection called with id: ${sectionId}`
+    ); // Simplified log
+    // Only set loading specific to section fetch, not global context loading
     setIsFetchingSection(true);
     setUnansweredQuestions(new Set());
     setUserAnswers({});
+    setStartTimer(false); // Reset timer before fetch
+    setCurrentQuestionIndex(0); // Reset index
+
     try {
-      // Always fetch by ID for accuracy
       const response = await fetch(`/api/section/${sectionId}`);
       const data = await response.json();
+
       if (!response.ok || !data) {
         throw new Error(data.error || Constants.ERROR_FETCHING_SECTION);
       }
-      setCurrentQuestionIndex(0);
+
+      // Set the fetched section data
       setCurrentSection(data);
-      setStartTimer(true);
-      // Update URL to reflect the selected section ID
-      router.push(`/questions?sectionId=${sectionId}`, undefined);
+      setStartTimer(true); // Start timer only after data is ready
+
+      // Update URL without full reload, replace state if possible
+      const currentPath = window.location.pathname + window.location.search;
+      const newUrl = `/questions?sectionId=${sectionId}`;
+      if (currentPath !== newUrl) {
+        router.replace(newUrl, undefined); // Use replace to avoid history spam
+      }
     } catch (error: any) {
       logErrorIfNotProduction(
         new Error(`${Constants.ERROR_FETCHING_SECTION}: ${error.message}`)
       );
-      setCurrentSection(null); // Clear section on error
+      setCurrentSection(null);
     } finally {
-      setLoading(false);
-      setIsFetchingSection(false);
+      setIsFetchingSection(false); // Clear section-specific loading state
     }
   };
 
@@ -174,30 +226,16 @@ const QuestionsPage: React.FC = () => {
     sectionName: string, // This is the unique timestamped name initially
     category?: string
   ) => {
-    console.log(
-      `QuestionsPage: handleAddSection called with type: ${type}, sectionName (initial): ${sectionName}, category: ${category}`
-    );
-
-    // Don't check existing based on timestamped name anymore
-    // const existingSection = sections.find(
-    //   (section: Section) => section.name === sectionName
-    // );
-    // if (existingSection) {
-    //   await handleSelectSection(existingSection.id, existingSection.name);
-    //   return;
-    // }
-
-    setIsCreatingSection(true);
+    setIsCreatingSection(true); // Set loading true at the start
     let newSectionId: string | null = null;
     let newSectionTitle: string | null = null;
 
     try {
       const requestBody = {
-        name: sectionName, // Pass the initial timestamped name to API
+        name: sectionName,
         type: type,
         category: category
       };
-      console.log('QuestionsPage: Sending to API:', requestBody);
 
       const response = await fetch('/api/ai/generateSection', {
         method: 'POST',
@@ -205,34 +243,38 @@ const QuestionsPage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' }
       });
       const data = await response.json();
-      console.log('generateSection API response:', data);
 
       if (response.ok && data.sectionId) {
         newSectionId = data.sectionId;
-        newSectionTitle = data.name; // Get the actual title used
+        newSectionTitle = data.name;
 
-        // Refetch sections via context
-        await fetchSections();
+        // Refetch sections via context - DO NOT show global loader
+        await fetchSections({ showLoader: false }); // Pass option here
 
-        // Add a check to ensure newSectionId is a string before calling
+        // Now that context should be updated, clear generating state
+        setIsCreatingSection(false);
+
+        // Select the new section using its ID and actual title
         if (newSectionId) {
-          // Select the new section using its ID and actual title
           await handleSelectSection(newSectionId, newSectionTitle || undefined);
         } else {
           console.error(Constants.ERROR_SECTION_ID_NULL);
         }
       } else {
+        // Handle API error
         const errorMsg = data.error || Constants.ERROR_UNKNOWN;
         console.error(`${Constants.ERROR_CREATING_SECTION_API}:`, errorMsg);
         logErrorIfNotProduction(new Error(errorMsg));
+        setIsCreatingSection(false); // Also clear loading on error
       }
     } catch (error: any) {
+      // Handle fetch error
       logErrorIfNotProduction(
         new Error(`${Constants.ERROR_CREATING_SECTION_API}: ${error.message}`)
       );
-    } finally {
-      setIsCreatingSection(false);
+      setIsCreatingSection(false); // Clear loading on error
     }
+    // Removed finally block as setIsCreatingSection is handled in try/catch
   };
 
   // Function to handle submitting answers
@@ -283,7 +325,6 @@ const QuestionsPage: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log('Submission result:', result);
 
       // Store user answers in Supabase for each question
       if (currentSection && currentSection.questions) {
@@ -386,55 +427,67 @@ const QuestionsPage: React.FC = () => {
 
   // Function to reset the selected answer for the current question
   const resetSelectedAnswer = () => {
-    const radios = document.getElementsByName(
-      `question-${currentQuestionIndex}`
-    );
-    radios.forEach((radio) => {
-      (radio as HTMLInputElement).checked = false;
-    });
+    // No need to manually reset radios if using controlled components properly
+    // setSelectedAnswerState((prev) => ({ ...prev, [currentQuestionIndex]: null }));
   };
 
   const handleAnswerSelect = (index: number, value: string) => {
-    console.log('handleAnswerSelect', index, value);
-
-    // Update the selected answer state for the specific question index
+    // --- Simplified: Only update state ---
+    // 1. Update states
     setSelectedAnswerState((prev) => ({ ...prev, [index]: value }));
     setUserAnswers((prev) => ({ ...prev, [index]: value }));
 
-    // If the selected answer is the same as the current selected answer for this specific question
-    if (selectedAnswerState[index] === value) {
-      // Check if we're on the last question
-      if (
+    // 2. Update unanswered set immediately
+    setUnansweredQuestions((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(index); // Remove from unanswered
+      return newSet;
+    });
+    // --- Removed next/submit logic ---
+  };
+
+  // --- NEW: Handler for double-click ---
+  const handleDoubleClickAnswer = (index: number, value: string) => {
+    // Check if the double-clicked value is the currently selected answer
+    // AND if the interaction is for the currently displayed question
+    if (
+      selectedAnswerState[index] === value &&
+      index === currentQuestionIndex
+    ) {
+      // Determine if it's the last question
+      const isLastQuestion =
         currentSection &&
         currentSection.questions &&
-        currentQuestionIndex === currentSection.questions.length - 1
-      ) {
+        currentQuestionIndex === currentSection.questions.length - 1;
+
+      if (isLastQuestion) {
         handleSubmitAnswers();
       } else {
         handleNextQuestion();
       }
     }
+    // If it's not a double-click on the currently selected answer, do nothing.
   };
 
   const renderUnansweredQuestions = () => {
     return (
-      <div className="mt-4">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-          Unanswered Questions:
+      <div className="mt-6 pt-6 border-t border-border/60 max-h-36 overflow-y-auto scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark pr-2">
+        <h3 className="text-base font-semibold text-foreground/80 mb-3 sticky top-0 py-1">
+          Unanswered Questions
         </h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 h-8">
           {unansweredQuestions.size > 0 ? (
             Array.from(unansweredQuestions).map((index) => (
               <button
                 key={index}
                 onClick={() => handleGoToQuestion(index)}
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                className="text-sm bg-muted hover:bg-accent text-muted-foreground hover:text-accent-foreground font-medium py-1.5 px-3 rounded-md transition-colors duration-150 border border-border"
               >
-                Question {index + 1}
+                Q {index + 1}
               </button>
             ))
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 py-2">
+            <p className="text-sm text-muted-foreground py-1 h-8">
               {Constants.SIDEBAR_QUESTION_SKIP_INFO}
             </p>
           )}
@@ -443,50 +496,67 @@ const QuestionsPage: React.FC = () => {
     );
   };
 
-  const buttonStyle = 'bg-gray-500 text-white font-bold py-2 px-4 rounded';
-
+  // Consistent button styling using buttonVariants from shadcn/ui
+  // (Assuming you have Button component setup)
   const renderButtons = () => {
-    if (currentSection)
-      return (
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={handlePreviousQuestion}
-            disabled={currentQuestionIndex === 0}
-            className={`${buttonStyle} ${currentQuestionIndex === 0 ? 'opacity-50 ' : 'hover:bg-gray-700'}`}
+    if (!currentSection || !currentSection.questions) return null;
+
+    const questionCount = currentSection.questions.length;
+    const isLastQuestion = currentQuestionIndex === questionCount - 1;
+
+    // --- Debugging Log ---
+    console.log(
+      `renderButtons: index=${currentQuestionIndex}, count=${questionCount}, isLast=${isLastQuestion}`
+    );
+    // --- End Debugging Log ---
+
+    return (
+      <div className="flex justify-between mt-6 pt-6 border-t border-border/60">
+        <Button
+          variant="outline"
+          onClick={handlePreviousQuestion}
+          disabled={currentQuestionIndex === 0}
+          className={`flex items-center gap-2 ${currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <i className="fas fa-arrow-left w-3 h-3"></i>
+          {Constants.PREVIOUS_QUESTION}
+        </Button>
+        {isLastQuestion ? (
+          <Button
+            onClick={handleSubmitAnswers}
+            disabled={isSubmitting}
+            className="bg-brand-green hover:bg-brand-green/90 text-white font-bold flex items-center gap-2"
           >
-            {Constants.PREVIOUS_QUESTION}
-          </button>
-          {currentSection.questions &&
-          currentQuestionIndex < currentSection.questions.length - 1 ? (
-            <button onClick={handleNextQuestion} className={buttonStyle}>
-              {Constants.NEXT_QUESTION}
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmitAnswers}
-              disabled={isSubmitting}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader />
-                  {Constants.SUBMITTING}
-                </>
-              ) : (
-                Constants.SUBMIT
-              )}
-            </button>
-          )}
-        </div>
-      );
-    else return null;
+            {isSubmitting ? (
+              <>
+                <Loader className="w-4 h-4" />
+                {Constants.SUBMITTING}
+              </>
+            ) : (
+              <>
+                {Constants.SUBMIT}
+                <i className="fas fa-check w-3 h-3"></i>
+              </>
+            )}
+          </Button>
+        ) : (
+          <Button
+            onClick={handleNextQuestion}
+            className="bg-brand-blue-hex dark:bg-brand-blue-hex hover:opacity-80 dark:hover:opacity-90 text-white dark:text-white font-bold flex items-center gap-2 transition-opacity duration-150 h-10 px-4 py-2 rounded-md text-sm justify-center whitespace-nowrap"
+          >
+            {Constants.NEXT_QUESTION}
+            <i className="fas fa-arrow-right w-3 h-3"></i>
+          </Button>
+        )}
+      </div>
+    );
   };
 
   const renderSection = () => {
     if (currentSection)
       return (
         <div className="p-6 rounded-lg shadow-md flex flex-col justify-between h-full">
-          <Timer startTimer={startTimer} />
+          <Timer startTimer={startTimer} resetKey={currentSection?.id || 0} />
           <div
             className="flex-grow mb-4"
             style={{ width: '600px', overflowX: 'auto' }}
@@ -500,7 +570,10 @@ const QuestionsPage: React.FC = () => {
                   question={currentSection.questions[currentQuestionIndex]}
                   currentQuestionIndex={currentQuestionIndex}
                   handleAnswerSelect={handleAnswerSelect}
-                  selectedAnswer={selectedAnswerState[currentQuestionIndex]}
+                  handleDoubleClickAnswer={handleDoubleClickAnswer}
+                  selectedAnswer={
+                    selectedAnswerState[currentQuestionIndex] || null
+                  }
                 />
               )}
           </div>
@@ -573,20 +646,124 @@ const QuestionsPage: React.FC = () => {
     }
   };
 
+  // Prepare recent sections for the welcome screen
+  const recentSections = [...sections] // Create a copy to sort
+    .filter((section) => section.created_at) // Ensure created_at exists
+    .sort((a, b) => {
+      // Add checks for created_at existence
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA; // Most recent first
+    })
+    .slice(0, 4); // Take the top 4 most recent
+
+  if (loading || user === null || isLoadingSections) {
+    return <Loader className="h-screen" />;
+  }
+
   return (
     <div className="flex flex-col h-screen">
       <Navbar user={user} />
-      <div className="flex grow bg-muted/40">
+      <div className="flex bg-muted/40 flex-1 overflow-hidden">
         <Sidebar
           onSelectSection={handleSelectSection}
           onAddSection={handleAddSection}
           isCreatingSection={isCreatingSection}
           setIsCreatingSection={setIsCreatingSection}
         />
-        <div className="flex grow flex-col p-4">
-          {loading || isFetchingSection || isCreatingSection
-            ? renderLoaders()
-            : renderSection()}
+        <div className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto h-vh-minus-navbar scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
+          {isCreatingSection ? (
+            // --- Generation Message View ---
+            <div className="flex flex-col justify-center items-center h-full text-center">
+              <Loader />
+              {generationMessages.length > 0 &&
+                currentMessageIndex < generationMessages.length && ( // Check index bounds
+                  <p className="ml-4 text-lg mt-4 text-gray-700 dark:text-gray-300 animate-pulse">
+                    {generationMessages[currentMessageIndex]}
+                  </p>
+                )}
+            </div>
+          ) : currentSection ? (
+            // --- Active Section View --- Apply flex column and height here
+            <div className="w-full max-w-3xl mx-auto flex flex-col h-full">
+              {/* == Top Fixed Part == */}
+              <div>
+                {/* Display Section Title and Category */}
+                {currentSection && (
+                  <div className="mb-6 pb-4 border-b border-border/60 dark:border-border/40">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                      {currentSection.name || 'Loading Title...'}
+                    </h1>
+                    <p className="text-base text-gray-600 dark:text-gray-400">
+                      {currentSection.section_type} -{' '}
+                      {currentSection.category || Constants.OTHER_CATEGORY}
+                    </p>
+                  </div>
+                )}
+
+                {/* Timer Component */}
+                <Timer
+                  startTimer={startTimer}
+                  resetKey={currentSection?.id || 0}
+                />
+              </div>
+
+              {/* == Scrollable Question Area == */}
+              <div className="flex-grow overflow-y-auto mb-4 scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark pr-2">
+                {/* Question Component */}
+                {currentSection.questions &&
+                currentSection.questions[currentQuestionIndex] ? (
+                  <QuestionComponent
+                    question={currentSection.questions[currentQuestionIndex]}
+                    currentQuestionIndex={currentQuestionIndex}
+                    handleAnswerSelect={handleAnswerSelect}
+                    handleDoubleClickAnswer={handleDoubleClickAnswer}
+                    selectedAnswer={
+                      selectedAnswerState[currentQuestionIndex] || null
+                    }
+                  />
+                ) : (
+                  <p>Loading question or question not found...</p>
+                )}
+              </div>
+
+              {/* == Bottom Fixed Part == */}
+              <div>
+                {/* Navigation Buttons */}
+                {renderButtons()}
+
+                {/* Unanswered Questions List */}
+                {renderUnansweredQuestions()}
+              </div>
+            </div>
+          ) : (
+            // --- Initial/Empty State View ---
+            <div className="flex flex-col justify-center items-center h-full text-center px-4">
+              <h1 className="text-3xl font-bold mb-4 text-foreground">
+                {Constants.WELCOME}
+              </h1>
+              <p className="text-lg text-muted-foreground text-center mb-6 max-w-md">
+                {Constants.WELCOME_PROMPT}
+              </p>
+              {/* Recent Sections Area */}
+              {recentSections.length > 0 && (
+                <div className="mt-8 w-full max-w-2xl">
+                  <h2 className="text-xl font-semibold mb-4 text-foreground/90">
+                    Recent Sections
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 justify-items-center">
+                    {recentSections.map((section) => (
+                      <RecentSectionCard
+                        key={section.id}
+                        section={section}
+                        onSelect={handleSelectSection}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

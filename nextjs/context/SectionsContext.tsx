@@ -6,7 +6,7 @@ import { logErrorIfNotProduction } from '@/app/utils/helpers';
 
 interface SectionsContextProps {
   sections: Section[];
-  fetchSections: () => void;
+  fetchSections: (options?: { showLoader?: boolean }) => Promise<void>;
   isLoadingSections: boolean;
 }
 
@@ -20,21 +20,33 @@ export const SectionsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [sections, setSections] = useState<Section[]>([]);
   const [isLoadingSections, setIsLoadingSections] = useState<boolean>(false);
 
-  const fetchSections = async () => {
-    setIsLoadingSections(true);
+  const fetchSections = async (options?: { showLoader?: boolean }) => {
+    const showLoader = options?.showLoader ?? false;
+    console.log(
+      `SectionsContext: fetchSections CALLED (showLoader: ${showLoader})`
+    );
+
+    if (showLoader) {
+      setIsLoadingSections(true);
+    }
+
     try {
       const response = await fetch('/api/sections');
       const data = await response.json();
       setSections(data);
     } catch (error: any) {
       logErrorIfNotProduction(error);
+      setSections([]);
     } finally {
       setIsLoadingSections(false);
     }
   };
 
   useEffect(() => {
-    fetchSections();
+    console.log(
+      'SectionsContext: useEffect[] mount - calling fetchSections (with loader)'
+    );
+    fetchSections({ showLoader: true });
   }, []);
 
   return (

@@ -1,5 +1,5 @@
 // General UI Text
-export const GENERATING = 'Generating...';
+export const GENERATING = 'Generating';
 export const SUBMITTING = 'Submitting...';
 export const SUBMIT = 'Submit';
 export const NEXT_QUESTION = 'Next';

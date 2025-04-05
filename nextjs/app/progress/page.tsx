@@ -56,9 +56,10 @@ const ProgressPage: React.FC = () => {
         } finally {
           setLoading(false);
         }
+      } else {
+        // Removed log
       }
     };
-
     fetchResults();
   }, [user]);
 
@@ -98,9 +99,7 @@ const ProgressPage: React.FC = () => {
     sectionId: string,
     sectionName?: string
   ) => {
-    console.log(
-      `ProgressPage: handleSelectSection called with id: ${sectionId}, name: ${sectionName}`
-    );
+    // console.log(`ProgressPage: handleSelectSection called with id: ${sectionId}, name: ${sectionName}`); // Removed log
     await router.push(`/questions?sectionId=${sectionId}`);
   };
 
@@ -109,9 +108,7 @@ const ProgressPage: React.FC = () => {
     sectionName: string,
     category?: string
   ) => {
-    console.log(
-      `ProgressPage: handleAddSection called with type: ${type}, sectionName: ${sectionName}, category: ${category}`
-    );
+    // console.log(`ProgressPage: handleAddSection called with type: ${type}, sectionName: ${sectionName}, category: ${category}`); // Removed log
     let url = `/questions?addSection=true&type=${type}&sectionName=${sectionName}`;
     if (category) {
       url += `&category=${encodeURIComponent(category)}`;

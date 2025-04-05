@@ -37,17 +37,10 @@ export const generateSection = async (
   sectionType: string,
   category?: string
 ) => {
-  console.log(
-    `generateSectionService: generating a ${sectionType} section with category: ${category}`
-  );
-
   let prompt;
   const baseInstructions = `${OPENAI_RESPONSE_FORMAT_INSTRUCTIONS} ${OPENAI_QUESTION_FORMAT_INSTRUCTIONS} ${OPENAI_PASSAGE_INSTRUCTIONS} ${OPENAI_TITLE_INSTRUCTIONS}`;
 
   if (category) {
-    console.log(
-      `generateSectionService: Using category in prompt: ${category}`
-    );
     prompt = `Generate a 10 question ${sectionType} SAT question section focused on the category "${category}". 
     ${baseInstructions}
     All questions should be appropriate for the ${category} category of the ${sectionType} section of the SAT.`;
@@ -62,7 +55,7 @@ export const generateSection = async (
 
   // Call OpenAI API to generate the section
   const completion: any = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'o3-mini-2025-01-31',
     messages: [{ role: 'user', content: prompt }],
     response_format: zodResponseFormat(SectionSchema, 'section'),
     reasoning_effort: 'high'
@@ -84,9 +77,6 @@ export const generateSection = async (
   }
 
   // Create a new section in Supabase
-  console.log(
-    `generateSectionService: Inserting into Supabase with name: ${generatedTitle || sectionName}, type: ${sectionType}, category: ${category}`
-  );
   const { data: sectionData, error: sectionError } = await supabase
     .from('sections')
     .insert([
@@ -100,6 +90,7 @@ export const generateSection = async (
     .single();
 
   if (sectionError) {
+    console.error('DB Insert Error:', sectionError);
     throw new Error(`${ERROR_SETTING_SECTION_DB}: ${sectionError.message}`);
   }
 

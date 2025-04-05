@@ -136,9 +136,6 @@ const CategoryPerformancePage: React.FC = () => {
     sectionId: string,
     sectionName?: string
   ) => {
-    console.log(
-      `CategoryPerformancePage: handleSelectSection called with id: ${sectionId}, name: ${sectionName}`
-    );
     await router.push(`/questions?sectionId=${sectionId}`);
   };
 
@@ -147,9 +144,6 @@ const CategoryPerformancePage: React.FC = () => {
     sectionName: string,
     category?: string
   ) => {
-    console.log(
-      `CategoryPerformancePage: handleAddSection called with type: ${type}, sectionName: ${sectionName}, category: ${category}`
-    );
     let url = `/questions?addSection=true&type=${type}&sectionName=${sectionName}`;
     if (category) {
       url += `&category=${encodeURIComponent(category)}`;
