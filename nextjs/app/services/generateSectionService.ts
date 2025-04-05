@@ -56,9 +56,10 @@ export const generateSection = async (
 
   // Call OpenAI API to generate the section
   const completion: any = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'o3-mini-2025-01-31',
     messages: [{ role: 'user', content: prompt }],
-    response_format: zodResponseFormat(SectionSchema, 'section')
+    response_format: zodResponseFormat(SectionSchema, 'section'),
+    reasoning_effort: 'high'
   });
 
   const generatedText = completion['choices'][0].message.content;
