@@ -114,6 +114,15 @@ export const Footer = () => {
               Instagram
             </a>
           </div>
+          <div>
+            <a
+              rel="noreferrer noopener"
+              href={process?.env?.NEXT_PUBLIC_X_URL}
+              className="opacity-60 hover:opacity-100"
+            >
+              X
+            </a>
+          </div>
 
           {/* <div>
             <a

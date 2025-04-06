@@ -89,7 +89,7 @@ export default function AccountPage({
             <Link href="#" className="font-semibold text-primary">
               General
             </Link>
-            <Link href="mailto:gabriel@garzaconsulting.co">Support</Link>
+            <Link href="https://discord.gg/6bzAzHAhxa">Support</Link>
             <Link href="/progress">Progress</Link>
           </nav>
           <div className="grid gap-6">

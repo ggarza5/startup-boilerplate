@@ -1,185 +1,38 @@
 'use client';
 
-import { useEffect } from 'react';
+import React from 'react';
 
-const AgentInjector: React.FC = () => {
-  useEffect(() => {
-    // --- Prevent duplicate injection ---
-    if (document.getElementById('agentContainer')) {
-      return;
-    }
+// SVG component for the Discord logo - REMOVED
+/*
+const DiscordLogo = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    className="w-8 h-8 fill-white"
+  >
+    <path d="M20.317 4.369a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.078.037 14.077 14.077 0 0 0-1.453 3.076 18.458 18.458 0 0 0-5.602 0 14.253 14.253 0 0 0-1.453-3.076.075.075 0 0 0-.078-.037 19.736 19.736 0 0 0-4.885 1.515.069.069 0 0 0-.032.027c-2.441 4.086-3.075 8.807-2.165 13.143a.073.073 0 0 0 .042.063 21.618 21.618 0 0 0 5.693 2.099.076.076 0 0 0 .087-.027 14.996 14.996 0 0 0 1.844-3.114.071.071 0 0 0-.031-.092 16.475 16.475 0 0 1-1.448-.62.074.074 0 0 1-.017-.118 14.328 14.328 0 0 1 .788-1.016.074.074 0 0 1 .1-.019 17.181 17.181 0 0 0 6.186 0 .074.074 0 0 1 .1.019 14.38 14.38 0 0 1 .788 1.016.073.073 0 0 1-.017.118 16.397 16.397 0 0 1-1.448.62.071.071 0 0 0-.031.092 15.069 15.069 0 0 0 1.844 3.114.076.076 0 0 0 .087.027 21.618 21.618 0 0 0 5.693-2.1.073.073 0 0 0 .042-.063c.91-4.336.276-9.057-2.165-13.143a.069.069 0 0 0-.032-.027ZM8.02 15.33c-1.183 0-2.142-.966-2.142-2.16s.959-2.16 2.142-2.16c1.184 0 2.143.966 2.143 2.16s-.959 2.16-2.143 2.16Zm7.96 0c-1.183 0-2.142-.966-2.142-2.16s.959-2.16 2.142-2.16c1.184 0 2.143.966 2.143 2.16s-.959 2.16-2.143 2.16Z" />
+  </svg>
+);
+*/
 
-    // --- 1. Create CSS Styles ---
-    const styleElement = document.createElement('style');
-    styleElement.id = 'agent-custom-styles';
-    styleElement.innerHTML = `
-      #agentContainer {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 320px;
-        height: 480px;
-        border: 1px solid #ccc; /* Adjust color if needed */
-        background-color: #fff; /* Adjust color if needed */
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        display: flex;
-        flex-direction: column;
-        z-index: 1000;
-        border-radius: 8px; /* Added slight rounding */
-        overflow: hidden; /* Ensure content respects border radius */
-      }
-      #agentHeader {
-        background-color: #f1f1f1; /* Adjust color if needed */
-        padding: 8px 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: default;
-        user-select: none;
-        border-bottom: 1px solid #ccc; /* Added border */
-      }
-      #agentHeader > span {
-        font-weight: 600; /* Made title bolder */
-      }
-      #agentHeader > div {
-        display: flex;
-        align-items: center;
-      }
-      #agentHeader button {
-        background: none;
-        border: none;
-        font-size: 18px; /* Slightly larger */
-        font-weight: bold;
-        line-height: 1;
-        margin-left: 5px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 24px; /* Adjusted size */
-        height: 24px; /* Adjusted size */
-        border-radius: 4px;
-        color: #555; /* Added default color */
-        transition: background-color 0.2s ease, color 0.2s ease;
-      }
-      #minimizeButton {
-        padding-bottom: 10px; /* Adjusted padding */
-      }
-      #agentHeader button:hover {
-        background-color: #e0e0e0; /* Adjust color if needed */
-        color: #000;
-      }
-      #agentContent {
-        flex-grow: 1;
-        overflow: hidden;
-        background-color: #fff; /* Ensure content bg */
-      }
-      agent-standard {
-         width: 100%;
-         height: 100%;
-         display: block; /* Ensure it takes space */
-      }
-    `;
-    document.head.appendChild(styleElement);
-
-    // --- 2. Create HTML Structure ---
-    const agentContainer = document.createElement('div');
-    agentContainer.id = 'agentContainer';
-
-    const agentHeader = document.createElement('div');
-    agentHeader.id = 'agentHeader';
-
-    const headerTitle = document.createElement('span');
-    headerTitle.textContent = 'Assistant';
-
-    const headerControls = document.createElement('div');
-
-    const minimizeButton = document.createElement('button');
-    minimizeButton.id = 'minimizeButton';
-    minimizeButton.title = 'Minimize';
-    minimizeButton.innerHTML = '_'; // Using underscore
-
-    const closeButton = document.createElement('button');
-    closeButton.id = 'closeButton';
-    closeButton.title = 'Close';
-    closeButton.innerHTML = '×'; // Using multiplication sign
-
-    headerControls.appendChild(minimizeButton);
-    headerControls.appendChild(closeButton);
-    agentHeader.appendChild(headerTitle);
-    agentHeader.appendChild(headerControls);
-
-    const agentContent = document.createElement('div');
-    agentContent.id = 'agentContent';
-
-    const agentStandardElement = document.createElement('agent-standard');
-    // Removed inline style, handled by CSS rule now
-
-    agentContent.appendChild(agentStandardElement);
-    agentContainer.appendChild(agentHeader);
-    agentContainer.appendChild(agentContent);
-
-    document.body.appendChild(agentContainer);
-
-    // --- 3. Add Button Logic ---
-    const minimizeHandler = () => {
-      if (agentContent.style.display === 'none') {
-        agentContent.style.display = 'block';
-        agentContainer.style.height = '480px';
-        minimizeButton.innerHTML = '_'; // Show minimize symbol
-      } else {
-        agentContent.style.display = 'none';
-        agentContainer.style.height = 'auto'; // Adjust height to fit header
-        minimizeButton.innerHTML = '□'; // Show restore symbol
-      }
-    };
-
-    const closeHandler = () => {
-      agentContainer.style.display = 'none';
-      // Optional: Add logic to re-open it later if needed
-    };
-
-    minimizeButton.addEventListener('click', minimizeHandler);
-    closeButton.addEventListener('click', closeHandler);
-
-    // --- 4. Initialize Agent ---
-    // Dynamically import the agent script AFTER the container is ready
-    const agentScript = document.createElement('script');
-    agentScript.type = 'module';
-    agentScript.id = 'agent-loader-script';
-    agentScript.innerHTML = `
-      import Agent from 'https://cdn.jsdelivr.net/npm/@agent-embed/js@latest/dist/web.js';
-      Agent.initStandard({
-        agentName: "Assistant OpenAI-979ca", // From your new example
-        apiHost: "https://app.predictabledialogs.com/web/incoming", // From your new example
-        initialPrompt: "Hi",
-        target: document.querySelector('#agentContent agent-standard') // Explicitly target the element
-      });
-    `;
-    document.body.appendChild(agentScript); // Append script to body
-
-    // --- 5. Cleanup Function ---
-    return () => {
-      minimizeButton.removeEventListener('click', minimizeHandler);
-      closeButton.removeEventListener('click', closeHandler);
-
-      const container = document.getElementById('agentContainer');
-      if (container) {
-        document.body.removeChild(container);
-      }
-      const styles = document.getElementById('agent-custom-styles');
-      if (styles) {
-        document.head.removeChild(styles);
-      }
-      const loaderScript = document.getElementById('agent-loader-script');
-      if (loaderScript) {
-        document.body.removeChild(loaderScript);
-      }
-      // Note: The agent itself might have internal cleanup, but we remove its container and script.
-    };
-  }, []); // Empty dependency array ensures this runs only once on mount
-
-  return null; // This component doesn't render anything itself
+const DiscordLinkWidget: React.FC = () => {
+  return (
+    <a
+      href="https://discord.gg/6bzAzHAhxa"
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Join our Discord!"
+      className="fixed bottom-6 right-6 z-[1000] flex h-14 w-14 items-center justify-center rounded-full bg-[#5865F2] shadow-md transition-all duration-200 ease-in-out hover:scale-110 hover:shadow-lg"
+    >
+      {/* Replace inline SVG with img tag referencing public file */}
+      <img
+        src="/Discord-Symbol-White.svg" // Path relative to public folder
+        alt="Discord Logo"
+        className="w-8 h-8" // Apply Tailwind size classes
+      />
+    </a>
+  );
 };
 
-export default AgentInjector;
+// Renaming the component for clarity
+export default DiscordLinkWidget;

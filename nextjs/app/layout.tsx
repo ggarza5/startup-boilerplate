@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 import { Toaster } from '@/components/ui/toaster';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { SectionsProvider } from '@/context/SectionsContext';
-import AgentInjector from '@/components/AgentInjector';
+import DiscordLinkWidget from '@/components/AgentInjector';
 
 const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false
@@ -69,13 +69,13 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                 className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
               >
                 {children}
+                <DiscordLinkWidget />{' '}
               </main>
               <Toaster />
             </SectionsProvider>
           </body>
         </PHProvider>
       </ThemeProvider>
-      <AgentInjector />
       <GoogleAnalytics gaId={GoogleAnalyticsID} />
     </html>
   );

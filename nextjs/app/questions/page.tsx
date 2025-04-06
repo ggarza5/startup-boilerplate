@@ -68,6 +68,9 @@ const QuestionsPage: React.FC = () => {
     null
   );
   const DEBOUNCE_INTERVAL = 2000; // 2 seconds debounce interval - ignore repeated calls within this window
+  const [optimisticActiveSectionId, setOptimisticActiveSectionId] = useState<
+    string | null
+  >(null); // NEW STATE
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -205,32 +208,47 @@ const QuestionsPage: React.FC = () => {
     };
   }, [isCreatingSection]);
 
+  // --- NEW: Effect to sync optimistic state with actual currentSection ---
+  useEffect(() => {
+    console.log(
+      `QuestionsPage: useEffect[currentSection] - Syncing optimistic ID. currentSection?.id=${currentSection?.id}`
+    );
+    setOptimisticActiveSectionId(currentSection?.id || null);
+  }, [currentSection]);
+
   // Function to handle section selection
   const handleSelectSection = async (
     sectionId: string,
     sectionName?: string
   ) => {
-    // Record the current time as when we started processing this section ID
+    // Set optimistic state immediately
+    setOptimisticActiveSectionId(sectionId);
+    console.log(
+      `QuestionsPage: handleSelectSection - Set optimisticActiveSectionId = ${sectionId}`
+    );
+
+    // Record timestamp for debouncing
     lastProcessedTimeRef.current.set(sectionId, Date.now());
     console.log(
       `QuestionsPage: handleSelectSection - Recording timestamp for ${sectionId}`
     );
 
-    // Set the ref at the very beginning
+    // Set processing ref
     processingSectionIdRef.current = sectionId;
     console.log(
       `QuestionsPage: handleSelectSection - Set processingIdRef = ${sectionId}`
     );
 
-    // Log right before setting true
+    // Set fetching state
     console.log(
       `QuestionsPage: handleSelectSection - About to set isFetchingSection = true for id: ${sectionId}`
     );
     setIsFetchingSection(true);
     setUnansweredQuestions(new Set());
     setUserAnswers({});
-    setStartTimer(false); // Reset timer before fetch
-    setCurrentQuestionIndex(0); // Reset index
+    setSelectedAnswerState({});
+    setStartTimer(false);
+    setCurrentQuestionIndex(0);
 
     try {
       const response = await fetch(`/api/section/${sectionId}`);
@@ -240,20 +258,20 @@ const QuestionsPage: React.FC = () => {
         throw new Error(data.error || Constants.ERROR_FETCHING_SECTION);
       }
 
-      // Set the fetched section data
+      // Set the actual fetched section data
       setCurrentSection(data);
       setStartTimer(true); // Start timer only after data is ready
     } catch (error: any) {
       logErrorIfNotProduction(
         new Error(`${Constants.ERROR_FETCHING_SECTION}: ${error.message}`)
       );
-      setCurrentSection(null);
+      setCurrentSection(null); // Clear actual section on error
+      // Optimistic state will be cleared by the useEffect watching currentSection
     } finally {
       console.log(
         `QuestionsPage: handleSelectSection FINALLY - Setting isFetchingSection = false, clearing processingIdRef for id: ${sectionId}`
       );
       setIsFetchingSection(false);
-      // Clear the ref in finally block
       processingSectionIdRef.current = null;
     }
   };
@@ -765,7 +783,7 @@ const QuestionsPage: React.FC = () => {
           onAddSection={handleAddSection}
           isCreatingSection={isCreatingSection}
           setIsCreatingSection={setIsCreatingSection}
-          activeSectionId={currentSection?.id || null}
+          activeSectionId={optimisticActiveSectionId}
         />
         <div className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto h-vh-minus-navbar scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
           {isCreatingSection ? (

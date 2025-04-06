@@ -53,13 +53,12 @@ const pricingList: PricingProps[] = [
     popular: 1,
     price: 5,
     description:
-      'Access to unlimited practice sections and detailed performance analytics.',
+      'Access to unlimited follow up questions, practice tests, and more.',
     buttonText: 'Subscribe Now',
     benefitList: [
-      '4 Practice Tests',
-      'Detailed Analytics',
-      'Priority Support',
-      'Full Access'
+      'Unlimited Follow Up Questions',
+      'Unlimited Practice Tests',
+      'Priority Support'
     ]
   }
 ];

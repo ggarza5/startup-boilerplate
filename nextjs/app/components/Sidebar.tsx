@@ -234,26 +234,36 @@ const Sidebar: React.FC<SidebarProps> = ({
                 return (
                   <div
                     key={section.id}
-                    className={`mb-1 mx-1 px-2 py-2 cursor-pointer rounded-md transition-colors duration-150 flex items-center
+                    className={`group mb-1 mx-1 px-2 py-2 cursor-pointer rounded-md transition-colors duration-150 flex items-center
                       ${
                         isFlashing
                           ? 'bg-brand-blue-hex/20 dark:bg-brand-blue-hex/30'
                           : isSelected
                             ? 'bg-brand-blue-hex/10 dark:bg-brand-blue-hex/20'
-                            : 'hover:bg-gray-200 dark:hover:bg-muted/40 text-gray-800 dark:text-gray-300'
+                            : 'text-gray-800 dark:text-gray-300 hover:bg-brand-blue-hex/10 dark:hover:bg-brand-blue-hex/20'
                       }`}
                     onClick={() => handleItemClick(section.id, section.name)}
                   >
                     {/* Text content (takes up available space) */}
                     <div className="flex-grow truncate mr-2">
-                      {/* Use brand-blue-hex for text */}
+                      {/* Use group-hover for text color change when not selected */}
                       <div
-                        className={`font-medium ${isSelected ? 'text-brand-blue-hex dark:text-brand-blue-hex/90' : 'text-gray-900 dark:text-gray-100'}`}
+                        className={`font-medium 
+                          ${
+                            isSelected
+                              ? 'text-brand-blue-hex dark:text-brand-blue-hex/90'
+                              : 'text-gray-900 dark:text-gray-100 group-hover:text-brand-blue-hex dark:group-hover:text-brand-blue-hex'
+                          }`}
                       >
                         {section.name}
                       </div>
                       <div
-                        className={`text-xs mt-1 ${isSelected ? 'text-brand-blue-hex/80 dark:text-brand-blue-hex/70' : 'text-gray-600 dark:text-gray-400'}`}
+                        className={`text-xs mt-1 
+                          ${
+                            isSelected
+                              ? 'text-brand-blue-hex/80 dark:text-brand-blue-hex/70'
+                              : 'text-gray-600 dark:text-gray-400 group-hover:text-brand-blue-hex/80 dark:group-hover:text-brand-blue-hex/70'
+                          }`}
                       >
                         {`${sectionType} - ${categoryDisplay}`}
                         {creationTime && ` - ${creationTime}`}
