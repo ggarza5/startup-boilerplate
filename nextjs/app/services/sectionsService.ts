@@ -22,10 +22,9 @@ export const fetchSections = async (): Promise<Section[]> => {
       return {
         id: item.id,
         name: item.name || '',
-        section_type: item.section_type,
-        category: item.category,
-        created_at: item.created_at,
-        created_by: item.created_by || null // Handle null created_by
+        type: item.section_type,
+        questions: [],
+        createdAt: item.created_at
       };
     });
 
@@ -66,10 +65,8 @@ export const fetchSectionByName = async (
     const section: Section = {
       id: data[0].id,
       name: data[0].name || '',
-      section_type: data[0].section_type,
-      category: data[0].category,
-      created_at: data[0].created_at,
-      created_by: data[0].created_by || null, // Handle null created_by
+      type: data[0].section_type,
+      createdAt: data[0].created_at,
       questions: []
     };
 

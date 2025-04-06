@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Section } from '@/app/types';
 import { createClient } from '@/utils/supabase/client';
 import { Navbar } from '@/app/components/ui/Navbar';
-import { User } from '@supabase/supabase-js';
+import { User, SupabaseClient } from '@supabase/supabase-js';
+import { Database } from '@/types_db';
 
 export default function CreateTestClientPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function CreateTestClientPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const supabase = createClient();
+        const supabase: SupabaseClient<Database> = createClient();
 
         // Check if user is authenticated
         const {
@@ -40,12 +41,23 @@ export default function CreateTestClientPage() {
         // Fetch available sections
         const { data: sectionsData, error: sectionsError } = await supabase
           .from('sections')
-          .select('id, name, section_type, category, created_at, created_by')
+          .select('id, name, section_type, created_at, category, created_by')
           .order('created_at', { ascending: false });
 
         if (sectionsError) throw new Error(sectionsError.message);
 
-        setSections(sectionsData as Section[]);
+        // Map the fetched data (with section_type) to the internal Section type (with type)
+        const mappedSections: Section[] = sectionsData
+          ? sectionsData.map((item) => ({
+              id: item.id,
+              name: item.name || '',
+              type: item.section_type,
+              questions: [],
+              createdAt: item.created_at || undefined
+            }))
+          : [];
+
+        setSections(mappedSections);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'An unknown error occurred'
@@ -120,7 +132,7 @@ export default function CreateTestClientPage() {
   const groupSectionsByType = () => {
     return sections.reduce(
       (groups, section) => {
-        const type = section.section_type;
+        const type = section.type;
         if (!groups[type]) {
           groups[type] = [];
         }
@@ -189,11 +201,6 @@ export default function CreateTestClientPage() {
                       onClick={() => handleSectionToggle(section.id)}
                     >
                       <div className="font-medium">{section.name}</div>
-                      {section.category && (
-                        <div className="text-sm text-muted-foreground">
-                          Category: {section.category}
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>

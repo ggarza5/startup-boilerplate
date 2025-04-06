@@ -8,6 +8,7 @@ import { PracticeTest, Section } from '@/app/types';
 import { createClient } from '@/utils/supabase/client';
 import { Navbar } from '@/app/components/ui/Navbar';
 import { User } from '@supabase/supabase-js';
+import { Database } from '@/types_db';
 
 export default function TestsClientPage() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function TestsClientPage() {
             .order('created_at', { ascending: false }),
           supabase
             .from('sections')
-            .select('id, name, section_type, created_at, created_by')
+            .select('id, name, section_type, created_at')
             .order('created_at', { ascending: false })
         ]);
 
@@ -54,7 +55,18 @@ export default function TestsClientPage() {
           throw new Error(sectionsResponse.error.message);
 
         setTests(testsResponse.data as PracticeTest[]);
-        setSections(sectionsResponse.data as Section[]);
+
+        // Map fetched data to internal Section type
+        const mappedSections: Section[] = sectionsResponse.data
+          ? sectionsResponse.data.map((item) => ({
+              id: item.id,
+              name: item.name || '',
+              type: item.section_type,
+              questions: [],
+              createdAt: item.created_at || undefined
+            }))
+          : [];
+        setSections(mappedSections);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'An unknown error occurred'

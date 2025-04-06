@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { Button } from '@/components/ui/button';
-import { PracticeTest, Section, Result } from '@/app/types';
+import { PracticeTest, Section, Result, Question } from '@/app/types';
+import { Database } from '@/types_db';
 
 interface TestResultsClientPageProps {
   testId: string;
@@ -68,17 +69,27 @@ export default function TestResultsClientPage({
 
         setResults(resultsData as Result[]);
 
-        // Fetch section data
-        const sectionIds = testData.sections || [];
-        if (sectionIds.length > 0) {
+        // Fetch sections included in the test
+        if (testData.sections && testData.sections.length > 0) {
           const { data: sectionsData, error: sectionsError } = await supabase
             .from('sections')
-            .select('*')
-            .in('id', sectionIds);
+            .select('id, name, section_type, created_at')
+            .in('id', testData.sections);
 
           if (sectionsError) throw new Error(sectionsError.message);
 
-          setSections(sectionsData as Section[]);
+          // Map fetched data to internal Section type
+          const mappedSections: Section[] = sectionsData
+            ? sectionsData.map((item) => ({
+                id: item.id,
+                name: item.name || '',
+                type: item.section_type,
+                questions: [],
+                createdAt: item.created_at || undefined
+              }))
+            : [];
+
+          setSections(mappedSections);
         }
       } catch (err) {
         setError(
@@ -208,8 +219,7 @@ export default function TestResultsClientPage({
                       {section?.name || 'Unknown Section'}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-2">
-                      {section?.section_type || 'Unknown Type'}
-                      {section?.category && ` • ${section.category}`}
+                      {section?.type || 'Unknown Type'}
                     </p>
                   </div>
                   <div className="px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">

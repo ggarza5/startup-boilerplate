@@ -314,9 +314,18 @@ const QuestionsPage: React.FC = () => {
   };
 
   const handleAnswerSelect = (index: number, value: string) => {
-    console.log('handleAnswerSelect', index, value);
     setSelectedAnswerState(value);
-    setUserAnswers((prev) => ({ ...prev, [index]: value })); // Update user answers
+    setUserAnswers((prev) => ({ ...prev, [index]: value }));
+    setUnansweredQuestions((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(index);
+      return newSet;
+    });
+  };
+
+  const handleDoubleClickAnswer = (index: number, value: string) => {
+    handleAnswerSelect(index, value);
+    handleNextQuestion();
   };
 
   const renderUnansweredQuestions = () => {
@@ -396,7 +405,10 @@ const QuestionsPage: React.FC = () => {
                   question={currentSection.questions[currentQuestionIndex]}
                   currentQuestionIndex={currentQuestionIndex} // Pass currentQuestionIndex
                   handleAnswerSelect={handleAnswerSelect} // Pass handleAnswerSelect
-                  selectedAnswer={selectedAnswerState} // Pass selectedAnswer
+                  handleDoubleClickAnswer={handleDoubleClickAnswer} // Pass handleDoubleClickAnswer
+                  selectedAnswer={
+                    userAnswers[currentQuestionIndex] || selectedAnswerState
+                  } // Pass selectedAnswer
                 />
               )}
           </div>

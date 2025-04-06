@@ -115,7 +115,7 @@ const CreateTestForm: React.FC<CreateTestFormProps> = ({
               >
                 <div className="font-medium">{section.name}</div>
                 <div className="text-sm text-muted-foreground">
-                  {section.section_type}
+                  {section.type}
                 </div>
               </div>
             ))}

@@ -4,606 +4,560 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
 export type Database = {
   public: {
     Tables: {
-      checkout_sessions: {
-        Row: {
-          created: string;
-          id: string;
-          metadata: Json | null;
-          mode: Database['public']['Enums']['checkout_mode'] | null;
-          payment_status:
-            | Database['public']['Enums']['checkout_payment_status']
-            | null;
-          price_id: string | null;
-          quantity: number | null;
-          status: Database['public']['Enums']['checkout_status'] | null;
-          user_id: string;
-        };
-        Insert: {
-          created?: string;
-          id: string;
-          metadata?: Json | null;
-          mode?: Database['public']['Enums']['checkout_mode'] | null;
-          payment_status?:
-            | Database['public']['Enums']['checkout_payment_status']
-            | null;
-          price_id?: string | null;
-          quantity?: number | null;
-          status?: Database['public']['Enums']['checkout_status'] | null;
-          user_id: string;
-        };
-        Update: {
-          created?: string;
-          id?: string;
-          metadata?: Json | null;
-          mode?: Database['public']['Enums']['checkout_mode'] | null;
-          payment_status?:
-            | Database['public']['Enums']['checkout_payment_status']
-            | null;
-          price_id?: string | null;
-          quantity?: number | null;
-          status?: Database['public']['Enums']['checkout_status'] | null;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'checkout_sessions_price_id_fkey';
-            columns: ['price_id'];
-            isOneToOne: false;
-            referencedRelation: 'prices';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'checkout_sessions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      customers: {
-        Row: {
-          id: string;
-          stripe_customer_id: string | null;
-        };
-        Insert: {
-          id: string;
-          stripe_customer_id?: string | null;
-        };
-        Update: {
-          id?: string;
-          stripe_customer_id?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'customers_id_fkey';
-            columns: ['id'];
-            isOneToOne: true;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      prices: {
-        Row: {
-          active: boolean | null;
-          currency: string | null;
-          description: string | null;
-          id: string;
-          interval: Database['public']['Enums']['pricing_plan_interval'] | null;
-          interval_count: number | null;
-          metadata: Json | null;
-          product_id: string | null;
-          trial_period_days: number | null;
-          type: Database['public']['Enums']['pricing_type'] | null;
-          unit_amount: number | null;
-        };
-        Insert: {
-          active?: boolean | null;
-          currency?: string | null;
-          description?: string | null;
-          id: string;
-          interval?:
-            | Database['public']['Enums']['pricing_plan_interval']
-            | null;
-          interval_count?: number | null;
-          metadata?: Json | null;
-          product_id?: string | null;
-          trial_period_days?: number | null;
-          type?: Database['public']['Enums']['pricing_type'] | null;
-          unit_amount?: number | null;
-        };
-        Update: {
-          active?: boolean | null;
-          currency?: string | null;
-          description?: string | null;
-          id?: string;
-          interval?:
-            | Database['public']['Enums']['pricing_plan_interval']
-            | null;
-          interval_count?: number | null;
-          metadata?: Json | null;
-          product_id?: string | null;
-          trial_period_days?: number | null;
-          type?: Database['public']['Enums']['pricing_type'] | null;
-          unit_amount?: number | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'prices_product_id_fkey';
-            columns: ['product_id'];
-            isOneToOne: false;
-            referencedRelation: 'products';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      practice_tests: {
-        Row: {
-          id: string;
-          user_id: string;
-          name: string;
-          sections: string[];
-          start_time: string | null;
-          end_time: string | null;
-          status: 'in_progress' | 'completed' | 'paused';
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          name: string;
-          sections: string[];
-          start_time?: string | null;
-          end_time?: string | null;
-          status?: 'in_progress' | 'completed' | 'paused';
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          name?: string;
-          sections?: string[];
-          start_time?: string | null;
-          end_time?: string | null;
-          status?: 'in_progress' | 'completed' | 'paused';
-          created_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'practice_tests_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      products: {
-        Row: {
-          active: boolean | null;
-          description: string | null;
-          id: string;
-          image: string | null;
-          metadata: Json | null;
-          name: string | null;
-        };
-        Insert: {
-          active?: boolean | null;
-          description?: string | null;
-          id: string;
-          image?: string | null;
-          metadata?: Json | null;
-          name?: string | null;
-        };
-        Update: {
-          active?: boolean | null;
-          description?: string | null;
-          id?: string;
-          image?: string | null;
-          metadata?: Json | null;
-          name?: string | null;
-        };
-        Relationships: [];
-      };
-      subscriptions: {
-        Row: {
-          cancel_at: string | null;
-          cancel_at_period_end: boolean | null;
-          canceled_at: string | null;
-          created: string;
-          current_period_end: string;
-          current_period_start: string;
-          ended_at: string | null;
-          id: string;
-          metadata: Json | null;
-          price_id: string | null;
-          quantity: number | null;
-          status: Database['public']['Enums']['subscription_status'] | null;
-          trial_end: string | null;
-          trial_start: string | null;
-          user_id: string;
-        };
-        Insert: {
-          cancel_at?: string | null;
-          cancel_at_period_end?: boolean | null;
-          canceled_at?: string | null;
-          created?: string;
-          current_period_end?: string;
-          current_period_start?: string;
-          ended_at?: string | null;
-          id: string;
-          metadata?: Json | null;
-          price_id?: string | null;
-          quantity?: number | null;
-          status?: Database['public']['Enums']['subscription_status'] | null;
-          trial_end?: string | null;
-          trial_start?: string | null;
-          user_id: string;
-        };
-        Update: {
-          cancel_at?: string | null;
-          cancel_at_period_end?: boolean | null;
-          canceled_at?: string | null;
-          created?: string;
-          current_period_end?: string;
-          current_period_start?: string;
-          ended_at?: string | null;
-          id?: string;
-          metadata?: Json | null;
-          price_id?: string | null;
-          quantity?: number | null;
-          status?: Database['public']['Enums']['subscription_status'] | null;
-          trial_end?: string | null;
-          trial_start?: string | null;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'subscriptions_price_id_fkey';
-            columns: ['price_id'];
-            isOneToOne: false;
-            referencedRelation: 'prices';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'subscriptions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      users: {
-        Row: {
-          avatar_url: string | null;
-          billing_address: Json | null;
-          full_name: string | null;
-          id: string;
-          payment_method: Json | null;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          section_type: string;
-          category?: string | null;
-          created_at?: string;
-          created_by: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          section_type?: string;
-          category?: string | null;
-          created_at?: string;
-          created_by?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'sections_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      questions: {
-        Row: {
-          id: string;
-          section_id: string;
-          question: string;
-          answer_choices: string[];
-          answer: string;
-          explanation: string | null;
-          created_at: string;
-          follow_up_questions: string[] | null;
-        };
-        Insert: {
-          id?: string;
-          section_id: string;
-          question: string;
-          answer_choices: string[];
-          answer: string;
-          explanation?: string | null;
-          created_at?: string;
-          follow_up_questions?: string[] | null;
-        };
-        Update: {
-          id?: string;
-          section_id?: string;
-          question?: string;
-          answer_choices?: string[];
-          answer?: string;
-          explanation?: string | null;
-          created_at?: string;
-          follow_up_questions?: string[] | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'questions_section_id_fkey';
-            columns: ['section_id'];
-            isOneToOne: false;
-            referencedRelation: 'sections';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      results: {
-        Row: {
-          id: string;
-          user_id: string;
-          section_id: string;
-          score: number;
-          created_at: string;
-          metadata: Json | null;
-          practice_test_id: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          section_id: string;
-          score: number;
-          created_at?: string;
-          metadata?: Json | null;
-          practice_test_id?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          section_id?: string;
-          score?: number;
-          created_at?: string;
-          metadata?: Json | null;
-          practice_test_id?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'results_section_id_fkey';
-            columns: ['section_id'];
-            isOneToOne: false;
-            referencedRelation: 'sections';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'results_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'results_practice_test_id_fkey';
-            columns: ['practice_test_id'];
-            isOneToOne: false;
-            referencedRelation: 'practice_tests';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
       answers: {
         Row: {
-          id: string;
-          user_id: string;
-          section_id: string;
-          question_id: string;
-          answer: string;
-          created_at: string;
-          updated_at: string;
-        };
+          answer: string
+          created_at: string
+          id: string
+          question_id: string
+          section_id: string
+          updated_at: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          section_id: string;
-          question_id: string;
-          answer: string;
-          created_at?: string;
-          updated_at?: string;
-        };
+          answer: string
+          created_at?: string
+          id?: string
+          question_id: string
+          section_id: string
+          updated_at?: string
+          user_id: string
+        }
         Update: {
-          id?: string;
-          user_id?: string;
-          section_id?: string;
-          question_id?: string;
-          answer?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
+          answer?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+          section_id?: string
+          updated_at?: string
+          user_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: 'answers_question_id_fkey';
-            columns: ['question_id'];
-            isOneToOne: false;
-            referencedRelation: 'questions';
-            referencedColumns: ['id'];
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'answers_section_id_fkey';
-            columns: ['section_id'];
-            isOneToOne: false;
-            referencedRelation: 'sections';
-            referencedColumns: ['id'];
+            foreignKeyName: "answers_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: 'answers_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
+        ]
+      }
+      customers: {
+        Row: {
+          id: string
+          stripe_customer_id: string | null
+          "Time Created": string | null
+        }
+        Insert: {
+          id: string
+          stripe_customer_id?: string | null
+          "Time Created"?: string | null
+        }
+        Update: {
+          id?: string
+          stripe_customer_id?: string | null
+          "Time Created"?: string | null
+        }
+        Relationships: []
+      }
+      email_list: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          name: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+        }
+        Relationships: []
+      }
       follow_up_questions: {
         Row: {
-          id: string;
-          question_id: string;
-          follow_up_content: string;
-          answer_choices: string[];
-          correct_answer: string;
-          explanation: string | null;
-          created_at: string;
-        };
+          answer_choices: string[]
+          correct_answer: string
+          created_at: string | null
+          explanation: string | null
+          follow_up_content: string
+          id: string
+          question_id: string
+        }
         Insert: {
-          id?: string;
-          question_id: string;
-          follow_up_content: string;
-          answer_choices: string[];
-          correct_answer: string;
-          explanation?: string | null;
-          created_at?: string;
-        };
+          answer_choices: string[]
+          correct_answer: string
+          created_at?: string | null
+          explanation?: string | null
+          follow_up_content: string
+          id?: string
+          question_id: string
+        }
         Update: {
-          id?: string;
-          question_id?: string;
-          follow_up_content?: string;
-          answer_choices?: string[];
-          correct_answer?: string;
-          explanation?: string | null;
-          created_at?: string;
-        };
+          answer_choices?: string[]
+          correct_answer?: string
+          created_at?: string | null
+          explanation?: string | null
+          follow_up_content?: string
+          id?: string
+          question_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: 'follow_up_questions_question_id_fkey';
-            columns: ['question_id'];
-            isOneToOne: false;
-            referencedRelation: 'questions';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-    };
+            foreignKeyName: "follow_up_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practice_tests: {
+        Row: {
+          created_at: string | null
+          end_time: string | null
+          id: string
+          name: string
+          sections: string[]
+          start_time: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          name: string
+          sections: string[]
+          start_time?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          name?: string
+          sections?: string[]
+          start_time?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prices: {
+        Row: {
+          active: boolean | null
+          currency: string | null
+          description: string | null
+          id: string
+          interval: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval_count: number | null
+          metadata: Json | null
+          product_id: string | null
+          trial_period_days: number | null
+          type: Database["public"]["Enums"]["pricing_type"] | null
+          unit_amount: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          currency?: string | null
+          description?: string | null
+          id: string
+          interval?: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval_count?: number | null
+          metadata?: Json | null
+          product_id?: string | null
+          trial_period_days?: number | null
+          type?: Database["public"]["Enums"]["pricing_type"] | null
+          unit_amount?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          interval?: Database["public"]["Enums"]["pricing_plan_interval"] | null
+          interval_count?: number | null
+          metadata?: Json | null
+          product_id?: string | null
+          trial_period_days?: number | null
+          type?: Database["public"]["Enums"]["pricing_type"] | null
+          unit_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean | null
+          description: string | null
+          id: string
+          image: string | null
+          metadata: Json | null
+          name: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          description?: string | null
+          id: string
+          image?: string | null
+          metadata?: Json | null
+          name?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          metadata?: Json | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          answer: string
+          answer_choices: string[] | null
+          created_at: string | null
+          explanation: string | null
+          id: string
+          question: string
+          section_id: string | null
+        }
+        Insert: {
+          answer: string
+          answer_choices?: string[] | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          question: string
+          section_id?: string | null
+        }
+        Update: {
+          answer?: string
+          answer_choices?: string[] | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          question?: string
+          section_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      results: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json | null
+          practice_test_id: string | null
+          score: number
+          section_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          practice_test_id?: string | null
+          score: number
+          section_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          practice_test_id?: string | null
+          score?: number
+          section_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_practice_test_id_fkey"
+            columns: ["practice_test_id"]
+            isOneToOne: false
+            referencedRelation: "practice_tests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sections: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          section_type: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name: string
+          section_type: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          section_type?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at: string | null
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          created: string
+          current_period_end: string
+          current_period_start: string
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          price_id: string | null
+          quantity: number | null
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end: string | null
+          trial_start: string | null
+          user_id: string
+        }
+        Insert: {
+          cancel_at?: string | null
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created?: string
+          current_period_end?: string
+          current_period_start?: string
+          ended_at?: string | null
+          id: string
+          metadata?: Json | null
+          price_id?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end?: string | null
+          trial_start?: string | null
+          user_id: string
+        }
+        Update: {
+          cancel_at?: string | null
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          created?: string
+          current_period_end?: string
+          current_period_start?: string
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          price_id?: string | null
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          trial_end?: string | null
+          trial_start?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_price_id_fkey"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          avatar_url: string | null
+          billing_address: Json | null
+          full_name: string | null
+          id: string
+          payment_method: Json | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          billing_address?: Json | null
+          full_name?: string | null
+          id: string
+          payment_method?: Json | null
+        }
+        Update: {
+          avatar_url?: string | null
+          billing_address?: Json | null
+          full_name?: string | null
+          id?: string
+          payment_method?: Json | null
+        }
+        Relationships: []
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Functions: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Enums: {
-      checkout_mode: 'payment' | 'setup' | 'subscription';
-      checkout_payment_status: 'paid' | 'unpaid' | 'no_payment_required';
-      checkout_status: 'complete' | 'expired' | 'open';
-      pricing_plan_interval: 'day' | 'week' | 'month' | 'year';
-      pricing_type: 'one_time' | 'recurring';
+      pricing_plan_interval: "day" | "week" | "month" | "year"
+      pricing_type: "one_time" | "recurring"
       subscription_status:
-        | 'trialing'
-        | 'active'
-        | 'canceled'
-        | 'incomplete'
-        | 'incomplete_expired'
-        | 'past_due'
-        | 'unpaid'
-        | 'paused';
-    };
+        | "trialing"
+        | "active"
+        | "canceled"
+        | "incomplete"
+        | "incomplete_expired"
+        | "past_due"
+        | "unpaid"
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-};
+      [_ in never]: never
+    }
+  }
+}
 
-type PublicSchema = Database[Extract<keyof Database, 'public'>];
+type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (PublicSchema['Tables'] & PublicSchema['Views'])
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-        Database[PublicTableNameOrOptions['schema']]['Views'])
-    : never = never
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-      Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
-      Row: infer R;
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] &
-        PublicSchema['Views'])
-    ? (PublicSchema['Tables'] &
-        PublicSchema['Views'])[PublicTableNameOrOptions] extends {
-        Row: infer R;
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
       }
       ? R
       : never
-    : never;
+    : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
-    : never = never
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-      Insert: infer I;
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
-        Insert: infer I;
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
       }
       ? I
       : never
-    : never;
+    : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
-    : never = never
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-      Update: infer U;
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
-        Update: infer U;
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
       }
       ? U
       : never
-    : never;
+    : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof PublicSchema['Enums']
+    | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums']
-    : never = never
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema['Enums']
-    ? PublicSchema['Enums'][PublicEnumNameOrOptions]
-    : never;
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
