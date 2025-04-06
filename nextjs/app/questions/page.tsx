@@ -781,7 +781,7 @@ const QuestionsPage: React.FC = () => {
             </div>
           ) : currentSection ? (
             // --- Active Section View --- Apply flex column and height here
-            <div className="w-full max-w-3xl mx-auto flex flex-col h-full">
+            <div className="w-full max-w-3xl flex flex-col h-full">
               {/* == Top Fixed Part == */}
               <div>
                 {/* Display Section Title, Loader, and Progress */}
@@ -803,25 +803,22 @@ const QuestionsPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Display category only when section exists (already handled) */}
-                {currentSection && (
-                  <p className="text-base text-gray-600 dark:text-gray-400 mb-6 pb-4 border-b border-border/60 dark:border-border/40">
-                    {currentSection.section_type} -{' '}
-                    {currentSection.category || Constants.OTHER_CATEGORY}
-                  </p>
-                )}
-
                 {/* Timer Component */}
-                <Timer
-                  startTimer={startTimer}
-                  resetKey={currentSection?.id || 0}
-                />
+                <div className="flex justify-between items-center mb-4 pb-2 border-b border-border/60 dark:border-border/40">
+                  {currentSection && (
+                    <p className="text-base text-gray-600 dark:text-gray-400">
+                      {currentSection.section_type} -{' '}
+                      {currentSection.category || Constants.OTHER_CATEGORY}
+                    </p>
+                  )}
+                  <Timer
+                    startTimer={startTimer}
+                    resetKey={currentSection?.id || 0}
+                  />
+                </div>
               </div>
-
-              {/* == Scrollable Question Area == */}
-              <div className="flex-grow overflow-hidden mb-4 relative">
+              <div className="flex-grow overflow-hidde relative">
                 {/* AnimatePresence handles enter/exit animations */}
-                {/* Use `mode="wait"` if you want the old one to exit before the new one enters */}
                 <AnimatePresence
                   initial={false}
                   custom={slideDirection}

@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 import { Toaster } from '@/components/ui/toaster';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { SectionsProvider } from '@/context/SectionsContext';
+import AgentInjector from '@/components/AgentInjector';
 
 const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false
@@ -74,6 +75,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
           </body>
         </PHProvider>
       </ThemeProvider>
+      <AgentInjector />
       <GoogleAnalytics gaId={GoogleAnalyticsID} />
     </html>
   );

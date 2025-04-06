@@ -40,9 +40,9 @@ const Timer: React.FC<TimerProps> = ({ startTimer, resetKey }) => {
   };
 
   return (
-    <div className="text-center mb-4 p-2 bg-muted rounded-md border border-border/60">
-      <p className="text-lg font-semibold text-foreground">
-        Time Elapsed: {formatTime(timeElapsed)}
+    <div className="text-center p-2 rounded-md">
+      <p className="text-med font-semibold text-foreground">
+        {formatTime(timeElapsed)}
       </p>
     </div>
   );

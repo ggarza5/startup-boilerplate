@@ -317,7 +317,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Content */}
       <div className="p-2 overflow-y-auto h-[calc(100vh-8rem)] scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
-        {/* --- Add Progress Links (Expanded Only) --- */}
         {!isCollapsed && (
           <div className="mb-4 px-2 space-y-1">
             <Link
@@ -348,27 +347,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         ) : (
           renderSections()
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-border/60">
-        {isCollapsed ? (
-          <Link
-            href="/dashboard"
-            title="Dashboard"
-            className="flex justify-center items-center h-10 w-10 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-150"
-          >
-            <i className="fas fa-tachometer-alt text-gray-600 dark:text-gray-400"></i>
-          </Link>
-        ) : (
-          <Link
-            href="/dashboard"
-            className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-150"
-          >
-            <i className="fas fa-tachometer-alt w-4 h-4"></i>
-            <span>Dashboard</span>
-          </Link>
         )}
       </div>
     </div>
