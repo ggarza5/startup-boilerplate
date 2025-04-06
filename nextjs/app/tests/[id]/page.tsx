@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import TestClientPage from './TestClientPage';
 
-// Define params type for Next.js 15
+// Define params type for Next.js 15 NEW
 export type Params = Promise<{ id: string }>;
 
 // Make the component async to allow awaiting params
