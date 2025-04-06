@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 import { Toaster } from '@/components/ui/toaster';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { SectionsProvider } from '@/context/SectionsContext';
+import PostHogPageViewWrapper from '@/components/misc/PostHogPageViewWrapper';
 
 const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
   ssr: false
@@ -62,7 +63,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <PHProvider>
           <body>
             <SectionsProvider>
-              <PostHogPageView />
+              <PostHogPageViewWrapper />
               <main
                 id="skip"
                 className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
