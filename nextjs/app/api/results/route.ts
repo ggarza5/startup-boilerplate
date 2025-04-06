@@ -9,13 +9,18 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
-  console.log('userId:', userId); // Log userId
+  const practiceTestId = searchParams.get('practiceTestId');
+
   try {
-    const { data, error } = await supabase
-      .from('results')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: true });
+    let query = supabase.from('results').select('*').eq('user_id', userId);
+
+    if (practiceTestId) {
+      query = query.eq('practice_test_id', practiceTestId);
+    }
+
+    const { data, error } = await query.order('created_at', {
+      ascending: true
+    });
 
     if (error) throw error;
 
@@ -24,19 +29,36 @@ export async function GET(request: NextRequest) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     } else {
-      return NextResponse.json({ error: 'An unknown error occurred' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'An unknown error occurred' },
+        { status: 500 }
+      );
     }
   }
 }
 
 //takes userId, sectionId and score and inserts into results table
 export async function POST(request: NextRequest) {
-  const { userId, sectionId, score } = await request.json();
+  const { userId, sectionId, score, practiceTestId } = await request.json();
 
   try {
-    const { data, error } = await supabase
-      .from('results')
-      .insert([{ user_id: userId, section_id: sectionId, score: score }]);
+    const resultData: {
+      user_id: string;
+      section_id: string;
+      score: number;
+      practice_test_id?: string;
+    } = {
+      user_id: userId,
+      section_id: sectionId,
+      score: score
+    };
+
+    // Add practice_test_id if provided
+    if (practiceTestId) {
+      resultData.practice_test_id = practiceTestId;
+    }
+
+    const { data, error } = await supabase.from('results').insert([resultData]);
 
     console.log('Result inserted:', data);
     if (error) {
@@ -49,7 +71,10 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     } else {
-      return NextResponse.json({ error: 'An unknown error occurred' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'An unknown error occurred' },
+        { status: 500 }
+      );
     }
   }
 }
