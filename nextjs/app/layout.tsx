@@ -4,15 +4,10 @@ import { getURL } from '@/utils/helpers';
 import '@/styles/main.css';
 import { PHProvider } from './providers';
 import { ThemeProvider } from '@/components/landing/theme-provider';
-import dynamic from 'next/dynamic';
 import { Toaster } from '@/components/ui/toaster';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { SectionsProvider } from '@/context/SectionsContext';
 import PostHogPageViewWrapper from '@/components/misc/PostHogPageViewWrapper';
-
-const PostHogPageView = dynamic(() => import('./PostHogPageView'), {
-  ssr: false
-});
 
 const GoogleAnalyticsID = 'G-J8XQH1YH0C';
 
