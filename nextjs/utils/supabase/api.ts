@@ -35,7 +35,12 @@ export const createApiClient = (supabase: SupabaseClient<Database>) => {
     const res = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: getURL('/api/auth_callback')
+        redirectTo: getURL('/api/auth_callback'),
+        skipBrowserRedirect: false,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent'
+        }
       }
     });
     if (res.error) throw res.error;
