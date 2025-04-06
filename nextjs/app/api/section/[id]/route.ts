@@ -1,29 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchQuestionsBySectionId } from '../../../services/questionService';
 
 export const maxDuration = 45;
 export const dynamic = 'force-dynamic';
 
-// Remove the interface definition
-/*
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
-*/
+// Using 'any' as a temporary workaround for Next.js 15 compatibility
+export async function GET(request: NextRequest, context: any) {
+  const sectionId = context.params.id;
 
-// Use the inline type definition again, ensuring syntax is precise
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const sectionId = params.id;
-  if (!sectionId)
+  if (!sectionId) {
     return NextResponse.json(
       { error: 'Section ID is required' },
       { status: 400 }
     );
+  }
 
   try {
     // Fetch questions using the service
@@ -40,7 +30,7 @@ export async function GET(
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    // Keep the default return for unexpected error types
+    // Default return for unexpected error types
     return NextResponse.json(
       { error: 'An unexpected error occurred' },
       { status: 500 }

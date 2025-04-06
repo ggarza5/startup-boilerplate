@@ -1,18 +1,22 @@
 import { Suspense } from 'react';
 import TestResultsClientPage from './TestResultsClientPage';
 
-interface TestResultsPageProps {
-  params: {
-    id: string;
-  };
-}
+// Define params type for Next.js 15
+export type TestResultsPageProps = {
+  params: Promise<{ id: string }>;
+};
 
-export default function TestResultsPage({ params }: TestResultsPageProps) {
+export default async function TestResultsPage({
+  params
+}: TestResultsPageProps) {
+  // Destructure while awaiting to get the actual id value
+  const { id } = await params;
+
   return (
     <Suspense
       fallback={<div className="p-10 text-center">Loading results...</div>}
     >
-      <TestResultsClientPage testId={params.id} />
+      <TestResultsClientPage testId={id} />
     </Suspense>
   );
 }
