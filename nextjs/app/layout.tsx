@@ -8,6 +8,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { SectionsProvider } from '@/context/SectionsContext';
 import PostHogPageViewWrapper from '@/components/misc/PostHogPageViewWrapper';
+import { UserProvider } from '@/context/UserContext';
+import { createClient } from '@/utils/supabase/server';
 
 const GoogleAnalyticsID = 'G-J8XQH1YH0C';
 
@@ -52,21 +54,29 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: PropsWithChildren) {
+  // Get the initial user server-side
+  const supabase = await createClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
   return (
     <html lang="en">
       <ThemeProvider>
         <PHProvider>
           <body>
-            <SectionsProvider>
-              <PostHogPageViewWrapper />
-              <main
-                id="skip"
-                className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
-              >
-                {children}
-              </main>
-              <Toaster />
-            </SectionsProvider>
+            <UserProvider initialUser={user}>
+              <SectionsProvider>
+                <PostHogPageViewWrapper />
+                <main
+                  id="skip"
+                  className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
+                >
+                  {children}
+                </main>
+                <Toaster />
+              </SectionsProvider>
+            </UserProvider>
           </body>
         </PHProvider>
       </ThemeProvider>

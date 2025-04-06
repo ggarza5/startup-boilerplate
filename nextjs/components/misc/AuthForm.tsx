@@ -40,7 +40,7 @@ export function AuthForm({ state }: { state: AuthState }) {
         try {
           await api.passwordSignup({ email, password });
           await api.passwordSignin({ email, password });
-          router.push("/questions")
+          router.push('/questions');
         } catch (e) {
           if (e instanceof Error) {
             toast({
@@ -63,7 +63,7 @@ export function AuthForm({ state }: { state: AuthState }) {
         setLoading(true);
         try {
           await api.passwordSignin({ email, password });
-          router.push("/questions")
+          router.push('/questions');
         } catch (e) {
           if (e instanceof Error) {
             toast({
@@ -265,6 +265,25 @@ export function AuthForm({ state }: { state: AuthState }) {
               </Button>
             </>
           )}
+          {/* Add debugging information for authentication status */}
+          <div className="mt-4 text-xs text-center text-gray-500">
+            <button
+              onClick={async () => {
+                const supabase = createClient();
+                const { data, error } = await supabase.auth.getUser();
+                console.log('Current auth state:', { data, error });
+                toast({
+                  title: 'Auth Status',
+                  description: data.user
+                    ? 'Logged in as: ' + data.user.email
+                    : 'Not authenticated'
+                });
+              }}
+              className="text-blue-500 hover:underline"
+            >
+              Check Auth Status
+            </button>
+          </div>
         </div>
       </CardContent>
     </Card>
