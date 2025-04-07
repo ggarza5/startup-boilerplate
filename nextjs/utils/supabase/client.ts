@@ -2,68 +2,150 @@ import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types_db';
 import { getURL } from '@/utils/helpers';
 
-// Check if code is running in a browser environment
 const isBrowser = typeof window !== 'undefined';
 
-// Define a function to create a Supabase client for client-side operations
-export const createClient = () => {
-  // Get the base URL for the current environment (dev or prod)
-  const siteUrl = getURL().replace(/^https?:\/\//, '');
-  const domain = siteUrl.split(':')[0]; // Remove port if present
+// Debug function to log cookie information
+const logCookieDebug = () => {
+  if (!isBrowser) return;
 
-  return createBrowserClient<Database>(
-    // Pass Supabase URL and anonymous key from the environment to the client
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      // Add cookie options with the correct format
-      cookies: {
-        // Using standard setter/getter methods with browser detection
-        get(name) {
-          if (!isBrowser) return undefined;
+  try {
+    console.log('Cookie Debug Info:');
+    const allCookies = document.cookie;
+    console.log('All cookies:', allCookies);
 
-          return document.cookie
-            .split('; ')
-            .find((c) => c.startsWith(`${name}=`))
-            ?.split('=')[1];
-        },
-        set(name, value, options) {
-          // Skip in non-browser environments
-          if (!isBrowser) return;
+    // Check for specific auth cookies
+    const authCookies = allCookies
+      .split(';')
+      .map((c) => c.trim())
+      .filter(
+        (c) =>
+          c.startsWith('sb-') || c.includes('supabase') || c.includes('auth')
+      );
 
-          const cookieOptions = {
-            path: '/',
-            sameSite: 'lax' as const,
-            domain: domain === 'localhost' ? undefined : '.' + domain,
-            secure: domain !== 'localhost',
-            ...options
-          };
+    console.log('Auth cookies:', authCookies);
 
-          let cookie = `${name}=${value}`;
-          if (cookieOptions.path) cookie += `; path=${cookieOptions.path}`;
-          if (cookieOptions.maxAge)
-            cookie += `; max-age=${cookieOptions.maxAge}`;
-          if (cookieOptions.domain)
-            cookie += `; domain=${cookieOptions.domain}`;
-          if (cookieOptions.secure) cookie += `; secure`;
-          if (cookieOptions.sameSite)
-            cookie += `; samesite=${cookieOptions.sameSite}`;
-
-          document.cookie = cookie;
-        },
-        remove(name, options) {
-          // Skip in non-browser environments
-          if (!isBrowser) return;
-
-          const currentDomain =
-            options?.domain ||
-            (document.location.hostname === 'localhost'
-              ? undefined
-              : '.' + document.location.hostname);
-
-          document.cookie = `${name}=; path=${options?.path || '/'}; max-age=0; ${currentDomain ? `domain=${currentDomain};` : ''} ${options?.secure ? 'secure;' : ''} samesite=${options?.sameSite || 'lax'}`;
-        }
-      }
+    if (authCookies.length === 0) {
+      console.warn('No auth cookies found - may cause authentication issues');
     }
-  );
+  } catch (err) {
+    console.error('Error in cookie debug:', err);
+  }
+};
+
+export const createClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  // Get domain for cookie settings
+  const siteUrl = getURL();
+  let domain: string | undefined = undefined;
+
+  try {
+    if (!isBrowser) {
+      console.log('Server environment detected for Supabase client');
+    } else {
+      const url = new URL(siteUrl);
+      // Don't set domain for localhost (causes issues)
+      if (url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
+        // Add a dot prefix for subdomain support
+        domain = `.${url.hostname.split('.').slice(-2).join('.')}`;
+        console.log(`Setting cookie domain to: ${domain}`);
+      } else {
+        console.log('Using default cookie domain for localhost');
+      }
+
+      // Log cookie debug info on client init
+      logCookieDebug();
+    }
+  } catch (err) {
+    console.error('Error parsing domain for cookies:', err);
+  }
+
+  // Create the Supabase client with enhanced cookie handling
+  const client = createBrowserClient<Database>(supabaseUrl, supabaseKey, {
+    cookies: {
+      get(name) {
+        if (!isBrowser) return undefined;
+        const cookie = document.cookie
+          .split(';')
+          .find((c) => c.trim().startsWith(`${name}=`));
+
+        if (!cookie) {
+          console.log(`Cookie not found: ${name}`);
+          return undefined;
+        }
+
+        const value = cookie.split('=')[1];
+        console.log(`Retrieved cookie ${name}: ${value.substring(0, 10)}...`);
+        return decodeURIComponent(value);
+      },
+      set(name, value, options) {
+        if (!isBrowser) {
+          console.log(
+            'Attempting to set cookie in non-browser environment, skipping'
+          );
+          return;
+        }
+
+        let cookieString = `${name}=${encodeURIComponent(value)}; path=/; samesite=lax;`;
+
+        if (options?.domain || domain) {
+          cookieString += ` domain=${options?.domain || domain};`;
+        }
+
+        if (options?.maxAge) {
+          cookieString += ` max-age=${options.maxAge};`;
+        }
+
+        if (options?.expires) {
+          cookieString += ` expires=${options.expires.toUTCString()};`;
+        }
+
+        document.cookie = cookieString;
+        console.log(
+          `Set cookie ${name} with domain ${options?.domain || domain || 'default'}`
+        );
+      },
+      remove(name, options) {
+        if (!isBrowser) {
+          console.log(
+            'Attempting to remove cookie in non-browser environment, skipping'
+          );
+          return;
+        }
+
+        // Set expiration to past date to remove
+        let cookieString = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax;`;
+
+        if (options?.domain || domain) {
+          cookieString += ` domain=${options?.domain || domain};`;
+        }
+
+        document.cookie = cookieString;
+        console.log(
+          `Removed cookie ${name} with domain ${options?.domain || domain || 'default'}`
+        );
+      }
+    },
+    auth: {
+      flowType: 'pkce',
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      persistSession: true
+    }
+  });
+
+  // Set up auth state listener manually (instead of using callbacks)
+  if (isBrowser) {
+    client.auth.onAuthStateChange((event, session) => {
+      console.log(
+        'Auth state changed:',
+        event,
+        session ? 'Session exists' : 'No session'
+      );
+      logCookieDebug();
+    });
+  }
+
+  return client;
 };

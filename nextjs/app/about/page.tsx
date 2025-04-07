@@ -13,18 +13,23 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { createClient } from '@/utils/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { toast } from '@/components/ui/use-toast';
+import { useRouter } from 'next/navigation';
 
 export default function AboutPage() {
-  const { user, refreshUser } = useUser();
+  const router = useRouter();
+  const { user, refreshUser, isLoading, hasValidSession } = useUser();
   const [showDebug, setShowDebug] = useState(false);
   const [authState, setAuthState] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const checkSession = async () => {
         try {
-          setLoading(true);
+          setSessionLoading(true);
           const supabase = createClient();
           const {
             data: { session },
@@ -47,13 +52,36 @@ export default function AboutPage() {
         } catch (err) {
           console.error('Error checking session:', err);
         } finally {
-          setLoading(false);
+          setSessionLoading(false);
         }
       };
 
       checkSession();
     }
   }, []);
+
+  const handleSignOut = async () => {
+    try {
+      setSigningOut(true);
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      toast({
+        title: 'Signed Out',
+        description: 'You have been successfully signed out.'
+      });
+      await refreshUser();
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not sign out. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setSigningOut(false);
+    }
+  };
 
   return (
     <div className="container mx-auto py-10">
@@ -75,18 +103,33 @@ export default function AboutPage() {
 
             <div>
               <h3 className="text-lg font-medium">Authentication Status</h3>
-              {loading ? (
-                <p className="text-sm text-gray-500">
-                  Loading authentication status...
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant={hasValidSession ? 'success' : 'destructive'}>
+                  {hasValidSession ? 'Valid Session' : 'Invalid Session'}
+                </Badge>
+
+                {isLoading && (
+                  <Badge variant="outline" className="animate-pulse">
+                    Loading...
+                  </Badge>
+                )}
+              </div>
+
+              {sessionLoading ? (
+                <p className="text-sm text-gray-500 mt-2">
+                  Loading session details...
                 </p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-2">
                   <p className="font-medium">
                     {user ? `Logged in as: ${user.email}` : 'Not authenticated'}
                   </p>
 
                   {authState && (
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                      <p className="text-gray-500">Context Session Status:</p>
+                      <p>{hasValidSession ? 'Valid' : 'Invalid'}</p>
+
                       <p className="text-gray-500">Active Session:</p>
                       <p>{authState.hasSession ? 'Yes' : 'No'}</p>
 
@@ -101,12 +144,11 @@ export default function AboutPage() {
                     </div>
                   )}
 
-                  <div className="mt-3">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => refreshUser()}
-                      className="mr-2"
                     >
                       Refresh Auth State
                     </Button>
@@ -117,6 +159,16 @@ export default function AboutPage() {
                     >
                       {showDebug ? 'Hide' : 'Show'} Debug Info
                     </Button>
+                    {user && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleSignOut}
+                        disabled={signingOut}
+                      >
+                        {signingOut ? 'Signing Out...' : 'Sign Out'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}

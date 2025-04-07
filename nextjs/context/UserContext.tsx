@@ -16,16 +16,16 @@ const isBrowser = typeof window !== 'undefined';
 
 interface UserContextProps {
   user: User | null;
-  userLoading: boolean;
-  setUser: (user: User | null) => void;
-  refreshUser: () => Promise<void>; // Add refreshUser function
+  refreshUser: () => Promise<void>;
+  isLoading: boolean;
+  hasValidSession: boolean;
 }
 
 const UserContext = createContext<UserContextProps>({
   user: null,
-  userLoading: true,
-  setUser: () => {},
-  refreshUser: async () => {} // Initialize refreshUser
+  refreshUser: async () => {},
+  isLoading: true,
+  hasValidSession: false
 });
 
 interface UserProviderProps {
@@ -35,73 +35,118 @@ interface UserProviderProps {
 
 export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
   const [user, setUser] = useState<User | null>(initialUser);
-  const [userLoading, setUserLoading] = useState(!initialUser);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasValidSession, setHasValidSession] = useState(false);
 
-  // Add refreshUser function that can be called anywhere in the app
   const refreshUser = async () => {
-    if (!isBrowser) return; // Skip in non-browser environments
+    if (!isBrowser) return;
 
-    setUserLoading(true);
+    setIsLoading(true);
     try {
-      const client = createClient();
-      const { data, error } = await client.auth.getUser();
+      console.log('Refreshing user data...');
+      const supabase = createClient();
 
-      if (error) {
-        console.error('Error refreshing user:', error.message);
+      // First check if there's a valid session
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        setHasValidSession(false);
         setUser(null);
-      } else {
-        console.log(
-          'User refreshed successfully:',
-          data.user ? 'Authenticated' : 'Not authenticated'
-        );
-        setUser(data.user);
+        return;
       }
-    } catch (e) {
-      console.error('Exception refreshing user:', e);
+
+      const hasSession = !!sessionData.session;
+      console.log('Has active session:', hasSession);
+      setHasValidSession(hasSession);
+
+      if (!hasSession) {
+        console.log('No active session found, clearing user data');
+        setUser(null);
+        return;
+      }
+
+      // If session exists, get the user data
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error fetching user:', error);
+        setUser(null);
+      } else if (data?.user) {
+        console.log('User data refreshed successfully');
+        setUser(data.user);
+      } else {
+        console.log('No user found despite valid session');
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Exception refreshing user:', error);
       setUser(null);
     } finally {
-      setUserLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!isBrowser) return; // Skip in non-browser environments
+    if (!isBrowser) return;
 
-    // Set up auth state change listener
-    const client = createClient();
-
-    // Set initial state if no initialUser
-    if (!initialUser) {
-      refreshUser();
-    } else {
-      setUserLoading(false);
+    // Set initial user state from props
+    if (initialUser) {
+      console.log('Setting initial user from server-side data');
+      setUser(initialUser);
     }
 
-    // Subscribe to auth state changes
+    // Initial validation
+    refreshUser();
+
+    // Set up auth state listener
+    const supabase = createClient();
     const {
       data: { subscription }
-    } = client.auth.onAuthStateChange((event, session) => {
-      console.log(
-        'Auth state changed:',
-        event,
-        session ? 'Has session' : 'No session'
-      );
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event);
 
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      if (event === 'SIGNED_IN') {
+        console.log('User signed in');
         setUser(session?.user || null);
+        setHasValidSession(true);
       } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
         setUser(null);
+        setHasValidSession(false);
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Auth token refreshed');
+        setUser(session?.user || null);
+        setHasValidSession(true);
+      } else if (event === 'USER_UPDATED') {
+        console.log('User data updated');
+        setUser(session?.user || null);
       }
     });
 
-    // Clean up subscription
+    // Set up a timer to periodically check the session status (every 5 minutes)
+    const refreshInterval = setInterval(
+      () => {
+        console.log('Periodic session check');
+        refreshUser();
+      },
+      5 * 60 * 1000
+    );
+
     return () => {
       subscription.unsubscribe();
+      clearInterval(refreshInterval);
     };
-  }, [initialUser]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialUser]);
 
   return (
-    <UserContext.Provider value={{ user, userLoading, setUser, refreshUser }}>
+    <UserContext.Provider
+      value={{
+        user,
+        refreshUser,
+        isLoading,
+        hasValidSession
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
