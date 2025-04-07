@@ -9,63 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      answers: {
-        Row: {
-          created: string;
-          id: string;
-          metadata: Json | null;
-          mode: Database['public']['Enums']['checkout_mode'] | null;
-          payment_status:
-            | Database['public']['Enums']['checkout_payment_status']
-            | null;
-          price_id: string | null;
-          quantity: number | null;
-          status: Database['public']['Enums']['checkout_status'] | null;
-          user_id: string;
-        };
-        Insert: {
-          created?: string;
-          id: string;
-          metadata?: Json | null;
-          mode?: Database['public']['Enums']['checkout_mode'] | null;
-          payment_status?:
-            | Database['public']['Enums']['checkout_payment_status']
-            | null;
-          price_id?: string | null;
-          quantity?: number | null;
-          status?: Database['public']['Enums']['checkout_status'] | null;
-          user_id: string;
-        };
-        Update: {
-          created?: string;
-          id?: string;
-          metadata?: Json | null;
-          mode?: Database['public']['Enums']['checkout_mode'] | null;
-          payment_status?:
-            | Database['public']['Enums']['checkout_payment_status']
-            | null;
-          price_id?: string | null;
-          quantity?: number | null;
-          status?: Database['public']['Enums']['checkout_status'] | null;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'checkout_sessions_price_id_fkey';
-            columns: ['price_id'];
-            isOneToOne: false;
-            referencedRelation: 'prices';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'checkout_sessions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
       customers: {
         Row: {
           id: string;
