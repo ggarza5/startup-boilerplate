@@ -19,6 +19,7 @@ import { useUser } from '@/context/UserContext'; // Import useUser
 import { Loader } from '@/components/ui/loader';
 import { calculateScore } from '../utils/helpers';
 import { ProgressButton } from '../components/ProgressButton';
+import * as Constants from '../constants'; // Import constants
 
 const Results: React.FC = () => {
   return (
@@ -45,6 +46,7 @@ const ResultsPage: React.FC = () => {
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -66,9 +68,16 @@ const ResultsPage: React.FC = () => {
     }
 
     const fetchSections = async () => {
-      const response = await fetch('/api/sections');
-      const data = await response.json();
-      setSections(data);
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/sections');
+        const data = await response.json();
+        setSections(data);
+      } catch (error) {
+        console.error(Constants.ERROR_FETCHING_SECTIONS, error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchSections();
   }, [user, isLoading]);
@@ -85,9 +94,19 @@ const ResultsPage: React.FC = () => {
   useEffect(() => {
     const fetchCurrentSection = async () => {
       if (sectionId) {
-        const response = await fetch(`/api/section/${sectionId}`);
-        const data = await response.json();
-        setCurrentSection(data);
+        try {
+          setIsLoading(true);
+          const response = await fetch(`/api/section/${sectionId}`);
+          const data = await response.json();
+          if (!response.ok) {
+            console.error(Constants.ERROR_FETCHING_SECTION, data.error);
+          }
+          setCurrentSection(data);
+        } catch (error) {
+          console.error(Constants.ERROR_FETCHING_SECTION, error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
     fetchCurrentSection();
@@ -115,18 +134,22 @@ const ResultsPage: React.FC = () => {
     let correct = 0;
     let incorrect = 0;
     let unanswered = 0;
+    let percentageCorrect = 0;
 
-    currentSection?.questions.forEach((question, index) => {
-      const status = getQuestionStatus(question, index);
-      if (status === 'correct') correct++;
-      else if (status === 'incorrect') incorrect++;
-      else unanswered++;
-    });
+    if (currentSection && currentSection.questions) {
+      // Added check here
+      currentSection.questions.forEach((question, index) => {
+        const status = getQuestionStatus(question, index);
+        if (status === 'correct') correct++;
+        else if (status === 'incorrect') incorrect++;
+        else unanswered++;
+      });
 
-    const percentageCorrect = calculateScore(
-      currentSection as Section,
-      userAnswers
-    );
+      percentageCorrect = calculateScore(
+        currentSection as Section, // Safe to cast here due to the check
+        userAnswers
+      );
+    }
 
     return { correct, incorrect, unanswered, percentageCorrect };
   };
@@ -142,14 +165,25 @@ const ResultsPage: React.FC = () => {
   };
 
   // Handle adding a new section from the sidebar
-  const handleAddSection = async (type: string, sectionName: string) => {
-    router.push(
-      `/questions?addSection=true&type=${type}&sectionName=${sectionName}`
-    );
+  const handleAddSection = async (
+    type: string,
+    sectionName: string,
+    category?: string
+  ) => {
+    let url = `/questions?addSection=true&type=${type}&sectionName=${sectionName}`;
+    if (category) {
+      url += `&category=${encodeURIComponent(category)}`;
+    }
+    router.push(url);
+  };
+
+  // Handle going to the detailed review page
+  const handleGoToReview = () => {
+    router.push(`/review?sectionId=${sectionId}`);
   };
 
   return (
-    <div className="flex flex-col bg-gray-100 dark:bg-gray-900">
+    <div className="flex flex-col bg-muted/40">
       <Navbar user={user} /> {/* Pass user to Navbar */}
       <div className="flex scrollbar-thin scrollbar-thumb-scrollbar-thumb-light scrollbar-track-scrollbar-track-light dark:scrollbar-thumb-scrollbar-thumb-dark dark:scrollbar-track-scrollbar-track-dark">
         <Sidebar
@@ -158,14 +192,15 @@ const ResultsPage: React.FC = () => {
           isCreatingSection={false}
           setIsCreatingSection={() => {}}
         />
-        <div
-          className="flex flex-col p-4"
-          style={{ height: 'calc(100vh - 57px)' }}
-        >
-          {selectedQuestion ? (
+        <div className="flex flex-col p-4 h-vh-minus-navbar w-full">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full">
+              <Loader />
+            </div>
+          ) : selectedQuestion ? (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md relative flex flex-col items-center">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Question Review
+                {Constants.QUESTION_REVIEW_TITLE}
               </h2>
               <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
                 {selectedQuestion.question}
@@ -214,12 +249,35 @@ const ResultsPage: React.FC = () => {
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                   Congratulations!
                 </h1>
-                <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
-                  You have completed the section.
+                <p className="text-lg text-gray-700 dark:text-gray-300 text-center mb-8 ">
+                  You have completed the section.<br></br>Select a question
+                  below or click Detailed Review.
                 </p>
+                <div className="flex gap-4 mb-6">
+                  <button
+                    onClick={handleGoToReview}
+                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded flex items-center"
+                  >
+                    <span className="mr-2">{Constants.DETAILED_REVIEW}</span>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                  <ProgressButton />
+                </div>
                 <div className="w-full text-center">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Your Results
+                    {Constants.YOUR_PROGRESS} - Summary
                   </h2>
                   <div className="mt-4">
                     <p className="text-lg text-gray-700 dark:text-gray-300">
@@ -278,7 +336,6 @@ const ResultsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <ProgressButton />
             </div>
           )}
         </div>

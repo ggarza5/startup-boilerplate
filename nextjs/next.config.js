@@ -8,5 +8,15 @@ module.exports = {
       }
     ];
   },
-  productionBrowserSourceMaps: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'mars-images.imgix.net',
+        port: '',
+        pathname: '/**'
+      }
+    ]
+  },
+  productionBrowserSourceMaps: false
 };

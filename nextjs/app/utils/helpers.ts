@@ -1,4 +1,4 @@
-import { Section } from "../types";
+import { Section } from '../types';
 
 export const getURL = (): string => {
   return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -16,16 +16,22 @@ export const logErrorIfNotProduction = (error: Error) => {
   }
 };
 
-
-export const calculateScore = (section: Section, userAnswers: string[]) => {
+export const calculateScore = (
+  section: Section | null,
+  userAnswers: string[]
+) => {
   console.log('calculateScore', section, userAnswers);
+  if (!section || !section.questions) {
+    return 0; // Return 0 if section or questions are not available
+  }
+
   let numCorrect = 0;
-  section?.questions.forEach((question, index) => {
+  section.questions.forEach((question, index) => {
     if (userAnswers[index] === question.answer) {
       numCorrect++;
     }
   });
-  const score = (numCorrect / section?.questions.length) * 100;
+
+  const score = (numCorrect / section.questions.length) * 100;
   return score;
 };
-

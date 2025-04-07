@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 import ConsultationButton from '../components/ui/ConsultationButton';
 import GabrielCard from '../components/GabrielCard';
 import { logErrorIfNotProduction } from '../utils/helpers';
-
+import { CONSULTATION_URL } from '@/utils/constants';
 const SalesPage = () => {
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
@@ -60,7 +60,7 @@ const SalesPage = () => {
             This is a great opportunity to get personalized advice and guidance
             from someone who has successfully navigated the process.
           </p>
-          <ConsultationButton />
+          <ConsultationButton url={CONSULTATION_URL} />
         </div>
         <GabrielCard className="hidden md:block mt-8" />{' '}
         {/* Reduced margin-top for larger screens */}

@@ -24,6 +24,7 @@ module.exports = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        text: 'hsl(var(--text))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))'
@@ -40,6 +41,10 @@ module.exports = {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))'
         },
+        vibrant: {
+          DEFAULT: 'hsl(var(--vibrant))',
+          foreground: 'hsl(var(--vibrant-foreground))'
+        },
         accent: {
           DEFAULT: 'hsl(var(--accent))',
           foreground: 'hsl(var(--accent-foreground))'
@@ -52,10 +57,15 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
         },
-        'scrollbar-thumb-light': '#888',
-        'scrollbar-track-light': '#f1f1f1',
-        'scrollbar-thumb-dark': '#555',
-        'scrollbar-track-dark': '#333',
+        'brand-blue': 'hsl(var(--brand-blue))',
+        'brand-blue-hex': '#1fc0f1',
+        'brand-green': 'hsl(var(--brand-green))',
+        'brand-pink': 'hsl(var(--brand-pink))',
+        'brand-yellow': 'hsl(var(--brand-yellow))',
+        'scrollbar-track-light': 'hsl(var(--scrollbar-track-light))',
+        'scrollbar-thumb-light': 'hsl(var(--scrollbar-thumb-light))',
+        'scrollbar-track-dark': 'hsl(var(--scrollbar-track-dark))',
+        'scrollbar-thumb-dark': 'hsl(var(--scrollbar-thumb-dark))',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -75,12 +85,38 @@ module.exports = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out'
+      },
+      height: {
+        'vh-minus-navbar': 'calc(100vh - 57px)', // Custom height class
+        'navbar-height': '57px',
+      },
+      minWidth: {
+        'sidebar-collapsed': '',
+        'sidebar-expanded': '230px'
+      },
+      width: {
+        'w-fill-available': [
+          '-webkit-fill-available',
+          '-moz-available',
+          'stretch',
+          'fill-available'
+        ]
       }
     }
   },
   plugins: [
     require('tailwind-scrollbar'),
-    require('tailwindcss-animate')
+    require('tailwindcss-animate'),
+    function({ addUtilities }) {
+      addUtilities({
+        '.w-fill-available': {
+          width: '-webkit-fill-available',
+          width: '-moz-available',
+          width: 'stretch',
+          width: 'fill-available',
+        },
+      })
+    }
   ],
   variants: {
     scrollbar: ['dark'],

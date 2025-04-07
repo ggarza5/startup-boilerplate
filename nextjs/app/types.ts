@@ -4,7 +4,7 @@ export interface Question {
   question: string;
   answer_choices: string[];
   answer: string;
-  explanation?: string;
+  explanation?: string | null;
   created_at: string;
   // Keeping this for backward compatibility, will be deprecated
   follow_up_questions?: string[] | null;
@@ -13,9 +13,11 @@ export interface Question {
 export interface Section {
   id: string;
   name: string;
-  type: string;
-  questions: Question[];
-  createdAt?: string;
+  section_type: string;
+  category?: string | null;
+  questions?: Question[];
+  created_at?: string;
+  created_by?: string;
 }
 
 export interface Result {

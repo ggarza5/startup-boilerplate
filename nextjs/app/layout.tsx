@@ -10,6 +10,7 @@ import { SectionsProvider } from '@/context/SectionsContext';
 import PostHogPageViewWrapper from '@/components/misc/PostHogPageViewWrapper';
 import { createClient } from '@/utils/supabase/server';
 import ClientUserProvider from './ClientUserProvider';
+import DiscordLinkWidget from '@/components/AgentInjector';
 
 // Force dynamic rendering since we use cookies for auth
 export const dynamic = 'force-dynamic';
@@ -81,6 +82,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                   className="min-h-[calc(100dvh-4rem)] md:min-h[calc(100dvh-5rem)]"
                 >
                   {children}
+                  <DiscordLinkWidget />{' '}
                 </main>
                 <Toaster />
               </SectionsProvider>

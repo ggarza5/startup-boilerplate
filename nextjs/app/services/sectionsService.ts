@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Section } from '../types'; // Import the Section type
 import { fetchQuestionsBySectionId } from './questionService';
+import { ERROR_FETCHING_SECTIONS, ERROR_FETCHING_SECTION } from '../constants'; // Import specific constants
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -10,21 +11,21 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Function to fetch all sections
 export const fetchSections = async (): Promise<Section[]> => {
   try {
-    console.log('we are inside the fetchSections');
     const { data, error } = await supabase.from('sections').select('*');
 
     if (error) {
-      console.error('Error fetching sections:', error);
+      console.error(ERROR_FETCHING_SECTIONS, error);
       return [];
     }
 
     const sections: Section[] = data.map((item: any) => {
       return {
         id: item.id,
-        name: item.name || '',
-        type: item.section_type,
-        questions: [],
-        createdAt: item.created_at
+        name: item.name,
+        section_type: item.section_type,
+        category: item.category,
+        created_at: item.created_at,
+        created_by: item.created_by
       };
     });
 
@@ -46,7 +47,7 @@ export const fetchSectionByName = async (
       .eq('name', name);
 
     if (error) {
-      console.error('Error fetching section:', error);
+      console.error(ERROR_FETCHING_SECTION, error);
       return null;
     }
 
@@ -64,9 +65,11 @@ export const fetchSectionByName = async (
     // Map the API response to the Section type
     const section: Section = {
       id: data[0].id,
-      name: data[0].name || '',
-      type: data[0].section_type,
-      createdAt: data[0].created_at,
+      name: data[0].name,
+      section_type: data[0].section_type,
+      category: data[0].category,
+      created_at: data[0].created_at,
+      created_by: data[0].created_by,
       questions: []
     };
 
