@@ -32,6 +32,25 @@ const logCookieDebug = () => {
   }
 };
 
+/**
+ * Parses a cookie value and attempts to extract JSON content
+ */
+const parseCookieValue = (value: string): any => {
+  try {
+    // First try simple JSON parse
+    return JSON.parse(decodeURIComponent(value));
+  } catch (e) {
+    // If that fails, try to handle URL-encoded JSON
+    try {
+      return JSON.parse(decodeURIComponent(value.replace(/\+/g, ' ')));
+    } catch (e2) {
+      // If both fail, return the raw value
+      console.log('Could not parse cookie value as JSON:', e2);
+      return value;
+    }
+  }
+};
+
 export const createClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -61,23 +80,70 @@ export const createClient = () => {
     console.error('Error parsing domain for cookies:', err);
   }
 
+  // Extract the project reference from the Supabase URL
+  const supabaseProjectRef =
+    supabaseUrl.match(/https:\/\/([^.]+)\./)?.[1] || '';
+  const authCookieName = `sb-${supabaseProjectRef}-auth-token`;
+
+  console.log(`Looking for auth cookie with name: ${authCookieName}`);
+
   // Create the Supabase client with enhanced cookie handling
   const client = createBrowserClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {
       get(name) {
         if (!isBrowser) return undefined;
-        const cookie = document.cookie
-          .split(';')
-          .find((c) => c.trim().startsWith(`${name}=`));
 
-        if (!cookie) {
-          console.log(`Cookie not found: ${name}`);
+        try {
+          // Special handling for auth token cookie
+          if (name === authCookieName) {
+            const cookies = document.cookie.split(';');
+
+            // Find all parts of the auth token
+            const authCookieParts: Record<string, string> = {};
+
+            cookies.forEach((cookie) => {
+              const [key, value] = cookie.trim().split('=');
+              if (key && key.startsWith(`${authCookieName}.`)) {
+                const index = key.split('.')[1];
+                authCookieParts[index] = value || '';
+              }
+            });
+
+            // Check if we found any auth token parts
+            const numParts = Object.keys(authCookieParts).length;
+            if (numParts === 0) {
+              console.log(`Auth cookie not found: ${authCookieName}`);
+              return undefined;
+            }
+
+            // Combine all parts in order
+            const combinedValue = Object.keys(authCookieParts)
+              .sort((a, b) => parseInt(a) - parseInt(b))
+              .map((k) => authCookieParts[k])
+              .join('');
+
+            console.log(
+              `Found ${numParts} auth cookie parts, combined length: ${combinedValue.length}`
+            );
+            return decodeURIComponent(combinedValue);
+          }
+
+          // Standard cookie handling for non-auth cookies
+          const cookie = document.cookie
+            .split(';')
+            .find((c) => c.trim().startsWith(`${name}=`));
+
+          if (!cookie) {
+            console.log(`Cookie not found: ${name}`);
+            return undefined;
+          }
+
+          const value = cookie.split('=')[1];
+          return decodeURIComponent(value);
+        } catch (error) {
+          console.error('Error retrieving cookie:', error);
           return undefined;
         }
-
-        const value = cookie.split('=')[1];
-        console.log(`Retrieved cookie ${name}: ${value.substring(0, 10)}...`);
-        return decodeURIComponent(value);
       },
       set(name, value, options) {
         if (!isBrowser) {
@@ -87,24 +153,28 @@ export const createClient = () => {
           return;
         }
 
-        let cookieString = `${name}=${encodeURIComponent(value)}; path=/; samesite=lax;`;
+        try {
+          let cookieString = `${name}=${encodeURIComponent(value)}; path=/; samesite=lax;`;
 
-        if (options?.domain || domain) {
-          cookieString += ` domain=${options?.domain || domain};`;
+          if (options?.domain || domain) {
+            cookieString += ` domain=${options?.domain || domain};`;
+          }
+
+          if (options?.maxAge) {
+            cookieString += ` max-age=${options.maxAge};`;
+          }
+
+          if (options?.expires) {
+            cookieString += ` expires=${options.expires.toUTCString()};`;
+          }
+
+          document.cookie = cookieString;
+          console.log(
+            `Set cookie ${name} with domain ${options?.domain || domain || 'default'}`
+          );
+        } catch (error) {
+          console.error('Error setting cookie:', error);
         }
-
-        if (options?.maxAge) {
-          cookieString += ` max-age=${options.maxAge};`;
-        }
-
-        if (options?.expires) {
-          cookieString += ` expires=${options.expires.toUTCString()};`;
-        }
-
-        document.cookie = cookieString;
-        console.log(
-          `Set cookie ${name} with domain ${options?.domain || domain || 'default'}`
-        );
       },
       remove(name, options) {
         if (!isBrowser) {
@@ -114,17 +184,21 @@ export const createClient = () => {
           return;
         }
 
-        // Set expiration to past date to remove
-        let cookieString = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax;`;
+        try {
+          // Set expiration to past date to remove
+          let cookieString = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax;`;
 
-        if (options?.domain || domain) {
-          cookieString += ` domain=${options?.domain || domain};`;
+          if (options?.domain || domain) {
+            cookieString += ` domain=${options?.domain || domain};`;
+          }
+
+          document.cookie = cookieString;
+          console.log(
+            `Removed cookie ${name} with domain ${options?.domain || domain || 'default'}`
+          );
+        } catch (error) {
+          console.error('Error removing cookie:', error);
         }
-
-        document.cookie = cookieString;
-        console.log(
-          `Removed cookie ${name} with domain ${options?.domain || domain || 'default'}`
-        );
       }
     },
     auth: {
@@ -135,7 +209,7 @@ export const createClient = () => {
     }
   });
 
-  // Set up auth state listener manually (instead of using callbacks)
+  // Set up auth state listener manually
   if (isBrowser) {
     client.auth.onAuthStateChange((event, session) => {
       console.log(

@@ -19,13 +19,15 @@ interface UserContextProps {
   refreshUser: () => Promise<void>;
   isLoading: boolean;
   hasValidSession: boolean;
+  repairSession: () => Promise<boolean>;
 }
 
 const UserContext = createContext<UserContextProps>({
   user: null,
   refreshUser: async () => {},
   isLoading: true,
-  hasValidSession: false
+  hasValidSession: false,
+  repairSession: async () => false
 });
 
 interface UserProviderProps {
@@ -37,6 +39,7 @@ export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
   const [user, setUser] = useState<User | null>(initialUser);
   const [isLoading, setIsLoading] = useState(true);
   const [hasValidSession, setHasValidSession] = useState(false);
+  const [recoveryAttempted, setRecoveryAttempted] = useState(false);
 
   const refreshUser = async () => {
     if (!isBrowser) return;
@@ -86,6 +89,51 @@ export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
     }
   };
 
+  const repairSession = async (): Promise<boolean> => {
+    if (!isBrowser) return false;
+
+    setIsLoading(true);
+    try {
+      console.log('Attempting session repair...');
+      const supabase = createClient();
+
+      // Check if we have auth token cookies despite missing session
+      const cookies = document.cookie;
+      const hasTokenCookies =
+        cookies.includes('sb-') && cookies.includes('-auth-token');
+
+      if (!hasTokenCookies) {
+        console.log('No auth cookies found, cannot repair session');
+        return false;
+      }
+
+      console.log('Auth cookies found, attempting to refresh session');
+
+      // Force token refresh
+      const { data, error } = await supabase.auth.refreshSession();
+
+      if (error) {
+        console.error('Session refresh error:', error);
+        return false;
+      }
+
+      if (data.session) {
+        console.log('Session successfully refreshed');
+        setUser(data.user);
+        setHasValidSession(true);
+        return true;
+      } else {
+        console.log('No session returned after refresh');
+        return false;
+      }
+    } catch (error) {
+      console.error('Exception repairing session:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isBrowser) return;
 
@@ -95,8 +143,21 @@ export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
       setUser(initialUser);
     }
 
-    // Initial validation
-    refreshUser();
+    const initializeAuth = async () => {
+      // Initial validation
+      await refreshUser();
+
+      // If no valid session but we have a user, try to recover
+      if (!hasValidSession && !recoveryAttempted && user) {
+        console.log(
+          'No valid session but user data exists, attempting recovery'
+        );
+        setRecoveryAttempted(true);
+        await repairSession();
+      }
+    };
+
+    initializeAuth();
 
     // Set up auth state listener
     const supabase = createClient();
@@ -136,7 +197,7 @@ export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
       subscription.unsubscribe();
       clearInterval(refreshInterval);
     };
-  }, [initialUser]);
+  }, [initialUser, hasValidSession, recoveryAttempted, user]);
 
   return (
     <UserContext.Provider
@@ -144,7 +205,8 @@ export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
         user,
         refreshUser,
         isLoading,
-        hasValidSession
+        hasValidSession,
+        repairSession
       }}
     >
       {children}
