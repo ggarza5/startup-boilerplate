@@ -8,15 +8,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { SectionsProvider } from '@/context/SectionsContext';
 import PostHogPageViewWrapper from '@/components/misc/PostHogPageViewWrapper';
-import { UserProvider } from '@/context/UserContext';
 import { createClient } from '@/utils/supabase/server';
-import dynamic from 'next/dynamic';
-
-// Dynamically import UserProvider to ensure it only runs on client
-const ClientUserProvider = dynamic(
-  () => import('@/context/UserContext').then((mod) => mod.UserProvider),
-  { ssr: false }
-);
+import ClientUserProvider from './ClientUserProvider';
 
 const GoogleAnalyticsID = 'G-J8XQH1YH0C';
 
