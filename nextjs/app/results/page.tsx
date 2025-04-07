@@ -30,7 +30,7 @@ const Results: React.FC = () => {
 
 // Main component for the Results Page
 const ResultsPage: React.FC = () => {
-  const { user, userLoading } = useUser(); // Use the useUser hook
+  const { user, isLoading } = useUser(); // Use the useUser hook
   const router = useRouter();
   const queryVariables = useSearchParams();
   const userAnswersQuery = queryVariables?.get('userAnswers');
@@ -59,7 +59,7 @@ const ResultsPage: React.FC = () => {
 
   // Fetch sections from the API when the component mounts
   useEffect(() => {
-    if (userLoading) return; // Wait for user to load
+    if (isLoading) return; // Wait for user to load
     if (!user) {
       router.push('/auth'); // Redirect to login if no user
       return;
@@ -71,7 +71,7 @@ const ResultsPage: React.FC = () => {
       setSections(data);
     };
     fetchSections();
-  }, [user, userLoading]);
+  }, [user, isLoading]);
 
   // Set the current section based on the section name from the query parameters
   useEffect(() => {
