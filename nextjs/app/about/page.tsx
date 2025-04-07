@@ -19,8 +19,7 @@ import { useRouter } from 'next/navigation';
 
 export default function AboutPage() {
   const router = useRouter();
-  const { user, refreshUser, isLoading, hasValidSession, repairSession } =
-    useUser();
+  const { user, refreshUser, isLoading, hasValidSession } = useUser();
   const [showDebug, setShowDebug] = useState(false);
   const [authState, setAuthState] = useState<any>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
@@ -90,27 +89,31 @@ export default function AboutPage() {
     try {
       setRepairingSession(true);
       toast({
-        title: 'Repairing Session',
-        description: 'Attempting to repair your authentication session...'
+        title: 'Refreshing Session',
+        description: 'Attempting to refresh your authentication session...'
       });
 
-      // Use the repairSession function from context
-      const success = await repairSession();
+      // Use the refreshUser function instead of repairSession
+      await refreshUser();
+
+      // Check if the session is valid after refresh
+      const supabase = createClient();
+      const {
+        data: { session },
+        error
+      } = await supabase.auth.getSession();
+
+      const success = !!session && !error;
 
       if (success) {
         toast({
-          title: 'Session Repaired',
+          title: 'Session Refreshed',
           description: 'Authentication session successfully refreshed.'
         });
 
         // Update local session data
-        const supabase = createClient();
-        const {
-          data: { session }
-        } = await supabase.auth.getSession();
-
         setAuthState({
-          hasSession: !!session,
+          hasSession: true,
           expiresAt: session?.expires_at
             ? new Date(session.expires_at * 1000).toLocaleString()
             : 'N/A',
@@ -121,17 +124,17 @@ export default function AboutPage() {
         });
       } else {
         toast({
-          title: 'Session Repair Failed',
-          description: 'Could not repair your authentication session.',
+          title: 'Session Refresh Failed',
+          description: 'Could not refresh your authentication session.',
           variant: 'destructive'
         });
       }
     } catch (error: any) {
-      console.error('Error repairing session:', error);
+      console.error('Error refreshing session:', error);
       toast({
-        title: 'Session Repair Failed',
+        title: 'Session Refresh Failed',
         description:
-          error.message || 'Could not repair authentication session.',
+          error.message || 'Could not refresh authentication session.',
         variant: 'destructive'
       });
     } finally {
@@ -221,7 +224,7 @@ export default function AboutPage() {
                       onClick={handleRepairSession}
                       disabled={repairingSession}
                     >
-                      {repairingSession ? 'Repairing...' : 'Repair Session'}
+                      {repairingSession ? 'Refreshing...' : 'Refresh Session'}
                     </Button>
                     {user && (
                       <Button
@@ -233,6 +236,13 @@ export default function AboutPage() {
                         {signingOut ? 'Signing Out...' : 'Sign Out'}
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push('/auth/debug')}
+                    >
+                      Advanced Auth Debug
+                    </Button>
                   </div>
                 </div>
               )}

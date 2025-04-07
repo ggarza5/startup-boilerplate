@@ -11,6 +11,9 @@ import PostHogPageViewWrapper from '@/components/misc/PostHogPageViewWrapper';
 import { createClient } from '@/utils/supabase/server';
 import ClientUserProvider from './ClientUserProvider';
 
+// Force dynamic rendering since we use cookies for auth
+export const dynamic = 'force-dynamic';
+
 const GoogleAnalyticsID = 'G-J8XQH1YH0C';
 
 const meta = {
