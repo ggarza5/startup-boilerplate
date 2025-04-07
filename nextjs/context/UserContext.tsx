@@ -11,6 +11,9 @@ import React, {
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client'; // Use the client-side Supabase client
 
+// Ensure this component is only used in client environment
+const isBrowser = typeof window !== 'undefined';
+
 interface UserContextProps {
   user: User | null;
   userLoading: boolean;
@@ -36,6 +39,8 @@ export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
 
   // Add refreshUser function that can be called anywhere in the app
   const refreshUser = async () => {
+    if (!isBrowser) return; // Skip in non-browser environments
+
     setUserLoading(true);
     try {
       const client = createClient();
@@ -60,6 +65,8 @@ export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
   };
 
   useEffect(() => {
+    if (!isBrowser) return; // Skip in non-browser environments
+
     // Set up auth state change listener
     const client = createClient();
 
@@ -91,7 +98,7 @@ export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [initialUser]);
+  }, [initialUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <UserContext.Provider value={{ user, userLoading, setUser, refreshUser }}>

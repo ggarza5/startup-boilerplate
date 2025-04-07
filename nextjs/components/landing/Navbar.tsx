@@ -71,7 +71,11 @@ export const Navbar = ({ user }: { user: User | null }) => {
               className="ml-2 font-bold text-xl flex"
             >
               {/* <LogoIcon /> */}
-              <img src="/SATPracticeBotLogo-removebg.png" alt="SAT Practice Bot" className="w-8 h-8 mr-2" />
+              <img
+                src="/SATPracticeBotLogo-removebg.png"
+                alt="SAT Practice Bot"
+                className="w-8 h-8 mr-2"
+              />
               SAT Practice Bot
             </a>
           </NavigationMenuItem>
@@ -107,6 +111,16 @@ export const Navbar = ({ user }: { user: User | null }) => {
                   ))}
                   <ConsultationButton />
                   <Button
+                    variant="ghost"
+                    onClick={() => {
+                      router.push('/about');
+                      setIsOpen(false);
+                    }}
+                    className="w-[110px]"
+                  >
+                    About
+                  </Button>
+                  <Button
                     variant="secondary"
                     onClick={handleAuth}
                     className={`w-[110px] border`}
@@ -136,6 +150,13 @@ export const Navbar = ({ user }: { user: User | null }) => {
 
           <div className="hidden md:flex gap-2">
             <ConsultationButton />
+            <Button
+              onClick={() => router.push('/about')}
+              className="border"
+              variant="ghost"
+            >
+              About
+            </Button>
             <Button
               onClick={handleAuth}
               className={`border`}

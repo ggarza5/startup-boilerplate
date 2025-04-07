@@ -18,6 +18,8 @@ import { createClient } from '@/utils/supabase/client';
 import { useToast } from '../ui/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthState, StateInfo } from '@/utils/types';
+import { useUser } from '@/context/UserContext';
+import AuthDebug from './AuthDebug';
 
 export function AuthForm({ state }: { state: AuthState }) {
   const { toast } = useToast();
@@ -28,6 +30,7 @@ export function AuthForm({ state }: { state: AuthState }) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { user, refreshUser } = useUser();
   const stateInfo: Record<AuthState, StateInfo> = {
     signup: {
       title: 'Sign Up',
@@ -151,6 +154,13 @@ export function AuthForm({ state }: { state: AuthState }) {
     }
   }, []);
 
+  const renderDebugSection = () => {
+    if (process.env.NODE_ENV === 'development') {
+      return <AuthDebug />;
+    }
+    return null;
+  };
+
   const currState = stateInfo[authState];
   return (
     <Card className="mx-auto w-96 mx-4">
@@ -265,25 +275,7 @@ export function AuthForm({ state }: { state: AuthState }) {
               </Button>
             </>
           )}
-          {/* Add debugging information for authentication status */}
-          <div className="mt-4 text-xs text-center text-gray-500">
-            <button
-              onClick={async () => {
-                const supabase = createClient();
-                const { data, error } = await supabase.auth.getUser();
-                console.log('Current auth state:', { data, error });
-                toast({
-                  title: 'Auth Status',
-                  description: data.user
-                    ? 'Logged in as: ' + data.user.email
-                    : 'Not authenticated'
-                });
-              }}
-              className="text-blue-500 hover:underline"
-            >
-              Check Auth Status
-            </button>
-          </div>
+          {renderDebugSection()}
         </div>
       </CardContent>
     </Card>

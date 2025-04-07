@@ -2,6 +2,9 @@ import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types_db';
 import { getURL } from '@/utils/helpers';
 
+// Check if code is running in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
 // Define a function to create a Supabase client for client-side operations
 export const createClient = () => {
   // Get the base URL for the current environment (dev or prod)
@@ -15,14 +18,19 @@ export const createClient = () => {
     {
       // Add cookie options with the correct format
       cookies: {
-        // Using standard setter/getter methods since 'name' isn't recognized
+        // Using standard setter/getter methods with browser detection
         get(name) {
+          if (!isBrowser) return undefined;
+
           return document.cookie
             .split('; ')
             .find((c) => c.startsWith(`${name}=`))
             ?.split('=')[1];
         },
         set(name, value, options) {
+          // Skip in non-browser environments
+          if (!isBrowser) return;
+
           const cookieOptions = {
             path: '/',
             sameSite: 'lax' as const,
@@ -44,13 +52,16 @@ export const createClient = () => {
           document.cookie = cookie;
         },
         remove(name, options) {
-          const domain =
+          // Skip in non-browser environments
+          if (!isBrowser) return;
+
+          const currentDomain =
             options?.domain ||
             (document.location.hostname === 'localhost'
               ? undefined
               : '.' + document.location.hostname);
 
-          document.cookie = `${name}=; path=${options?.path || '/'}; max-age=0; ${domain ? `domain=${domain};` : ''} ${options?.secure ? 'secure;' : ''} samesite=${options?.sameSite || 'lax'}`;
+          document.cookie = `${name}=; path=${options?.path || '/'}; max-age=0; ${currentDomain ? `domain=${currentDomain};` : ''} ${options?.secure ? 'secure;' : ''} samesite=${options?.sameSite || 'lax'}`;
         }
       }
     }

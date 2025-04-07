@@ -75,6 +75,16 @@ export const Navbar = ({ user }: { user: User | null }) => {
                 </SheetHeader>
                 <nav className="flex flex-col justify-center items-center gap-2 mt-4">
                   <Button
+                    variant="ghost"
+                    onClick={() => {
+                      router.push('/about');
+                      setIsOpen(false);
+                    }}
+                    className="w-[110px]"
+                  >
+                    About
+                  </Button>
+                  <Button
                     variant="secondary"
                     onClick={handleAuth}
                     className={`w-[110px] border`}
@@ -89,6 +99,13 @@ export const Navbar = ({ user }: { user: User | null }) => {
 
           <div className="hidden md:flex gap-2">
             <ConsultationButton />
+            <Button
+              onClick={() => router.push('/about')}
+              className="border"
+              variant="ghost"
+            >
+              About
+            </Button>
             <Button onClick={handleAuth} className={`border`} variant="outline">
               {user ? 'Account' : 'Sign In'}
             </Button>

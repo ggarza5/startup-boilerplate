@@ -10,6 +10,13 @@ import { SectionsProvider } from '@/context/SectionsContext';
 import PostHogPageViewWrapper from '@/components/misc/PostHogPageViewWrapper';
 import { UserProvider } from '@/context/UserContext';
 import { createClient } from '@/utils/supabase/server';
+import dynamic from 'next/dynamic';
+
+// Dynamically import UserProvider to ensure it only runs on client
+const ClientUserProvider = dynamic(
+  () => import('@/context/UserContext').then((mod) => mod.UserProvider),
+  { ssr: false }
+);
 
 const GoogleAnalyticsID = 'G-J8XQH1YH0C';
 
@@ -55,17 +62,22 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   // Get the initial user server-side
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  let initialUser = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    initialUser = data.user;
+  } catch (error) {
+    console.error('Error fetching user server-side:', error);
+    // Continue without initial user data
+  }
 
   return (
     <html lang="en">
       <ThemeProvider>
         <PHProvider>
           <body>
-            <UserProvider initialUser={user}>
+            <ClientUserProvider initialUser={initialUser}>
               <SectionsProvider>
                 <PostHogPageViewWrapper />
                 <main
@@ -76,7 +88,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                 </main>
                 <Toaster />
               </SectionsProvider>
-            </UserProvider>
+            </ClientUserProvider>
           </body>
         </PHProvider>
       </ThemeProvider>
