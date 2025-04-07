@@ -51,9 +51,11 @@ export default function CreateTestClientPage() {
           ? sectionsData.map((item) => ({
               id: item.id,
               name: item.name || '',
-              type: item.section_type,
+              section_type: item.section_type,
               questions: [],
-              createdAt: item.created_at || undefined
+              created_at: item.created_at ?? undefined,
+              category: item.category ?? undefined,
+              created_by: item.created_by ?? undefined
             }))
           : [];
 
@@ -132,7 +134,7 @@ export default function CreateTestClientPage() {
   const groupSectionsByType = () => {
     return sections.reduce(
       (groups, section) => {
-        const type = section.type;
+        const type = section.section_type;
         if (!groups[type]) {
           groups[type] = [];
         }

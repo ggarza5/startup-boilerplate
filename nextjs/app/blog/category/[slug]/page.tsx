@@ -17,17 +17,24 @@ async function getPosts(slug: string, page: number) {
   return client.getCategoryArticles(slug, page, 10);
 }
 
+// Define Promise types for params and searchParams
+type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
 function deslugify(str: string) {
   return str.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export const fetchCache = 'force-no-store';
 
-export async function generateMetadata({
-  params: { slug }
-}: {
-  params: { slug: string };
+export async function generateMetadata(props: {
+  params: Params;
+  // searchParams: SearchParams; // Include if needed
 }): Promise<Metadata> {
+  // Await the params promise
+  const params = await props.params;
+  const { slug } = params;
+
   const title = `${deslugify(slug)} - ${BLOG_NAME}`;
   return {
     title,
@@ -51,14 +58,22 @@ export async function generateMetadata({
   };
 }
 
-export default async function Category({
-  params: { slug },
-  searchParams: { page }
-}: {
-  params: { slug: string };
-  searchParams: { page: number };
-}) {
-  const pageNumber = Math.max((page || 0) - 1, 0);
+// Define props type for the page component
+export type CategoryPageProps = {
+  params: Params;
+  searchParams: SearchParams; // Include searchParams Promise
+};
+
+// Update component signature and logic to use Promise pattern
+export default async function Category(props: CategoryPageProps) {
+  // Await promises
+  const params = await props.params;
+  const searchParams = await props.searchParams;
+  const { slug } = params;
+  const page = searchParams.page; // Access page from resolved searchParams
+
+  // Ensure page is treated as a number, handling potential string/undefined types
+  const pageNumber = Math.max(Number(page || '0') - 1, 0);
   const { total, articles } = await getPosts(slug, pageNumber);
   const posts = articles || [];
   const lastPage = Math.ceil(total / 10);

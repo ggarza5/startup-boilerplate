@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Question, Section } from '@/app/types';
+import { Question, Section, Result } from '@/app/types';
 import { Loader } from '@/components/ui/loader';
 import { createClient } from '@/utils/supabase/client';
 import { Navbar } from '../components/ui/Navbar';
@@ -49,7 +49,22 @@ const ReviewClientComponent: React.FC = () => {
           return;
         }
 
-        setSection(sectionData);
+        // Transform the fetched section data before setting the state
+        const transformedSection = {
+          ...sectionData,
+          created_at:
+            sectionData.created_at === null
+              ? undefined
+              : sectionData.created_at,
+          created_by:
+            sectionData.created_by === null
+              ? undefined
+              : sectionData.created_by,
+          category:
+            sectionData.category === null ? undefined : sectionData.category
+        };
+
+        setSection(transformedSection);
 
         // Fetch questions for this section
         const { data: questionsData, error: questionsError } = await supabase
@@ -64,7 +79,17 @@ const ReviewClientComponent: React.FC = () => {
           return;
         }
 
-        setQuestions(questionsData);
+        // Transform questions data
+        const transformedQuestions =
+          questionsData?.map((q) => ({
+            ...q,
+            created_at: q.created_at ?? '', // Provide a default empty string if null
+            explanation: q.explanation ?? undefined,
+            section_id: q.section_id ?? '', // Assuming section_id should be a non-nullable string, defaulting to empty string if null
+            answer_choices: q.answer_choices ?? [] // Assuming answer_choices should be a non-nullable array, defaulting to empty array if null
+          })) || [];
+
+        setQuestions(transformedQuestions);
 
         // Fetch user answers if available
         if (user) {

@@ -46,7 +46,7 @@ export default function TestsClientPage() {
             .order('created_at', { ascending: false }),
           supabase
             .from('sections')
-            .select('id, name, section_type, created_at')
+            .select('id, name, section_type, created_at, category, created_by')
             .order('created_at', { ascending: false })
         ]);
 
@@ -61,9 +61,11 @@ export default function TestsClientPage() {
           ? sectionsResponse.data.map((item) => ({
               id: item.id,
               name: item.name || '',
-              type: item.section_type,
+              section_type: item.section_type,
               questions: [],
-              createdAt: item.created_at || undefined
+              created_at: item.created_at ?? undefined,
+              category: item.category ?? undefined,
+              created_by: item.created_by ?? undefined
             }))
           : [];
         setSections(mappedSections);

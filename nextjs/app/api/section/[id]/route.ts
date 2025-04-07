@@ -5,11 +5,8 @@ import { fetchQuestionsBySectionId } from '@/app/services/questionService';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } } // Use 'id' here
-) {
-  const sectionId = params.id; // Get ID from params.id
+export async function GET(request: NextRequest, context: any) {
+  const sectionId = context.params.id;
 
   if (!sectionId) {
     return NextResponse.json(
@@ -19,7 +16,7 @@ export async function GET(
   }
 
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Fetch section details by ID
     const { data: sectionData, error: sectionError } = await supabase

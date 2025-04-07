@@ -22,11 +22,19 @@ async function getPost(slug: string) {
 
 export const fetchCache = 'force-no-store';
 
-export async function generateMetadata({
-  params: { slug }
-}: {
-  params: { slug: string };
+// Define the type for params as a Promise
+type Params = Promise<{ slug: string }>;
+// Define the type for searchParams (even if unused in this specific function)
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export async function generateMetadata(props: {
+  params: Params;
+  // searchParams: SearchParams; // Include if needed
 }): Promise<Metadata> {
+  // Await the params promise
+  const params = await props.params;
+  const { slug } = params;
+
   const post = await getPost(slug);
   if (!post) return {};
 
@@ -55,11 +63,21 @@ export async function generateMetadata({
   };
 }
 
-export default async function Article({
-  params: { slug }
-}: {
-  params: { slug: string };
-}) {
+// Update BlogPageProps to use the Promise types
+export type BlogPageProps = {
+  params: Params;
+  // searchParams?: SearchParams; // Include if needed
+};
+
+// Define the component logic internally, accepting props with Promises
+async function ArticleComponent(props: BlogPageProps) {
+  // Await the params promise
+  const params = await props.params;
+  const { slug } = params;
+
+  // If using searchParams, await here too:
+  // const searchParams = await props.searchParams;
+
   const post = await getPost(slug);
   if (!post) return <NotFound />;
 
@@ -151,3 +169,6 @@ export default async function Article({
     </>
   );
 }
+
+// Remove @ts-ignore as the pattern should now match build expectations
+export default ArticleComponent;

@@ -5,6 +5,10 @@ import { type Metadata } from 'next';
 import { BlogClient } from 'seobot';
 import { Navbar } from '@/components/landing/Navbar';
 
+// Define Promise type for searchParams
+// Note: This page doesn't use route `params`
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
 export async function generateMetadata(): Promise<Metadata> {
   const title = 'SAT Practice Blog';
   const description =
@@ -45,12 +49,20 @@ async function getPosts(page: number) {
 
 export const fetchCache = 'force-no-store';
 
-export default async function Blog({
-  searchParams: { page }
-}: {
-  searchParams: { page: number };
-}) {
-  const pageNumber = Math.max((page || 0) - 1, 0);
+// Define props type for the page component
+export type BlogPageProps = {
+  // No `params` needed for this page
+  searchParams: SearchParams;
+};
+
+// Update component signature and logic to use Promise pattern
+export default async function Blog(props: BlogPageProps) {
+  // Await searchParams promise
+  const searchParams = await props.searchParams;
+  const page = searchParams.page; // Access page from resolved searchParams
+
+  // Ensure page is treated as a number, handling potential string/undefined types
+  const pageNumber = Math.max(Number(page || '0') - 1, 0);
   const { total, articles } = await getPosts(pageNumber);
   const posts = articles || [];
   const lastPage = Math.ceil(total / 10);

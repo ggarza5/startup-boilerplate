@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import { Result, Section } from '@/app/types';
+import { Result, Section, Question } from '@/app/types';
 import { Loader } from '@/components/ui/loader';
 import { createClient } from '@/utils/supabase/client';
 import { logErrorIfNotProduction, logIfNotProduction } from '../utils/helpers';
@@ -55,6 +55,23 @@ const CategoryPerformancePage: React.FC = () => {
 
   const { user, loading: userLoading, error, refetch } = useFetchUser();
 
+  function transformSection(section: {
+    category: string | null;
+    created_at: string | null;
+    created_by: string | null;
+    id: string;
+    name: string;
+    section_type: string;
+    questions?: Question[];
+  }): Section {
+    return {
+      ...section,
+      created_at: section.created_at === null ? undefined : section.created_at,
+      created_by: section.created_by === null ? undefined : section.created_by,
+      category: section.category === null ? undefined : section.category
+    };
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       if (user) {
@@ -74,11 +91,13 @@ const CategoryPerformancePage: React.FC = () => {
             .from('sections')
             .select('*');
 
+          const transformedSections = sectionsData?.map(transformSection);
+
           if (sectionsError) {
             console.error(Constants.ERROR_FETCHING_SECTIONS, sectionsError);
             // Handle error state if needed
           } else {
-            setSections(sectionsData || []);
+            setSections(transformedSections || []);
           }
         } catch (error) {
           console.error(Constants.ERROR_FETCHING_RESULTS, error); // Or a more general error

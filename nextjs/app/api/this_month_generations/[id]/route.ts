@@ -4,11 +4,8 @@ import { fetchQuestionsBySectionId } from '../../../services/questionService';
 export const maxDuration = 45;
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const sectionId = params.id;
+export async function GET(req: Request, context: any) {
+  const sectionId = context.params.id;
   if (!sectionId)
     return NextResponse.json(
       { error: 'Section ID is required' },

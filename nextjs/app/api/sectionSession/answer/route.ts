@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize Supabase client
-    const supabase = createClient();
+    // Initialize Supabase client - add await
+    const supabase = await createClient();
 
     // Check if an answer already exists
     const { data: existingAnswer, error: checkError } = await supabase

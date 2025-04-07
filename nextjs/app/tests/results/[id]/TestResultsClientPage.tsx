@@ -83,9 +83,9 @@ export default function TestResultsClientPage({
             ? sectionsData.map((item) => ({
                 id: item.id,
                 name: item.name || '',
-                type: item.section_type,
+                section_type: item.section_type,
                 questions: [],
-                createdAt: item.created_at || undefined
+                created_at: item.created_at ?? undefined
               }))
             : [];
 
@@ -219,7 +219,7 @@ export default function TestResultsClientPage({
                       {section?.name || 'Unknown Section'}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-2">
-                      {section?.type || 'Unknown Type'}
+                      {section?.section_type || 'Unknown Type'}
                     </p>
                   </div>
                   <div className="px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">

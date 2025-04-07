@@ -31,7 +31,7 @@ const Results: React.FC = () => {
 
 // Main component for the Results Page
 const ResultsPage: React.FC = () => {
-  const { user, isLoading } = useUser(); // Use the useUser hook
+  const { user, isLoading: isUserLoading } = useUser(); // Use the useUser hook
   const router = useRouter();
   const queryVariables = useSearchParams();
   const userAnswersQuery = queryVariables?.get('userAnswers');
@@ -46,7 +46,7 @@ const ResultsPage: React.FC = () => {
   const [currentSection, setCurrentSection] = useState<Section | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [isClient, setIsClient] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -61,7 +61,7 @@ const ResultsPage: React.FC = () => {
 
   // Fetch sections from the API when the component mounts
   useEffect(() => {
-    if (isLoading) return; // Wait for user to load
+    if (isUserLoading) return; // Wait for user to load
     if (!user) {
       router.push('/auth'); // Redirect to login if no user
       return;
@@ -69,18 +69,18 @@ const ResultsPage: React.FC = () => {
 
     const fetchSections = async () => {
       try {
-        setIsLoading(true);
+        setIsDataLoading(true);
         const response = await fetch('/api/sections');
         const data = await response.json();
         setSections(data);
       } catch (error) {
         console.error(Constants.ERROR_FETCHING_SECTIONS, error);
       } finally {
-        setIsLoading(false);
+        setIsDataLoading(false);
       }
     };
     fetchSections();
-  }, [user, isLoading]);
+  }, [user, isUserLoading]);
 
   // Set the current section based on the section name from the query parameters
   useEffect(() => {
@@ -95,7 +95,7 @@ const ResultsPage: React.FC = () => {
     const fetchCurrentSection = async () => {
       if (sectionId) {
         try {
-          setIsLoading(true);
+          setIsDataLoading(true);
           const response = await fetch(`/api/section/${sectionId}`);
           const data = await response.json();
           if (!response.ok) {
@@ -105,7 +105,7 @@ const ResultsPage: React.FC = () => {
         } catch (error) {
           console.error(Constants.ERROR_FETCHING_SECTION, error);
         } finally {
-          setIsLoading(false);
+          setIsDataLoading(false);
         }
       }
     };
@@ -193,7 +193,7 @@ const ResultsPage: React.FC = () => {
           setIsCreatingSection={() => {}}
         />
         <div className="flex flex-col p-4 h-vh-minus-navbar w-full">
-          {isLoading ? (
+          {isDataLoading ? (
             <div className="flex justify-center items-center h-full">
               <Loader />
             </div>
