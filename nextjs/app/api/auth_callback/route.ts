@@ -9,36 +9,58 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const errorMessage = requestUrl.searchParams.get('error_description');
+  const provider = requestUrl.searchParams.get('provider') || 'unknown';
 
   console.log(
-    `Auth callback triggered. Code present: ${!!code}, Error: ${errorMessage || 'none'}`
+    `Auth callback triggered for ${provider}. Code present: ${!!code}, Error: ${errorMessage || 'none'}`
   );
 
   try {
     if (code) {
       const supabase = await createClient();
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
       if (error) {
-        console.error('Error exchanging code for session:', error.message);
+        console.error(
+          `Error exchanging code for session (${provider}):`,
+          error.message
+        );
+
+        // More detailed error for debugging
+        if (error.message.includes('code verifier')) {
+          console.error(
+            'PKCE verification failed - code verifier missing or invalid'
+          );
+          console.error(
+            'This often happens when cookies are not properly maintained between requests'
+          );
+        }
+
         throw error;
       }
 
       // Successfully authenticated
-      console.log('Successfully exchanged code for session');
+      console.log(`Successfully exchanged code for session (${provider})`);
+      console.log(`User authenticated: ${data.user?.id}`);
+
+      // Add a small delay to ensure cookies are set properly
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       return NextResponse.redirect(getURL('/'));
     } else if (errorMessage) {
-      console.error('OAuth error:', errorMessage);
+      console.error(`OAuth error (${provider}):`, errorMessage);
       throw new Error(errorMessage);
     } else {
       // No code or error message
-      console.error('No code or error message present in callback URL');
+      console.error(
+        `No code or error message present in callback URL (${provider})`
+      );
       throw new Error('No code or error message present in callback URL');
     }
   } catch (e) {
     if (!(e instanceof Error)) throw e;
 
-    console.error('Auth callback error:', e.message);
+    console.error(`Auth callback error (${provider}):`, e.message);
 
     // Redirect with error information
     return NextResponse.redirect(

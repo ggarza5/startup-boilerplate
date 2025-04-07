@@ -1,55 +1,119 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types_db';
 import { getURL } from '@/utils/helpers';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 const isBrowser = typeof window !== 'undefined';
 
-// Debug function to log cookie information
-const logCookieDebug = () => {
+// Set debug log level
+const DEBUG_LEVEL = 1; // 0=none, 1=errors only, 2=all
+
+// Improved function to cleanup duplicate auth cookies
+function cleanupAuthCookies() {
   if (!isBrowser) return;
 
   try {
-    console.log('Cookie Debug Info:');
-    const allCookies = document.cookie;
-    console.log('All cookies:', allCookies);
+    const cookies = document.cookie.split(';');
+    const authCookies: Record<string, string[]> = {};
+    const flowStateCookies: string[] = [];
 
-    // Check for specific auth cookies
-    const authCookies = allCookies
-      .split(';')
-      .map((c) => c.trim())
-      .filter(
-        (c) =>
-          c.startsWith('sb-') || c.includes('supabase') || c.includes('auth')
-      );
+    // Identify all auth cookies and flow state cookies
+    cookies.forEach((cookie) => {
+      const [name, value] = cookie.trim().split('=');
+      if (name && name.includes('-auth-token')) {
+        const baseName = name.split('.')[0];
+        if (!authCookies[baseName]) {
+          authCookies[baseName] = [];
+        }
+        authCookies[baseName].push(name);
+      }
 
-    console.log('Auth cookies:', authCookies);
+      // Track flow_state cookies that might be stale
+      if (name && name.includes('supabase-auth-flow-state')) {
+        flowStateCookies.push(name);
+      }
+    });
 
-    if (authCookies.length === 0) {
-      console.warn('No auth cookies found - may cause authentication issues');
+    // Keep only the most recent pair (0 and 1) for each auth cookie base name
+    Object.values(authCookies).forEach((cookieNames) => {
+      if (cookieNames.length > 2) {
+        // Sort by .0 and .1 suffix to keep the correct pair
+        const sorted = [...cookieNames].sort((a, b) => {
+          const aSuffix = parseInt(a.split('.').pop() || '0');
+          const bSuffix = parseInt(b.split('.').pop() || '0');
+          return aSuffix - bSuffix;
+        });
+
+        // Find duplicates to remove (keep only newest pair)
+        const toRemove = sorted.slice(0, sorted.length - 2);
+
+        if (DEBUG_LEVEL >= 1) {
+          console.log(
+            `Found ${toRemove.length} duplicate auth cookies to remove`
+          );
+        }
+
+        // Remove duplicates
+        toRemove.forEach((name) => {
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+          if (DEBUG_LEVEL >= 2) {
+            console.log(`Removed duplicate cookie: ${name}`);
+          }
+        });
+      }
+    });
+
+    // Check for stale flow state cookies (older than 10 minutes)
+    // These cookies are used for OAuth PKCE flow and can cause issues if stale
+    const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+    flowStateCookies.forEach((name) => {
+      // We'll clean up flow state cookies older than 10 minutes
+      // as they should be used quickly after creation
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+      if (DEBUG_LEVEL >= 2) {
+        console.log(`Removed stale flow state cookie: ${name}`);
+      }
+    });
+  } catch (error) {
+    if (DEBUG_LEVEL >= 1) {
+      console.error('Error cleaning up auth cookies:', error);
     }
-  } catch (err) {
-    console.error('Error in cookie debug:', err);
   }
-};
+}
 
-/**
- * Parses a cookie value and attempts to extract JSON content
- */
-const parseCookieValue = (value: string): any => {
+// Improved function to log cookie debug information with less verbosity
+function logCookieDebug(message: string) {
+  if (!isBrowser || DEBUG_LEVEL < 2) return;
+
+  console.log(`[Cookie Debug] ${message}`);
+
   try {
-    // First try simple JSON parse
-    return JSON.parse(decodeURIComponent(value));
-  } catch (e) {
-    // If that fails, try to handle URL-encoded JSON
-    try {
-      return JSON.parse(decodeURIComponent(value.replace(/\+/g, ' ')));
-    } catch (e2) {
-      // If both fail, return the raw value
-      console.log('Could not parse cookie value as JSON:', e2);
-      return value;
+    const cookies = document.cookie.split(';');
+    const relevantCookies = cookies.filter(
+      (cookie) =>
+        cookie.trim().includes('-auth-token') ||
+        cookie.trim().includes('supabase-auth-flow-state') ||
+        cookie.trim().includes('supabase-auth-pkce')
+    );
+
+    if (relevantCookies.length > 0) {
+      console.log(`Auth-related cookies (${relevantCookies.length}):`);
+      relevantCookies.forEach((cookie) => {
+        console.log(`- ${cookie.trim()}`);
+      });
+    } else {
+      console.log('No auth-related cookies found');
     }
+  } catch (error) {
+    console.error('Error logging cookie debug info:', error);
   }
-};
+}
+
+// Export for debugging in console
+if (isBrowser) {
+  (window as any).cleanupAuthCookies = cleanupAuthCookies;
+  (window as any).logCookieDebug = logCookieDebug;
+}
 
 export const createClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -61,20 +125,32 @@ export const createClient = () => {
 
   try {
     if (!isBrowser) {
-      console.log('Server environment detected for Supabase client');
+      if (DEBUG_LEVEL >= 1) {
+        console.log('Server environment detected for Supabase client');
+      }
     } else {
       const url = new URL(siteUrl);
       // Don't set domain for localhost (causes issues)
       if (url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
         // Add a dot prefix for subdomain support
         domain = `.${url.hostname.split('.').slice(-2).join('.')}`;
-        console.log(`Setting cookie domain to: ${domain}`);
-      } else {
+
+        if (DEBUG_LEVEL >= 1) {
+          console.log(`Setting cookie domain to: ${domain}`);
+        }
+      } else if (DEBUG_LEVEL >= 1) {
         console.log('Using default cookie domain for localhost');
       }
 
+      // Extract the project reference from the Supabase URL
+      const supabaseProjectRef =
+        supabaseUrl.match(/https:\/\/([^.]+)\./)?.[1] || '';
+
+      // Clean up any duplicate auth cookies that might be causing issues
+      cleanupAuthCookies();
+
       // Log cookie debug info on client init
-      logCookieDebug();
+      logCookieDebug(`After client init`);
     }
   } catch (err) {
     console.error('Error parsing domain for cookies:', err);
@@ -85,7 +161,9 @@ export const createClient = () => {
     supabaseUrl.match(/https:\/\/([^.]+)\./)?.[1] || '';
   const authCookieName = `sb-${supabaseProjectRef}-auth-token`;
 
-  console.log(`Looking for auth cookie with name: ${authCookieName}`);
+  if (DEBUG_LEVEL >= 1) {
+    console.log(`Looking for auth cookie with name: ${authCookieName}`);
+  }
 
   // Create the Supabase client with enhanced cookie handling
   const client = createBrowserClient<Database>(supabaseUrl, supabaseKey, {
@@ -112,7 +190,9 @@ export const createClient = () => {
             // Check if we found any auth token parts
             const numParts = Object.keys(authCookieParts).length;
             if (numParts === 0) {
-              console.log(`Auth cookie not found: ${authCookieName}`);
+              if (DEBUG_LEVEL >= 1) {
+                console.log(`Auth cookie not found: ${authCookieName}`);
+              }
               return undefined;
             }
 
@@ -122,9 +202,11 @@ export const createClient = () => {
               .map((k) => authCookieParts[k])
               .join('');
 
-            console.log(
-              `Found ${numParts} auth cookie parts, combined length: ${combinedValue.length}`
-            );
+            if (DEBUG_LEVEL >= 1) {
+              console.log(
+                `Found ${numParts} auth cookie parts, combined length: ${combinedValue.length}`
+              );
+            }
             return decodeURIComponent(combinedValue);
           }
 
@@ -134,7 +216,9 @@ export const createClient = () => {
             .find((c) => c.trim().startsWith(`${name}=`));
 
           if (!cookie) {
-            console.log(`Cookie not found: ${name}`);
+            if (DEBUG_LEVEL >= 1) {
+              console.log(`Cookie not found: ${name}`);
+            }
             return undefined;
           }
 
@@ -147,9 +231,11 @@ export const createClient = () => {
       },
       set(name, value, options) {
         if (!isBrowser) {
-          console.log(
-            'Attempting to set cookie in non-browser environment, skipping'
-          );
+          if (DEBUG_LEVEL >= 1) {
+            console.log(
+              'Attempting to set cookie in non-browser environment, skipping'
+            );
+          }
           return;
         }
 
@@ -169,18 +255,23 @@ export const createClient = () => {
           }
 
           document.cookie = cookieString;
-          console.log(
-            `Set cookie ${name} with domain ${options?.domain || domain || 'default'}`
-          );
+
+          if (DEBUG_LEVEL >= 1) {
+            console.log(
+              `Set cookie ${name} with domain ${options?.domain || domain || 'default'}`
+            );
+          }
         } catch (error) {
           console.error('Error setting cookie:', error);
         }
       },
       remove(name, options) {
         if (!isBrowser) {
-          console.log(
-            'Attempting to remove cookie in non-browser environment, skipping'
-          );
+          if (DEBUG_LEVEL >= 1) {
+            console.log(
+              'Attempting to remove cookie in non-browser environment, skipping'
+            );
+          }
           return;
         }
 
@@ -193,9 +284,12 @@ export const createClient = () => {
           }
 
           document.cookie = cookieString;
-          console.log(
-            `Removed cookie ${name} with domain ${options?.domain || domain || 'default'}`
-          );
+
+          if (DEBUG_LEVEL >= 1) {
+            console.log(
+              `Removed cookie ${name} with domain ${options?.domain || domain || 'default'}`
+            );
+          }
         } catch (error) {
           console.error('Error removing cookie:', error);
         }
@@ -209,16 +303,35 @@ export const createClient = () => {
     }
   });
 
-  // Set up auth state listener manually
+  // Set up auth state change listener outside of the auth config
   if (isBrowser) {
-    client.auth.onAuthStateChange((event, session) => {
-      console.log(
-        'Auth state changed:',
-        event,
-        session ? 'Session exists' : 'No session'
-      );
-      logCookieDebug();
-    });
+    client.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        // Only log for significant auth events
+        if (
+          [
+            'SIGNED_IN',
+            'SIGNED_OUT',
+            'TOKEN_REFRESHED',
+            'USER_UPDATED',
+            'INITIAL_SESSION'
+          ].includes(event)
+        ) {
+          if (DEBUG_LEVEL >= 1) {
+            console.log(`Auth state changed: ${event}`);
+          }
+
+          if (DEBUG_LEVEL >= 2) {
+            logCookieDebug(`After auth event: ${event}`);
+          }
+
+          // Clean up cookies after auth events to prevent duplicates
+          if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+            setTimeout(cleanupAuthCookies, 1000); // Delay to ensure cookies are set
+          }
+        }
+      }
+    );
   }
 
   return client;

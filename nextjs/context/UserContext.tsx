@@ -6,6 +6,7 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useCallback,
   ReactNode
 } from 'react';
 import { User } from '@supabase/supabase-js';
@@ -16,202 +17,131 @@ const isBrowser = typeof window !== 'undefined';
 
 interface UserContextProps {
   user: User | null;
-  refreshUser: () => Promise<void>;
   isLoading: boolean;
+  refreshUser: () => Promise<void>;
   hasValidSession: boolean;
-  repairSession: () => Promise<boolean>;
+  lastRefresh: number;
 }
 
-const UserContext = createContext<UserContextProps>({
+// Default context state
+const defaultContextState: UserContextProps = {
   user: null,
-  refreshUser: async () => {},
   isLoading: true,
+  refreshUser: async () => {},
   hasValidSession: false,
-  repairSession: async () => false
-});
+  lastRefresh: 0
+};
+
+const UserContext = createContext<UserContextProps>(defaultContextState);
 
 interface UserProviderProps {
   children: ReactNode;
-  initialUser: User | null;
+  initialUser?: User | null;
 }
 
-export const UserProvider = ({ children, initialUser }: UserProviderProps) => {
-  const [user, setUser] = useState<User | null>(initialUser);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasValidSession, setHasValidSession] = useState(false);
-  const [recoveryAttempted, setRecoveryAttempted] = useState(false);
+// Minimum time between session refreshes in milliseconds (5 seconds)
+const REFRESH_THROTTLE = 5000;
 
-  const refreshUser = async () => {
+export const UserProvider: React.FC<UserProviderProps> = ({
+  children,
+  initialUser = null
+}) => {
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasValidSession, setHasValidSession] = useState<boolean>(false);
+  const [lastRefresh, setLastRefresh] = useState<number>(0);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Throttled refresh function to prevent excessive API calls
+  const refreshUser = useCallback(async () => {
     if (!isBrowser) return;
 
-    setIsLoading(true);
-    try {
-      console.log('Refreshing user data...');
-      const supabase = createClient();
+    const now = Date.now();
+    if (now - lastRefresh < REFRESH_THROTTLE) {
+      console.log('Session refresh throttled');
+      return;
+    }
 
-      // First check if there's a valid session
-      const { data: sessionData, error: sessionError } =
-        await supabase.auth.getSession();
-      if (sessionError) {
-        console.error('Session error:', sessionError);
+    setLastRefresh(now);
+    setIsLoading(true);
+    setAuthError(null);
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+        error
+      } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error('Error fetching user:', error.message);
+        setAuthError(error.message);
+        setUser(null);
         setHasValidSession(false);
-        setUser(null);
-        return;
-      }
-
-      const hasSession = !!sessionData.session;
-      console.log('Has active session:', hasSession);
-      setHasValidSession(hasSession);
-
-      if (!hasSession) {
-        console.log('No active session found, clearing user data');
-        setUser(null);
-        return;
-      }
-
-      // If session exists, get the user data
-      const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error('Error fetching user:', error);
-        setUser(null);
-      } else if (data?.user) {
-        console.log('User data refreshed successfully');
-        setUser(data.user);
       } else {
-        console.log('No user found despite valid session');
-        setUser(null);
+        setUser(user);
+        setHasValidSession(!!user);
+        if (user) {
+          console.log('User session refreshed successfully');
+        }
       }
     } catch (error) {
-      console.error('Exception refreshing user:', error);
+      console.error('Unexpected error in refreshUser:', error);
+      setAuthError(error instanceof Error ? error.message : 'Unknown error');
       setUser(null);
+      setHasValidSession(false);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [lastRefresh]);
 
-  const repairSession = async (): Promise<boolean> => {
-    if (!isBrowser) return false;
-
-    setIsLoading(true);
-    try {
-      console.log('Attempting session repair...');
-      const supabase = createClient();
-
-      // Check if we have auth token cookies despite missing session
-      const cookies = document.cookie;
-      const hasTokenCookies =
-        cookies.includes('sb-') && cookies.includes('-auth-token');
-
-      if (!hasTokenCookies) {
-        console.log('No auth cookies found, cannot repair session');
-        return false;
-      }
-
-      console.log('Auth cookies found, attempting to refresh session');
-
-      // Force token refresh
-      const { data, error } = await supabase.auth.refreshSession();
-
-      if (error) {
-        console.error('Session refresh error:', error);
-        return false;
-      }
-
-      if (data.session) {
-        console.log('Session successfully refreshed');
-        setUser(data.user);
-        setHasValidSession(true);
-        return true;
-      } else {
-        console.log('No session returned after refresh');
-        return false;
-      }
-    } catch (error) {
-      console.error('Exception repairing session:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Initial auth check + subscription to auth changes
   useEffect(() => {
     if (!isBrowser) return;
 
-    // Set initial user state from props
-    if (initialUser) {
-      console.log('Setting initial user from server-side data');
-      setUser(initialUser);
-    }
+    // Initial auth check
+    refreshUser();
 
-    const initializeAuth = async () => {
-      // Initial validation
-      await refreshUser();
-
-      // If no valid session but we have a user, try to recover
-      if (!hasValidSession && !recoveryAttempted && user) {
-        console.log(
-          'No valid session but user data exists, attempting recovery'
-        );
-        setRecoveryAttempted(true);
-        await repairSession();
-      }
-    };
-
-    initializeAuth();
-
-    // Set up auth state listener
+    // Subscribe to auth changes
     const supabase = createClient();
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(`Auth state changed: ${event}`);
 
       if (event === 'SIGNED_IN') {
-        console.log('User signed in');
         setUser(session?.user || null);
-        setHasValidSession(true);
+        setHasValidSession(!!session?.user);
       } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
         setUser(null);
         setHasValidSession(false);
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log('Auth token refreshed');
+      } else if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         setUser(session?.user || null);
-        setHasValidSession(true);
-      } else if (event === 'USER_UPDATED') {
-        console.log('User data updated');
-        setUser(session?.user || null);
+        setHasValidSession(!!session?.user);
       }
     });
 
-    // Set up a timer to periodically check the session status (every 5 minutes)
-    const refreshInterval = setInterval(
-      () => {
-        console.log('Periodic session check');
-        refreshUser();
-      },
-      5 * 60 * 1000
-    );
-
+    // Cleanup subscription
     return () => {
-      subscription.unsubscribe();
-      clearInterval(refreshInterval);
+      subscription?.unsubscribe();
     };
-  }, [initialUser, hasValidSession, recoveryAttempted, user]);
+  }, [refreshUser]);
 
   return (
     <UserContext.Provider
-      value={{
-        user,
-        refreshUser,
-        isLoading,
-        hasValidSession,
-        repairSession
-      }}
+      value={{ user, isLoading, refreshUser, hasValidSession, lastRefresh }}
     >
       {children}
+      {authError && isBrowser && (
+        <div style={{ display: 'none' }}>
+          {/* Hidden div to record errors for debugging */}
+          Auth error: {authError}
+        </div>
+      )}
     </UserContext.Provider>
   );
 };
 
 export const useUser = () => useContext(UserContext);
+
+export default UserContext;
